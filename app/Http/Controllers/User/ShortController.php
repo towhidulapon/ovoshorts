@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Image;
+use App\Models\StorageSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
@@ -13,17 +14,21 @@ class ShortController extends Controller
 
     private function setWasabiConfig()
     {
-        $wasabi = gs('wasabi');
-        if (is_string($wasabi)) {
-            $wasabi = json_decode($wasabi, true);
+        $wasabi = StorageSetting::where('alias', 'wasabi')->first();
+
+        if (!$wasabi || !isset($wasabi->parameters)) {
+            throw new \Exception("Wasabi configuration not found or invalid.");
         }
+
+        $config = $wasabi->parameters;
+
         Config::set('filesystems.disks.wasabi', [
-            'driver'   => $wasabi['driver'] ?? '',
-            'key'      => $wasabi['key'] ?? '',
-            'secret'   => $wasabi['secret'] ?? '',
-            'region'   => $wasabi['region'] ?? '',
-            'bucket'   => $wasabi['bucket'] ?? '',
-            'endpoint' => $wasabi['endpoint'] ?? '',
+            'driver'   => $config->driver->value ?? '',
+            'key'      => $config->key->value ?? '',
+            'secret'   => $config->secret->value ?? '',
+            'region'   => $config->region->value ?? '',
+            'bucket'   => $config->bucket->value ?? '',
+            'endpoint' => $config->endpoint->value ?? '',
         ]);
     }
 

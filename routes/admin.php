@@ -252,10 +252,6 @@ Route::middleware('admin')->group(function () {
         Route::get('general-setting', 'general')->name('setting.general');
         Route::post('general-setting', 'generalUpdate');
 
-        // Storage Setting
-        Route::get('storage-setting', 'storageSettings')->name('setting.storage');
-        Route::post('storage-setting', 'storageSettingsUpdate');
-
         Route::get('setting/social/credentials', 'socialiteCredentials')->name('setting.socialite.credentials');
         Route::post('setting/social/credentials/update/{key}', 'updateSocialiteCredential')->name('setting.socialite.credentials.update');
         Route::post('setting/social/credentials/status/{key}', 'updateSocialiteCredentialStatus')->name('setting.socialite.credentials.status.update');
@@ -326,6 +322,12 @@ Route::middleware('admin')->group(function () {
         Route::get('schedule/logs/{id}', 'scheduleLogs')->name('schedule.logs');
         Route::post('schedule/log/resolved/{id}', 'scheduleLogResolved')->name('schedule.log.resolved');
         Route::post('schedule/log/flush/{id}', 'logFlush')->name('log.flush');
+    });
+
+    Route::controller('StorageController')->name('storage.')->prefix('storage')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('update/{id}', 'update')->name('update');
+        Route::post('status/{id}', 'status')->name('status');
     });
 
     Route::controller("ExportController")->group(function () {

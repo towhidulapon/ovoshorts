@@ -300,62 +300,6 @@ class GeneralSettingController extends Controller
         return back()->withNotify($notify);
     }
 
-    public function storageSettings()
-    {
-        $pageTitle = 'Storage Setting';
-        return view('admin.setting.storage.storage', compact('pageTitle'));
-    }
-
-    public function storageSettingsUpdate(Request $request)
-    {
-        $request->validate(
-            [
-                'storage_type'    => 'in:1,2,3',
-                'ftp.host_domain' => 'required_if:storage_type,2',
-                'ftp.host'        => 'required_if:storage_type,2',
-                'ftp.username'    => 'required_if:storage_type,2',
-                'ftp.password'    => 'required_if:storage_type,2',
-                'ftp.port'        => 'required_if:storage_type,2',
-                'ftp.root_path'   => 'required_if:storage_type,2',
-
-                'wasabi.driver'   => 'required_if:storage_type,3',
-                'wasabi.key'      => 'required_if:storage_type,3',
-                'wasabi.secret'   => 'required_if:storage_type,3',
-                'wasabi.region'   => 'required_if:storage_type,3',
-                'wasabi.bucket'   => 'required_if:storage_type,3',
-                'wasabi.endpoint' => 'required_if:storage_type,3',
-            ],
-            [
-                'ftp.host_domain.required_if' => ':host_domain is required when ftp storage is selected',
-                'ftp.host.required_if'        => ':host is required when ftp storage is selected',
-                'ftp.username.required_if'    => ':username is required when ftp storage is selected',
-                'ftp.password.required_if'    => ':password is required when ftp storage is selected',
-                'ftp.port.required_if'        => ':port is required when ftp storage is selected',
-                'ftp.root_path.required_if'   => ':root_path is required when ftp storage is selected',
-
-                'wasabi.driver.required_if'   => 'Wasabi driver field is required',
-                'wasabi.key.required_if'      => 'Wasabi key field is required',
-                'wasabi.secret.required_if'   => 'Wasabi secret field is required',
-                'wasabi.region.required_if'   => 'Wasabi region field is required',
-                'wasabi.bucket'               => 'Wasabi bucket field is required',
-                'wasabi.endpoint'             => 'Wasabi endpoint field is required',
-            ]
-        );
-
-        $general               = gs();
-        $general->storage_type = $request->storage_type;
-        if ($request->storage_type == 2) {
-            $general->ftp = $request->ftp;
-        }
-        if ($request->storage_type == 3) {
-            $general->wasabi = $request->wasabi;
-        }
-
-        $general->save();
-        $notify[] = ['success', 'Storage setting updated successfully'];
-        return back()->withNotify($notify);
-    }
-
     public function inAppPurchase()
     {
         $pageTitle  = 'In App Purchase Configuration - Google Play Store';

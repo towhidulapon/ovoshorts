@@ -20,7 +20,7 @@ class ExtensionController extends Controller
         $extension      = Extension::findOrFail($id);
         $validationRule = [];
         foreach ($extension->shortcode as $key => $val) {
-            $validationRule = array_merge($validationRule,[$key => 'required']);
+            $validationRule = array_merge($validationRule, [$key => 'required']);
         }
         $request->validate($validationRule);
 
