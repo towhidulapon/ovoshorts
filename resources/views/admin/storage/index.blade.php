@@ -82,7 +82,7 @@
             $(document).on('click', '.editBtn', function() {
                 let modal = $('#editModal');
                 let parameter = $(this).data('parameters');
-                console.log(typeof parameter);
+                console.log(parameter);
                 modal.find('.storage-name').text($(this).data('name'));
                 modal.find('form').attr('action', $(this).data('action'));
 

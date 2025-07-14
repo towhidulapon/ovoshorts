@@ -10,6 +10,7 @@ use App\Lib\GoogleAuthenticator;
 use App\Models\Extension;
 use App\Models\Frontend;
 use App\Models\GeneralSetting;
+use App\Models\StorageSetting;
 use App\Notify\Notify;
 use Aws\Credentials\Credentials;
 use Aws\S3\S3Client;
@@ -614,16 +615,19 @@ function supportedThousandSeparator(): array
 }
 function getS3FileUri($fileName)
 {
-    $wasabi = gs('wasabi');
-    if (is_string($wasabi)) {
-        $wasabi = json_decode($wasabi, true);
+    $wasabi = StorageSetting::where('alias', 'wasabi')->first();
+
+    if (!$wasabi || !isset($wasabi->parameters)) {
+        return null;
     }
 
-    $accessKey  = $wasabi['key'] ?? null;
-    $secretKey  = $wasabi['secret'] ?? null;
-    $bucketName = $wasabi['bucket'] ?? null;
-    $region     = $wasabi['region'];
-    $endpoint   = $wasabi['endpoint'];
+    $config = $wasabi->parameters;
+
+    $accessKey  = $config->key->value ?? null;
+    $secretKey  = $config->secret->value ?? null;
+    $bucketName = $config->bucket->value ?? null;
+    $region     = $config->region->value;
+    $endpoint   = $config->endpoint->value;
 
     if (!$accessKey || !$secretKey || !$bucketName || !$endpoint) {
         return null;
