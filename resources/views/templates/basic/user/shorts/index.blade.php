@@ -5,7 +5,7 @@
         <div class="row">
             @forelse ($images->where('type','!=',2) as $image)
                 @php
-                    $fileUrl = getS3FileUri($image->image_name);
+                    $fileUrl = $image->storage_driver === 'wasabi' ? getS3FileUri($image->image_name) : route('user.short.file', $image->image_name);
                 @endphp
                 <div class="col-md-3 mb-4">
                     <a href="{{ route('user.short.view', $image->id) }}">
@@ -23,7 +23,7 @@
             <div class="row">
                 @forelse ($images->where('type', 2) as $image)
                     @php
-                        $fileUrl = getS3FileUri($image->image_name);
+                        $fileUrl = $image->storage_driver === 'wasabi' ? getS3FileUri($image->image_name) : route('user.short.file', $image->image_name);
                         $extension = pathinfo($image->image_name, PATHINFO_EXTENSION);
                     @endphp
                     <div class="col-md-3 mb-4">

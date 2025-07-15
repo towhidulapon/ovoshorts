@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Constants\Status;
 use App\Http\Controllers\Controller;
 use App\Models\StorageSetting;
 use Illuminate\Http\Request;
@@ -41,6 +42,15 @@ class StorageController extends Controller
 
     public function status($id)
     {
-        return StorageSetting::changeStatus($id);
+        $storage = StorageSetting::where('id', $id)->findOrFail($id);
+        StorageSetting::where('id', '!=', $id)->update(['status' => Status::DISABLE]);
+        if ($storage->status == Status::DISABLE) {
+            $storage->status = Status::ENABLE;
+        } else {
+            $storage->status = Status::DISABLE;
+        }
+        $storage->save();
+        $notify[] = ['success', 'Storage status updated successfully'];
+        return back()->withNotify($notify);
     }
 }
