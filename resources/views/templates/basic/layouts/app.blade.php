@@ -15,14 +15,38 @@
 
     <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/custom.css') }}?v=1">
     <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/main.css') }}">
+    <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/lightcase.css') }}">
+    <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/slick.css') }}">
+    <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/custom-animation.css') }}">
+    <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/plyr.css') }}">
+    <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/emoji.css') }}">
 
     @stack('style')
-    <link rel="stylesheet"
-        href="{{ asset($activeTemplateTrue . 'css/color.php') }}?color={{ gs('base_color') }}&secondColor={{ gs('secondary_color') }}">
+    {{-- <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/color.php') }}?color={{ gs('base_color') }}&secondColor={{ gs('secondary_color') }}"> --}}
 </head>
 @php echo loadExtension('google-analytics') @endphp
 
 <body>
+
+    <!--==================== Preloader End ====================-->
+    <!--==================== Overlay Start ====================-->
+    <div class="body-overlay"></div>
+    <!--==================== Overlay End ====================-->
+
+    <!--==================== Sidebar Overlay End ====================-->
+    <div class="sidebar-overlay"></div>
+    <!--==================== Sidebar Overlay End ====================-->
+
+    <!-- ==================== Scroll to Top End Here ==================== -->
+    <button class="scroll-top" type="button">
+        <svg class="scroll-top-progress" width="100%" height="100%" viewBox="-1 -1 102 102">
+            <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98">
+            </path>
+        </svg>
+    </button>
+    <!-- ==================== Scroll to Top End Here ==================== -->
+
 
     @yield('app-content')
 
@@ -30,7 +54,18 @@
 
     <script src="{{ asset('assets/global/js/jquery-3.7.1.min.js') }}"></script>
     <script src="{{ asset('assets/global/js/bootstrap.bundle.min.js') }}"></script>
-    
+    <script src="{{ asset($activeTemplateTrue . 'js/lightcase.js') }}"></script>
+    <script src="{{ asset($activeTemplateTrue . 'js/slick.min.js') }}"></script>
+    <script src="{{ asset($activeTemplateTrue . 'js/wow.js') }}"></script>
+    <script src="{{ asset($activeTemplateTrue . 'js/plyr.js') }}"></script>
+    <script src="{{ asset($activeTemplateTrue . 'js/emoji.min.js') }}"></script>
+    <script src="{{ asset($activeTemplateTrue . 'js/emoji-picker.min.js') }}"></script>
+    <script src="{{ asset($activeTemplateTrue . 'js/select2.min.js') }}"></script>
+    <script src="{{ asset($activeTemplateTrue . 'js/main.js') }}"></script>
+
+
+
+
     @stack('script-lib')
 
     <script src="{{ asset('assets/global/js/global.js') }}"></script>

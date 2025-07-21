@@ -2,86 +2,20 @@
 
 namespace App\Http\Controllers\User;
 
+use App\Constants\Status;
 use App\Http\Controllers\Controller;
+use App\Lib\StorageConfig;
 use App\Models\Image;
-use App\Models\StorageSetting;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Storage;
 
 class ShortController extends Controller
 {
-    private function getActiveStorage()
+
+    protected $storageConfig;
+
+    public function __construct(StorageConfig $storageConfig)
     {
-        return StorageSetting::where('status', 1)->first();
-    }
-
-    private function setWasabiConfig($config)
-    {
-        Config::set('filesystems.disks.wasabi', [
-            'driver'   => $config->driver->value,
-            'key'      => $config->key->value,
-            'secret'   => $config->secret->value,
-            'region'   => $config->region->value,
-            'bucket'   => $config->bucket->value,
-            'endpoint' => $config->endpoint->value,
-        ]);
-    }
-
-    private function setFtpConfig($config)
-    {
-        Config::set('filesystems.disks.ftp', [
-            'driver'   => $config->driver->value,
-            'host'     => $config->host->value,
-            'username' => $config->username->value,
-            'password' => $config->password->value,
-            'port'     => (int) ($config->port->value),
-            'root'     => $config->root->value,
-        ]);
-    }
-
-    private function configureStorageForDriver($driver)
-    {
-        $storage = StorageSetting::where('alias', $driver)->first();
-
-        if (!$storage || !isset($storage->parameters)) {
-            return false;
-        }
-
-        $config = $storage->parameters;
-
-        if ($driver === 'wasabi' && $config->driver->value === 's3') {
-            $this->setWasabiConfig($config);
-            return true;
-        } elseif ($driver === 'ftp' && $config->driver->value === 'ftp') {
-            $this->setFtpConfig($config);
-            return true;
-        }
-
-        return false;
-    }
-
-    private function configureStorage()
-    {
-        $storage = $this->getActiveStorage();
-
-        if (!$storage || !isset($storage->parameters)) {
-
-            throw new \Exception('Storage configuration not found');
-
-        }
-
-        $config = $storage->parameters;
-
-        if ($config->driver->value === 's3') {
-            $this->setWasabiConfig($config);
-            return 'wasabi';
-        } elseif ($config->driver->value === 'ftp') {
-            $this->setFtpConfig($config);
-            return 'ftp';
-        }
-
-        throw new \Exception("Unsupported storage driver: {$config->driver->value}");
+        $this->storageConfig = $storageConfig;
     }
 
     public function shortUploadIndex()
@@ -97,20 +31,19 @@ class ShortController extends Controller
         ]);
 
         try {
-            $disk = $this->configureStorage(); // this may throw
+            $disk = $this->storageConfig->configure();
         } catch (\Exception $e) {
             $notify[] = ['error', $e->getMessage()];
             return back()->withNotify($notify);
         }
 
-        // $disk = $this->configureStorage();
         $file = $request->file('file');
 
         $extension = strtolower($file->getClientOriginalExtension());
         $type      = in_array($extension, ['mp4', 'webm', 'mov']) ? 2 : 1;
 
         $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-        $path     = $file->storeAs('shorts', $filename, $disk);
+        $this->storageConfig->storeFile($disk, $filename, $file);
 
         $image                 = new Image();
         $image->user_id        = auth()->user()->id;
@@ -127,37 +60,11 @@ class ShortController extends Controller
     {
         $pageTitle = 'My Shorts';
         $user      = auth()->user();
-        $images    = Image::where('user_id', $user->id)->get();
+        $images    = Image::where('user_id', $user->id)->whereHas('storage', function ($q) {
+            $q->where('status', Status::ENABLE);
+        })->get();
         return view('Template::user.shorts.index', compact('pageTitle', 'images'));
     }
-
-    // public function viewShort($id)
-    // {
-    //     $pageTitle = 'View Short';
-    //     $user      = auth()->user();
-    //     $image     = Image::where('id', $id)->where('user_id', $user->id)->firstOrFail();
-    //     $filename  = $image->image_name;
-
-    //     if (!$this->configureStorageForDriver($image->storage_driver)) {
-    //         abort(404, 'Storage configuration not found');
-    //     }
-
-    //     if ($image->storage_driver === 'wasabi') {
-    //         $url = getS3FileUri($filename);
-    //     } elseif ($image->storage_driver === 'ftp') {
-    //         $config = StorageSetting::where('alias', 'ftp')->first()->parameters;
-    //         $host   = $config->host->value;
-    //         $root   = $config->root->value;
-    //         $url    = "{$host}{$root}/{$filename}";
-    //         // dd($url);
-    //     } else {
-    //         // abort(404, 'Unsupported storage driver');
-    //         $notify[] = ['error', 'Unsupported storage driver'];
-    //         return back()->withNotify($notify);
-    //     }
-
-    //     return view('Template::user.shorts.view', compact('pageTitle', 'url'));
-    // }
 
     public function viewShort($id)
     {
@@ -166,12 +73,15 @@ class ShortController extends Controller
         $image     = Image::where('id', $id)->where('user_id', $user->id)->firstOrFail();
         $filename  = $image->image_name;
 
-        if (!$this->configureStorageForDriver($image->storage_driver)) {
+        try {
+            $this->storageConfig->configure($image->storage_driver);
+        } catch (\Exception $e) {
             $notify[] = ['error', 'Storage configuration not found'];
             return back()->withNotify($notify);
         }
 
         if ($image->storage_driver === 'wasabi') {
+
             $url = getS3FileUri($filename);
         } elseif ($image->storage_driver === 'ftp') {
             $url = route('user.short.file', $filename);
@@ -188,11 +98,19 @@ class ShortController extends Controller
         $image = Image::where('image_name', $filename)->where('user_id', auth()->user()->id)->firstOrFail();
         $path  = 'shorts/' . $filename;
 
-        if (!$this->configureStorageForDriver($image->storage_driver) || !Storage::disk($image->storage_driver)->exists($path)) {
-            abort(404, 'File not found');
+        try {
+            $this->storageConfig->configure($image->storage_driver);
+        } catch (\Exception $e) {
+            $notify[] = ['error', 'Storage configuration not found'];
+            return back()->withNotify($notify);
         }
 
-        return Storage::disk($image->storage_driver)->response($path);
+        if (!$this->storageConfig->fileExists($image->storage_driver, $path)) {
+            $notify[] = ['error', 'File not found'];
+            return back()->withNotify($notify);
+        }
+
+        return $this->storageConfig->getFileResponse($image->storage_driver, $path);
     }
 
     public function deleteShort($id)
@@ -201,15 +119,12 @@ class ShortController extends Controller
         $image = Image::where('id', $id)->where('user_id', $user->id)->firstOrFail();
         $path  = 'shorts/' . $image->image_name;
 
-        if ($this->configureStorageForDriver($image->storage_driver)) {
-            if (Storage::disk($image->storage_driver)->exists($path)) {
-                Storage::disk($image->storage_driver)->delete($path);
-                \Log::info('File deleted from storage', ['driver' => $image->storage_driver, 'path' => $path]);
-            } else {
-                \Log::warning('File not found for deletion', ['driver' => $image->storage_driver, 'path' => $path]);
-            }
-        } else {
-            \Log::error('Storage configuration failed for deletion', ['driver' => $image->storage_driver]);
+        try {
+            $this->storageConfig->configure($image->storage_driver);
+            $this->storageConfig->deleteFile($image->storage_driver, $path);
+        } catch (\Exception $e) {
+            $notify[] = ['error', 'Storage configuration not found'];
+            return back()->withNotify($notify);
         }
 
         $image->delete();

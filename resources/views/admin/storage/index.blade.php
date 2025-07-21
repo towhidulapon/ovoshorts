@@ -1,6 +1,11 @@
 @extends('admin.layouts.app')
 @section('panel')
     <div class="row responsive-row">
+        <div class="form-group col-md-12">
+            <div class="alert alert--danger p-3">
+                @lang('Please Remember, Be very careful about changing storage or changing FTP host, Because if you change setting, make sure you copy all image and file directory of uploaded photos to your new FTP or LOCAL storage. Otherwise photos won\'t be shown to the site. e.g: Change LOCAL To FTP, then copy all your directory of shorts ("images" and "videos") to your FTP directory and FTP to LOCAL ( assets/shorts)')
+            </div>
+        </div>
         @foreach ($storages as $storage)
             <div class="col-xxl-4  col-xl-6 col-md-6">
                 <x-admin.ui.card class="h-100">
