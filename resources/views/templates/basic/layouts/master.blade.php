@@ -1,8 +1,9 @@
 @extends($activeTemplate . 'layouts.app')
 @section('app-content')
-    @include('Template::partials.auth_header')
-    <div class="py-5">
-        @yield('content')
+    <div class="home-fluid">
+        <div class="home__inner">
+            @include('Template::partials.sidebar')
+            @yield('content')
+        </div>
     </div>
-    @include('Template::partials.footer')
 @endsection

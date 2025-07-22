@@ -31,34 +31,28 @@
                         <p class="mb-0">{{ __(@$kyc->data_values->pending) }} <a href="{{ route('user.kyc.data') }}">@lang('See KYC Data')</a></p>
                     </div>
                 @endif
-                <div class="card ">
-                    <div class="card-header">
-                        <h5 class="card-title">{{ __($pageTitle) }}</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>
-                            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Rerum sunt ducimus laboriosam commodi nesciunt accusamus? Sunt in, minus ex, a eveniet inventore facilis doloribus placeat corrupti repudiandae sint esse nesciunt.
-                            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptatum unde, vitae esse eum perspiciatis consectetur nisi, atque repellendus, cumque magnam ab a inventore quis nobis quod quisquam omnis. In, possimus!
-                        </p>
-                    </div>
-                </div>
+
+
+
+
+
             </div>
         </div>
     </div>
 
     @if (auth()->user()->kv == Status::KYC_UNVERIFIED && auth()->user()->kyc_rejection_reason)
-    <div class="modal fade" id="kycRejectionReason">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">@lang('KYC Document Rejection Reason')</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>{{ auth()->user()->kyc_rejection_reason }}</p>
+        <div class="modal fade" id="kycRejectionReason">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">@lang('KYC Document Rejection Reason')</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>{{ auth()->user()->kyc_rejection_reason }}</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     @endif
 @endsection
