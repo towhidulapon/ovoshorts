@@ -5,6 +5,7 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title> {{ gs()->siteName(__($pageTitle)) }}</title>
     @include('partials.seo')
 
@@ -13,17 +14,18 @@
     <link rel="stylesheet" href="{{ asset('assets/global/css/line-awesome.min.css') }}">
     @stack('style-lib')
 
-    <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/custom.css') }}?v=1">
     <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/main.css') }}">
+    <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/custom.css') }}?v=1">
+    <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/lightcase.css') }}">
+    <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/plyr.css') }}">
     <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/slick.css') }}">
     <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/custom-animation.css') }}">
-    <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/select2.min.css') }}">
-    <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/plyr.css') }}">
     <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/emoji.css') }}">
 
     @stack('style')
-    {{-- <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/color.php') }}?color={{ gs('base_color') }}&secondColor={{ gs('secondary_color') }}"> --}}
+    {{--
+    <link rel="stylesheet" href="{{ asset($activeTemplateTrue . 'css/color.php') }}?color={{ gs('base_color') }}&secondColor={{ gs('secondary_color') }}"> --}}
 </head>
 @php echo loadExtension('google-analytics') @endphp
 
@@ -81,23 +83,23 @@
 
 </body>
 <script>
-    (function($) {
+    (function ($) {
         "use strict";
 
         //plicy
-        $('.policy').on('click', function() {
-            $.get('{{ route('cookie.accept') }}', function(response) {
+        $('.policy').on('click', function () {
+            $.get('{{ route('cookie.accept') }}', function (response) {
                 $('.cookies-card').addClass('d-none');
             });
         });
 
         // event when change lang
-        $(".langSel").on("change", function() {
+        $(".langSel").on("change", function () {
             window.location.href = "{{ route('home') }}/change/" + $(this).val();
         });
 
         //show cookie card
-        setTimeout(function() {
+        setTimeout(function () {
             $('.cookies-card').removeClass('hide');
         }, 2000);
     })(jQuery);

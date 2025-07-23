@@ -91,7 +91,9 @@ Route::middleware('auth')->name('user.')->group(function () {
 
             Route::controller('ShortsUploadController')->prefix('shorts-upload')->name('short.upload.')->group(function () {
                 Route::get('/', 'index')->name('index');
-                Route::post('store', 'store')->name('store');
+                Route::post('/upload-file', 'uploadFile')->name('file');
+                Route::post('/assemble-file', 'assembleFile')->name('assemble.file');
+                Route::post('/save', 'save')->name('save');
                 Route::get('edit/{id}', 'edit')->name('edit');
                 Route::post('update/{id}', 'update')->name('update');
                 Route::post('delete/{id}', 'delete')->name('delete');

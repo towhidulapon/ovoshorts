@@ -1,6 +1,7 @@
-@extends($activeTemplate . 'layouts.frontend')
+@extends($activeTemplate . 'layouts.dashboard_frontend')
 @section('content')
-    <div class="dashboard-body">
+
+    <div class="dashboard-body upload-step1">
         <div class="dashboard-body__bar d-lg-none d-block">
             <span class="dashboard-body__bar-icon"><i class="fas fa-bars"></i></span>
         </div>
@@ -17,7 +18,7 @@
                     <h5 class="video-upload-card__title">@lang('Select video to upload')</h5>
                     <p class="video-upload-card__desc">@lang('or drag and drop it here')</p>
                     <div class="avatar-edit seller-cover-photo">
-                        <input class="profilePicUpload" id="profilePicUpload1" name="coverImage" type="file" accept=".png, .jpg, .jpeg">
+                        <input class="profilePicUpload" id="profilePicUpload1" name="video" accept="video/*" type="file" required>
                         <label class="btn mb-0 btn--base" for="profilePicUpload1">@lang('Select video')</label>
                     </div>
                 </div>
@@ -30,7 +31,7 @@
                     </svg>
                     <div class="content">
                         <h4>@lang('Size and duration')</h4>
-                        <p>@lang('Maximum size'): 30 GB, @lang('video duration'): 60 minutes</p>
+                        <p>@lang('Maximum size'): 30 @lang('GB'), @lang('video duration'): 60 @lang('minutes.')</p>
                     </div>
                 </div>
 
@@ -41,7 +42,7 @@
                     </svg>
                     <div class="content">
                         <h4>@lang('File formats')</h4>
-                        <p>@lang('Recommended: “.mp4, .mov, .wmv, .flv, .avi, .mkv”')</p>
+                        <p>@lang('Recommended: “.mp4”. Other major formats are supported.')</p>
                     </div>
                 </div>
 
@@ -52,7 +53,7 @@
                     </svg>
                     <div class="content">
                         <h4>@lang('Video resolution')</h4>
-                        <p>@lang('High-resolution recommended: 1080p, 1440p, 4K')</p>
+                        <p>@lang('High-resolution recommended: 1080p, 1440p, 4K.')</p>
                     </div>
                 </div>
 
@@ -64,11 +65,414 @@
                     </svg>
                     <div class="content">
                         <h4>@lang('Video resolution')</h4>
-                        <p>@lang('Recommended: 16:9 for landscape, 9:16 for vertical')</p>
+                        <p>@lang('Recommended: 16:9 for landscape, 9:16 for vertical.')</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <div class="dashboard-body d-none upload-step2">
+        <div class="dashboard-body__bar d-lg-none d-block">
+            <span class="dashboard-body__bar-icon"><i class="fas fa-bars"></i></span>
+        </div>
+        <div class="video-upload__item">
+            <div class="video-upload__item__inner">
+                <div class="video-upload__content">
+                    <div class="d-flex gap-2 align-items-start">
+                        <div class="">
+                            <span class="video-upload__filename">
+                            </span>
+                            <div class="video-upload__status">
+                                <span class="video-upload__uploaded">
+
+                                </span>
+                            </div>
+                        </div>
+                        <span class="video-upload__badge"></span>
+                    </div>
+                    <button class="video-upload__replace">
+                        <i class="fas fa-sync-alt"></i>@lang('Replace')
+                    </button>
+                </div>
+
+            </div>
+            <div class="video-upload__progress">
+                <div class="video-upload__progress-bar" style="width: 80%;"></div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="video-upload-edit">
+                <div class="video-edit-card__wrapper">
+                    <div class="video-edit-card">
+                        <div class="video-edit-card-tabs">
+                            <ul class="nav nav-pills custom--tab" id="pills-tab" role="tablist">
+                                <li class="nav-item flex-grow-1" role="presentation">
+                                    <button class="nav-link active w-100" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">@lang('Feed')</button>
+                                </li>
+                                <li class="nav-item flex-grow-1 " role="presentation">
+                                    <button class="nav-link w-100" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">@lang('Web/TV')</button>
+                                </li>
+
+                            </ul>
+                            <div class="tab-content" id="pills-tabContent">
+                                <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab" tabindex="0">
+                                    <div class="explore-item">
+                                        <div class="explore-item__video">
+                                            <video class="video-player" playsinline preload="metadata" data-video_id="223" controls poster="assets/images/thumbs/edit-preview.png">
+                                                <source src="assets/images/video/v2.mp4" type="video/mp4">
+                                            </video>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
+                                    <div class="explore-item">
+                                        <div class="explore-item__video">
+                                            <video class="video-player" playsinline preload="metadata" data-video_id="223" controls poster="assets/images/thumbs/edit-preview.png">
+                                                <source src="assets/images/video/v2.mp4" type="video/mp4">
+                                            </video>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn video-edit-card__button w-100"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="25" viewBox="0 0 24 25" fill="none">
+                            <g clip-path="url(#clip0_2203_2461)">
+                                <path d="M24 5.52855C22.891 3.94478 20.6861 3.5274 19.1021 4.63637L10.9572 10.3394L7.99548 8.26539C9.09826 6.36142 8.57954 3.89762 6.74345 2.61212C4.80451 1.25491 2.13306 1.72591 0.775274 3.66447C-0.581898 5.60312 -0.111273 8.27514 1.82771 9.63292C3.15821 10.5645 4.83413 10.6344 6.19313 9.9602L9.8207 12.5001L6.19346 15.0398C4.83446 14.3659 3.15863 14.4358 1.82804 15.367C-0.110851 16.7248 -0.581523 19.3966 0.775602 21.3352C2.13338 23.2741 4.80512 23.7451 6.74373 22.3878C8.57959 21.1023 9.09821 18.6385 7.99576 16.7346L10.9575 14.6605L19.102 20.3633C20.6861 21.4726 22.891 21.0549 24 19.4711L14.0432 12.5001L24 5.52855ZM4.29502 8.35342C3.06816 8.35342 2.07352 7.35878 2.07352 6.13192C2.07352 4.90506 3.06821 3.91042 4.29502 3.91042C5.52216 3.91042 6.51652 4.90506 6.51652 6.13192C6.51652 7.35878 5.52216 8.35342 4.29502 8.35342ZM4.29502 21.09C3.06816 21.09 2.07352 20.0954 2.07352 18.8685C2.07352 17.6417 3.06816 16.647 4.29502 16.647C5.52216 16.647 6.51652 17.6417 6.51652 18.8685C6.51652 20.0953 5.52216 21.09 4.29502 21.09Z" fill="white" />
+                            </g>
+                            <defs>
+                                <clipPath id="clip0_2203_2461">
+                                    <rect width="24" height="24" fill="white" transform="translate(0 0.5)" />
+                                </clipPath>
+                            </defs>
+                        </svg> Edit Video</button>
+                </div>
+                <div class="video-upload-edit__details">
+                    <div class="video-upload-edit__item mb-4">
+                        <h4 class="title-heading">Details</h4>
+                        <div class="video-upload-edit__item-card">
+                            <h6 class="title">Description</h6>
+                            <div class="video-upload-form">
+                                <textarea class="form-control form--control" placeholder="Description"></textarea>
+                                <div class="video-upload-tags">
+                                    <div class="video-upload-tags__left">
+                                        <button class="btn video-upload-tags__button">#Hashtags</button>
+                                        <button class="btn video-upload-tags__button">@Mention</button>
+                                    </div>
+                                    <div class="video-upload-tags__right">
+                                        <span>49/4000</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="video-edit-cover">
+                                <h6 class="video-edit-cover__title">
+                                    Cover <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                        <g clip-path="url(#clip0_2101_1027)">
+                                            <path d="M10.0001 18.3333C14.6025 18.3333 18.3334 14.6023 18.3334 9.99996C18.3334 5.39759 14.6025 1.66663 10.0001 1.66663C5.39771 1.66663 1.66675 5.39759 1.66675 9.99996C1.66675 14.6023 5.39771 18.3333 10.0001 18.3333Z" stroke="#3A3A3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M10 13.3333V10" stroke="#3A3A3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M10 6.66663H10.0083" stroke="#3A3A3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                        </g>
+                                        <defs>
+                                            <clipPath id="clip0_2101_1027">
+                                                <rect width="20" height="20" fill="white" />
+                                            </clipPath>
+                                        </defs>
+                                    </svg>
+                                </h6>
+                                <div class="video-edit-cover__thumb">
+                                    <img class="fit-image" src="assets/images/thumbs/cover.png" alt="image">
+                                    <button class="video-edit-cover__edit ">
+                                        @lang('Edit cover')
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="video-edit-location">
+                                <h6 class="video-edit-location__title">
+                                    Location <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                        <g clip-path="url(#clip0_2101_1027)">
+                                            <path d="M10.0001 18.3333C14.6025 18.3333 18.3334 14.6023 18.3334 9.99996C18.3334 5.39759 14.6025 1.66663 10.0001 1.66663C5.39771 1.66663 1.66675 5.39759 1.66675 9.99996C1.66675 14.6023 5.39771 18.3333 10.0001 18.3333Z" stroke="#3A3A3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M10 13.3333V10" stroke="#3A3A3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M10 6.66663H10.0083" stroke="#3A3A3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                        </g>
+                                        <defs>
+                                            <clipPath id="clip0_2101_1027">
+                                                <rect width="20" height="20" fill="white" />
+                                            </clipPath>
+                                        </defs>
+                                    </svg>
+                                </h6>
+                                <div class="video-edit-location__form common-form-wrapper">
+                                    <div class="icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                            <path d="M14.5 9C14.5 10.3807 13.3807 11.5 12 11.5C10.6193 11.5 9.5 10.3807 9.5 9C9.5 7.61929 10.6193 6.5 12 6.5C13.3807 6.5 14.5 7.61929 14.5 9Z" stroke="#9DA4AF" stroke-width="1.5" />
+                                            <path d="M13.2574 17.4936C12.9201 17.8184 12.4693 18 12.0002 18C11.531 18 11.0802 17.8184 10.7429 17.4936C7.6543 14.5008 3.51519 11.1575 5.53371 6.30373C6.6251 3.67932 9.24494 2 12.0002 2C14.7554 2 17.3752 3.67933 18.4666 6.30373C20.4826 11.1514 16.3536 14.5111 13.2574 17.4936Z" stroke="#9DA4AF" stroke-width="1.5" />
+                                            <path d="M18 20C18 21.1046 15.3137 22 12 22C8.68629 22 6 21.1046 6 20" stroke="#9DA4AF" stroke-width="1.5" stroke-linecap="round" />
+                                        </svg>
+                                    </div>
+                                    <select name="location" id="" class="form--control form--select select2">
+                                        <option value="">Search Locations</option>
+                                        <option value="">Select Location</option>
+                                        <option value="">Select Location</option>
+                                        <option value="">Select Location</option>
+                                        <option value="">Select Location</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="video-edit-tags">
+                                <button class="btn video-edit-tags__button">The Bubbles</button>
+                                <button class="btn video-edit-tags__button">Welcome To Bangladesh</button>
+                                <button class="btn video-edit-tags__button">Ok Bangladesh</button>
+                                <button class="btn video-edit-tags__button">24k</button>
+                                <button class="btn video-edit-tags__button">Dhaka a Capital City</button>
+                                <button class="btn video-edit-tags__button">Dhakaiya</button>
+                                <button class="btn video-edit-tags__button">My Home</button>
+                                <button class="btn video-edit-tags__button">Cox’s Bazazar</button>
+                                <button class="btn video-edit-tags__button">100 Miles</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="video-upload-edit__item">
+                        <h4 class="title-heading">Settings</h4>
+                        <div class="video-upload-edit__item-card">
+                            <h6 class="title">When to post</h6>
+                            <div class="post-schedule">
+                                <div class="form-check form--radio">
+                                    <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault1">
+                                    <label class="form-check-label" for="radioDefault1">
+                                        Now
+                                    </label>
+                                </div>
+                                <div class="form-check form--radio">
+                                    <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault2">
+                                    <label class="form-check-label" for="radioDefault2">
+                                        Schedule
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="video-edit-watch-video">
+                                <h6 class="video-edit-location__title">
+                                    Who can watch this video
+                                </h6>
+                                <div class="common-form-wrapper">
+                                    <select name="location" id="" class="form--control form--select common-form-wrapper select2">
+                                        <option value="">Everyone</option>
+                                        <option value="">Friends</option>
+                                        <option value="">Only Me</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="video-edit-user">
+                                <h6 class="video-edit-location__title">
+                                    Allow users to:
+                                </h6>
+
+                                <div class="video-edit-user__check">
+                                    <div class="form--check">
+                                        <input class="form-check-input" type="checkbox" value="" id="comment">
+                                        <label class="form-check-label" for="comment">Comment</label>
+                                    </div>
+                                    <div class="form--check">
+                                        <input class="form-check-input" type="checkbox" value="" id="Duet">
+                                        <label class="form-check-label" for="Duet">Duet</label>
+                                    </div>
+                                    <div class="form--check">
+                                        <input class="form-check-input" type="checkbox" value="" id="Stitch">
+                                        <label class="form-check-label" for="Stitch">Stitch</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="video-edit-switch">
+                                <div class="video-edit-switch__item">
+                                    <div class="video-edit-switch__item-heading">
+                                        <h6 class="title">
+                                            Disclose post content
+                                        </h6>
+                                        <div class="form-check form--switch">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
+                                        </div>
+                                    </div>
+                                    <p class="desc">
+                                        Let others know this post promotes a brand, product or service.
+                                    </p>
+                                </div>
+                                <div class="video-edit-switch__item">
+                                    <div class="video-edit-switch__item-heading">
+                                        <h6 class="title">
+                                            AI-generated content
+                                        </h6>
+                                        <div class="form-check form--switch">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
+                                        </div>
+                                    </div>
+                                    <p class="desc">
+                                        Add this label for aigc. <a href="#" class="link-text"> Learn more</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="video-edit-btn-group mt-4 flex-wrap gap-2">
+                        <button class="btn btn--base btn-post">Post</button>
+                        <button class="btn btn-dark">Discard</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
 @endsection
+
+@push('script')
+
+    <script>
+        (function ($) {
+            "use strict";
+
+            const $uploadStep1 = $('.upload-step1');
+            const $uploadStep2 = $('.upload-step2');
+            const $fileInput = $('.profilePicUpload');
+            const $filenameSpan = $uploadStep2.find('.video-upload__filename');
+            const $uploadedSpan = $uploadStep2.find('.video-upload__uploaded');
+            const $qualitySpan = $uploadStep2.find('.video-upload__badge');
+            const $progressBar = $uploadStep2.find('.video-upload__progress-bar');
+            const $replaceBtn = $uploadStep2.find('.video-upload__replace');
+            const $videoPlayers = $('.video-player');
+            let uploadedVideoUrl = '';
+
+            const CHUNK_SIZE = 5 * 1024 * 1024;
+
+            $fileInput.on('change', function () {
+                const file = this.files[0];
+                if (!file) return;
+
+                $uploadStep1.addClass('d-none');
+                $uploadStep2.removeClass('d-none');
+                $filenameSpan.text(file.name);
+                const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                $uploadedSpan.text('Uploading...');
+                $qualitySpan.text(getVideoQuality(file.name));
+                $progressBar.css('width', '0%');
+
+                const extension = file.name.split('.').pop().toLowerCase();
+                const uniqueId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+
+                function uploadChunk(index) {
+                    const start = index * CHUNK_SIZE;
+                    const end = Math.min(start + CHUNK_SIZE, file.size);
+                    const chunk = file.slice(start, end);
+
+                    const formData = new FormData();
+                    formData.append('extension', extension);
+                    formData.append('fileName', file.name);
+                    formData.append('index', index);
+                    formData.append('uniqueId', uniqueId);
+                    formData.append('chunk', chunk);
+
+                    $.ajax({
+                        url: '{{ route("user.short.upload.file") }}',
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function (res) {
+                            const percent = Math.round(((index + 1) / totalChunks) * 100);
+                            $progressBar.css('width', percent + '%');
+                            if (index + 1 < totalChunks) {
+                                uploadChunk(index + 1);
+                            } else {
+                                assembleChunks(uniqueId, file.name, extension);
+                            }
+                        },
+                        error: function (xhr) {
+                            $uploadedSpan.text('Upload failed!');
+                            console.log(xhr.responseText);
+                        }
+                    });
+                }
+
+                function assembleChunks(uniqueId, fileName, extension) {
+                    $.ajax({
+                        url: '{{ route("user.short.upload.assemble.file") }}',
+                        type: 'POST',
+                        data: {
+                            uniqueId: uniqueId,
+                            fileName: fileName,
+                            extension: extension,
+                            _token: $('meta[name="csrf-token"]').attr('content')
+                        },
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function (res) {
+                            if (res.status === 'success') {
+                                $uploadedSpan.text('✔ Uploaded (' + sizeMB + 'MB)');
+                                uploadedVideoUrl = res.video_url;
+                                $('.video-url-input').val(uploadedVideoUrl);
+                                $videoPlayers.each(function () {
+                                    $(this).find('source').attr('src', uploadedVideoUrl);
+                                    this.load();
+                                });
+                            } else {
+                                $uploadedSpan.text('Assembly failed!');
+                            }
+                        },
+                        error: function (xhr) {
+                            console.log(xhr.responseText);
+                            $uploadedSpan.text('Assembly failed!');
+                        }
+                    });
+                }
+
+                uploadChunk(0);
+            });
+
+            $replaceBtn.on('click', function () {
+                $fileInput.val('');
+                $uploadStep2.addClass('d-none');
+                $uploadStep1.removeClass('d-none');
+                $filenameSpan.text('');
+                $uploadedSpan.text('');
+                $qualitySpan.text('');
+                $progressBar.css('width', '0%');
+                uploadedVideoUrl = '';
+                $('.video-url-input').val('');
+                $videoPlayers.each(function () {
+                    $(this).find('source').attr('src', '');
+                    this.load();
+                });
+            });
+
+            function getVideoQuality(filename) {
+                filename = filename.toLowerCase();
+                if (filename.includes('4k')) return '4K';
+                if (filename.includes('1440')) return '1440P';
+                if (filename.includes('1080')) return '1080P';
+                return 'HD';
+            }
+
+            $('.video-edit-cover__edit').on('click', function () {
+                const video = $videoPlayers[0];
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const dataURL = canvas.toDataURL('image/png');
+                $('.video-edit-cover__thumb .fit-image').attr('src', dataURL);
+                $('.cover-image-input').val(dataURL);
+            });
+
+        })(jQuery);
+    </script>
+
+
+@endpush
