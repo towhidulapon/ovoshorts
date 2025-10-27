@@ -1,0 +1,1 @@
+var firebaseConfig = {"apiKey":"AIzaSyDEL62a9fmT7WgjgV2SA7K26asw_nj1aKU","authDomain":"ovoshortz-25cce.firebaseapp.com","projectId":"ovoshortz-25cce","storageBucket":"ovoshortz-25cce.firebasestorage.app","messagingSenderId":"380361991278","appId":"1:380361991278:web:b70a88fe2f9fb075e6b27f","measurementId":"G-ZBBCM7P5TW"}

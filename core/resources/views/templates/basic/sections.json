@@ -1,0 +1,76 @@
+{
+    "stars": {
+        "builder": true,
+        "name": "Star Section",
+        "description": "Manage star blade contents.",
+        "icon": "las la-star",
+        "content": {
+            "title": "text",
+            "cashback": "number",
+            "cashback_detail": "text",
+            "modal_title": "text"
+        },
+        "element": {
+            "modal_option":"text",
+            "modal": true
+        }
+    },
+    "policy_pages": {
+        "builder": true,
+        "no_selection": true,
+        "name": "Policy Pages",
+        "description": "Manage and display your legal and policy-related information pages.",
+        "icon": "las la-file-alt",
+        "hide_builder": true,
+        "element": {
+            "title": "text",
+            "slug": "title",
+            "details": "textarea-nic",
+            "modal": false,
+            "seo": true
+        }
+    },
+    "register_disable": {
+        "builder": true,
+        "no_selection": true,
+        "name": "Registration Disable",
+        "description": "Temporarily disable user registrations with a custom message and button.",
+        "icon": "las la-user-slash",
+        "content": {
+            "images": {
+                "image": {
+                    "size": "280x280"
+                }
+            },
+            "heading": "text",
+            "subheading": "text",
+            "button_name": "text",
+            "button_url": "text"
+        }
+    },
+    "social_icon": {
+        "builder": true,
+        "no_selection": true,
+        "name": "Social Icons",
+        "description": "Connect and link your website seamlessly to all social media profiles.",
+        "icon": "las la-share-alt",
+        "element": {
+            "title": "text",
+            "social_icon": "icon",
+            "url": "text",
+            "modal": true
+        }
+    },
+    "kyc": {
+        "builder": true,
+        "no_selection": true,
+        "name": "KYC Content",
+        "description": "Manage Know Your Customer status for user verification.",
+        "icon": "las la-id-card",
+        "content": {
+            "required": "text",
+            "pending": "text",
+            "reject": "text"
+        }
+    }
+}
