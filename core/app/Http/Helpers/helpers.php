@@ -571,7 +571,8 @@ function responseManager(string $remark, string $message, string $responseType =
 
     if (array_key_exists('redirect', $responseData)) {
         $notify[] = [$responseType, $message];
-        return to_route($responseData['redirect'])->withNotify($notify);
+        return redirect()->route($responseData['redirect'])->withNotify($notify);
+        // return to_route($responseData['redirect'])->withNotify($notify);
     }
 
     if (array_key_exists('view', $responseData)) {

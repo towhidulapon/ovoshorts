@@ -16,7 +16,7 @@
                                 </div>
                             </div>
                         </form>
-                        <a href="{{ route('user.withdraw') }}" class="btn  btn--base btn--sm mb-2">@lang('New Withdraw')</a>
+                        <a href="{{ route('user.withdraw') }}" class="btn btn--base btn--sm mb-2">@lang('New Withdraw')</a>
                     </div>
                     <div class="card custom--card">
                         <div class="card-body p-0">
@@ -81,7 +81,7 @@
                                                     @php echo $withdraw->statusBadge @endphp
                                                 </td>
                                                 <td>
-                                                    <button class="btn  btn--base detailBtn"
+                                                    <button class="btn btn--sm btn--base detailBtn"
                                                         data-user_data="{{ json_encode($details) }}"
                                                         @if ($withdraw->status == Status::PAYMENT_REJECT) data-admin_feedback="{{ $withdraw->admin_feedback }}" @endif>
                                                         <i class="las la-info-circle"></i>
@@ -113,7 +113,7 @@
 
 
     {{-- APPROVE MODAL --}}
-    <div id="detailModal" class="modal fade" tabindex="-1" role="dialog">
+    <div id="detailModal" class="modal custom--modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">

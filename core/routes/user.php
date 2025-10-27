@@ -102,7 +102,7 @@ Route::middleware('auth')->name('user.')->group(function () {
                 Route::post('complete', 'completeUpload')->name('complete');
                 Route::post('store/{id?}', 'store')->name('store');
                 Route::post('draft', 'createDraft')->name('draft');
-                Route::get('delete-draft/{id?}', 'deleteDraft')->name('delete.draft');
+                Route::post('delete-draft/{id?}', 'deleteDraft')->name('delete.draft');
             });
 
             Route::controller('VideoProcessController')->prefix('video-process')->name('video.process.')->group(function () {

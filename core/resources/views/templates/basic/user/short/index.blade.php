@@ -86,9 +86,8 @@
                             </div>
                             <span class="video-upload__badge"></span>
                         </div>
-                        <a href="{{ route('user.short.upload.delete.draft', $latestDraft->id ?? null) }}" class="btn btn-sm video-upload__replace video-replace-btn" data-short-id="{{ $latestDraft->id ?? '' }}">
-                            <i class="fas fa-sync-alt"></i>@lang('Replace')
-                        </a>
+                        <button data-action="{{ route('user.short.upload.delete.draft', $latestDraft->id ?? null) }}" class="btn btn-sm video-upload__replace video-replace-btn confirmationBtn" data-question="@lang('Are you sure to replace this video?')"> <i class="fas fa-sync-alt"></i>@lang('Replace')
+                        </button>
                     </div>
                 </div>
                 <div class="video-upload__progress">
@@ -201,7 +200,7 @@
                                         @lang('Who can watch this video')
                                     </h6>
                                     <div class="common-form-wrapper">
-                                        <select name="visibility" id="" class="form--control form--select common-form-wrapper select2 video-visibility">
+                                        <select name="visibility" id="" class="form--control form--select common-form-wrapper select2 video-visibility" required>
                                             <option value="1" {{ old('visibility', $short->is_visible ?? '') == Status::EVERYONE ? 'selected' : '' }}>@lang('Everyone')</option>
                                             <option value="2" {{ old('visibility', $short->is_visible ?? '') == Status::ONLY_ME ? 'selected' : '' }}>@lang('Only Me')</option>
                                         </select>
@@ -212,7 +211,7 @@
                                         @lang('Category')
                                     </h6>
                                     <div class="common-form-wrapper">
-                                        <select name="category_id" id="" class="form--control form--select common-form-wrapper select2 video-visibility">
+                                        <select name="category_id" id="" class="form--control form--select common-form-wrapper select2 video-visibility" required>
                                             <option value="" disabled selected>@lang('Select Category')</option>
                                             @foreach ($categories as $category)
                                                 <option value="{{ $category->id }}" {{ old('category', $short->category_id ?? '') == $category->id ? 'selected' : '' }}>{{ __($category->name) }}</option>
@@ -243,6 +242,7 @@
         </div>
     </div>
 
+    <x-confirmation-modal :isFrontend="true" />
 @endsection
 
 
@@ -275,7 +275,7 @@
                 const latestFilename = $('.upload-step2').data('filename');
 
                 $('.short-id').val(latestShortId);
-                $('.video-replace-btn').data('short-id', latestShortId);
+                // $('.video-replace-btn').data('short-id', latestShortId);
                 $('.filename').text(latestFilename);
                 $('.upload-status').text('Upload Completed');
                 $('.progress-label').text('Uploading Progress');
@@ -304,14 +304,15 @@
                     return;
                 }
 
-                const existingShortId = $('.video-replace-btn').data('short-id');
-                if (existingShortId) {
-                    deleteDraft(existingShortId, function () {
-                        proceedWithUpload();
-                    });
-                } else {
-                    proceedWithUpload();
-                }
+                // const existingShortId = $('.video-replace-btn').data('short-id');
+                // if (existingShortId) {
+                //     deleteDraft(existingShortId, function () {
+                //         proceedWithUpload();
+                //     });
+                // } else {
+                //     proceedWithUpload();
+                // }
+                proceedWithUpload();
             });
 
             function proceedWithUpload() {
@@ -337,7 +338,7 @@
                             uploadId = response.data.upload_id;
                             shortId = response.data.short_id;
                             $('.short-id').val(shortId);
-                            $('.video-replace-btn').data('short-id', shortId);
+                            // $('.video-replace-btn').data('short-id', shortId);
                             chunkCount = Math.ceil(videoFile.size / CHUNK_SIZE);
                             currentChunk = 0;
                             uploadNextChunk();
@@ -454,45 +455,45 @@
                 shortId = null;
                 videoPath = null;
                 $('.short-id').val('');
-                $('.video-replace-btn').data('short-id', '');
+                // $('.video-replace-btn').data('short-id', '');
             }
 
-            function deleteDraft(shortId, callback) {
-                if (!shortId) {
-                    callback();
-                    return;
-                }
-                $.ajax({
-                    type: "POST",
-                    url: '{{ route('user.short.upload.delete.draft', '') }}/' + shortId,
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function (response) {
-                        if (response.data.success) {
-                            notify('success', response.message);
-                            callback();
-                        } else {
-                            notify('error', 'Failed to delete draft');
-                            callback();
-                        }
-                    }
-                });
-            }
+            // function deleteDraft(shortId, callback) {
+            //     if (!shortId) {
+            //         callback();
+            //         return;
+            //     }
+            //     $.ajax({
+            //         type: "POST",
+            //         url: '{{ route('user.short.upload.delete.draft', '') }}/' + shortId,
+            //         headers: {
+            //             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            //         },
+            //         success: function (response) {
+            //             if (response.data.success) {
+            //                 notify('success', response.message);
+            //                 callback();
+            //             } else {
+            //                 notify('error', 'Failed to delete draft');
+            //                 callback();
+            //             }
+            //         }
+            //     });
+            // }
 
-            $('.video-replace-btn').on('click', function () {
-                const shortId = $(this).data('short-id');
-                deleteDraft(shortId, function () {
-                    resetUpload();
-                });
-            });
+            // $('.video-replace-btn').on('click', function () {
+            //     const shortId = $(this).data('short-id');
+            //     deleteDraft(shortId, function () {
+            //         resetUpload();
+            //     });
+            // });
 
-            $('.discard').on('click', function () {
-                const shortId = $('.short-id').val();
-                deleteDraft(shortId, function () {
-                    resetUpload();
-                });
-            });
+            // $('.discard').on('click', function () {
+            //     const shortId = $('.short-id').val();
+            //     deleteDraft(shortId, function () {
+            //         resetUpload();
+            //     });
+            // });
 
             function saveCoverImageToDraft(shortId, dataUrl) {
                 if (!shortId || !dataUrl) return;

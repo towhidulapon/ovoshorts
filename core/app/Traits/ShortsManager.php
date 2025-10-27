@@ -165,7 +165,7 @@ trait ShortsManager
             'cover_image' => ['nullable', 'image', new FileTypeValidate(['jpg', 'jpeg', 'png'])],
             'visibility'  => 'required|in:1,2',
             'comment'     => 'nullable',
-            'category_id' => 'nullable|exists:categories,id',
+            'category_id' => 'required|exists:categories,id',
         ] : [
             'short_id'         => 'required|exists:shorts,id',
             'description'      => 'nullable|string|max:4000',
@@ -173,12 +173,22 @@ trait ShortsManager
             'cover_image_data' => ['nullable', 'string'],
             'visibility'       => 'required|in:1,2',
             'comment'          => 'nullable',
-            'category_id'      => 'nullable|exists:categories,id',
-            'post_at'          => 'nullable|in:1,2',
+            'category_id'      => 'required|exists:categories,id',
+            'post_at'          => 'required|in:1,2',
             'schedule_time'    => 'nullable|required_if:post_at,2|after:now',
         ];
 
-        $request->validate($rules);
+        $messages = [
+            'description.max'           => 'Description cannot exceed 4000 characters.',
+            'cover_image.image'         => 'Cover image must be a valid image file.',
+            'cover_image.mimes'         => 'Cover image must be a file of type: jpg, jpeg, png.',
+            'category_id.required'      => 'Please select a category.',
+            'category_id.exists'        => 'Selected category does not exist.',
+            'schedule_time.required_if' => 'Schedule time is required when post type is scheduled.',
+            'schedule_time.after'       => 'Schedule time must be a future date and time.',
+        ];
+
+        $request->validate($rules, $messages);
 
         if (!$isUpdate && !$request->hasFile('cover_image') && !$request->filled('cover_image_data')) {
             $message = 'A cover image is required';
@@ -495,6 +505,9 @@ trait ShortsManager
         }
 
         $short->delete();
+
+        // $notify[] = ['success', 'Draft deleted, select another video'];
+        // return redirect()->route('user.short.upload.index')->withNotify($notify);
 
         $redirect = 'user.short.upload.index';
         $message  = 'Draft deleted, select another video';
