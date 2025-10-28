@@ -11,7 +11,7 @@ class VerificationController extends Controller
 {
     public function setting()
     {
-        $pageTitle = "Verification";
+        $pageTitle = "Verification Setting";
         $form      = Form::where('act', 'verification')->first();
         return view('admin.verification.setting', compact('pageTitle', 'form'));
     }

@@ -4,7 +4,7 @@
         <div class="home-body overflow-hidden">
             <div class="video__wrapper video-details-wrapper bg-img position-relative" data-background-image="{{ getImage(getFilepath('coverImage') . '/' . $short->cover_image, getFileSize('coverImage')) }}">
                 <div class="video-details-header d-flex">
-                    <a href="{{ url()->previous() }}" class="video__back-button">
+                    <a href="#" class="video__back-button">
                         <i class="las la-times"></i>
                     </a>
 
@@ -77,16 +77,16 @@
                             </div>
                         </div>
                         @php
-                            $isLiked =
-                                auth()->check() &&
-                                App\Models\UserReaction::where('shorts_id', $short->id)
-                                    ->where('user_id', auth()->id())
-                                    ->exists();
-                            $isSaved =
-                                auth()->check() &&
-                                App\Models\SavedShort::where('shorts_id', $short->id)
-                                    ->where('user_id', auth()->id())
-                                    ->exists();
+$isLiked =
+    auth()->check() &&
+    App\Models\UserReaction::where('shorts_id', $short->id)
+        ->where('user_id', auth()->id())
+        ->exists();
+$isSaved =
+    auth()->check() &&
+    App\Models\SavedShort::where('shorts_id', $short->id)
+        ->where('user_id', auth()->id())
+        ->exists();
                         @endphp
                         <div class="video-action-wrapper">
                             <div class="video-item__action video-action-button-group">
@@ -786,6 +786,27 @@
                         console.error('Error copying link:', error);
                         notify('error', 'Failed to copy link');
                     }
+                });
+
+                $(document).on('click', '.video__back-button', function (e) {
+                    e.preventDefault();
+
+                    const referrer = document.referrer;
+
+                    const exploreRoute = "{{ route('explore') }}";
+                    const userRouteBase = "{{ url('user') }}";
+
+                    if (referrer.startsWith(exploreRoute) || referrer.startsWith(userRouteBase)) {
+                        window.location.href = referrer;
+                        return;
+                    }
+
+                    if (window.history.length > 1) {
+                        window.history.back();
+                        return;
+                    }
+
+                    window.location.href = exploreRoute;
                 });
             });
         })(jQuery);

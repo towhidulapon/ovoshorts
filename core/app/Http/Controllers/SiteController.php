@@ -461,6 +461,14 @@ class SiteController extends Controller
             ->where('id', '!=', $request->exclude_short_id)
             ->where('is_approved', Status::SHORT_APPROVE)
             ->where('status', Status::PUBLISHED)
+            ->where(function ($query) {
+                $query->where('storage_driver', 'local')
+                    ->orWhereIn('storage_driver', function ($subQuery) {
+                        $subQuery->select('alias')
+                            ->from('storage_settings')
+                            ->where('status', Status::ENABLE);
+                    });
+            })
             ->withCount('likes')
             ->withSum('stars', 'stars')
             ->orderBy('id', 'desc')

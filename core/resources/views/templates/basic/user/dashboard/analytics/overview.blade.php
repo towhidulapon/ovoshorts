@@ -1,6 +1,8 @@
 @extends($activeTemplate . 'layouts.dashboard_frontend')
 @section('content')
 
-    @include('Template::user.dashboard.home')
+    <div class="dashboard-body">
+        @include('Template::user.dashboard.home')
+    </div>
 
 @endsection

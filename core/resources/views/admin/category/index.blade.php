@@ -4,10 +4,11 @@
         <div class="col-12">
             <x-admin.ui.card class="table-has-filter">
                 <x-admin.ui.card.body :paddingZero="true">
-                    <x-admin.ui.table.layout renderTableFilter="false">
+                    <x-admin.ui.table.layout :renderExportButton="false">
                         <x-admin.ui.table>
                             <x-admin.ui.table.header>
                                 <tr>
+                                    <th>@lang('S.N.')</th>
                                     <th>@lang('Name')</th>
                                     <th>@lang('Status')</th>
                                     <th>@lang('Action')</th>
@@ -16,14 +17,15 @@
                             <x-admin.ui.table.body>
                                 @forelse($categories as $category)
                                     <tr>
+                                        <td>{{ $loop->index + $categories->firstItem() }}</td>
                                         <td>
-                                            <span class="fw-bold">{{ __($category->name) }}</span>
+                                            <span>{{ __($category->name) }}</span>
                                         </td>
                                         <td>
                                             <x-admin.other.status_switch :status="$category->status" :action="route('admin.category.status', $category->id)" title="Category" />
                                         </td>
                                         <td>
-                                            <x-admin.ui.btn.edit tag="btn" data-category="{{ json_encode($category) }}" :href="route('admin.category.save', $category->id)" />
+                                            <x-admin.ui.btn.edit tag="btn" data-category="{{ json_encode($category) }}" />
                                         </td>
                                     </tr>
                                 @empty
@@ -54,7 +56,7 @@
                 @csrf
                 <div class="form-group">
                     <label class="form-label">@lang('Category Name')</label>
-                    <input type="text" name="name" class="form-control" required placeholder="@lang('Enter category name')">
+                    <input type="text" name="name" class="form-control" value="{{ old('name') }}" placeholder="@lang('Enter category name')" required>
                 </div>
                 <div class="form-group">
                     <x-admin.ui.btn.modal />
@@ -81,7 +83,7 @@
             const $form = $modal.find('form');
 
             $('.addCategoryBtn').on('click', function () {
-                $modal.find('.modal-title').text('@lang('Add New Category')');
+                $modal.find('.modal-title').text("@lang('Add New Category')");
                 $form.trigger('reset');
                 $form.attr('action', "{{ route('admin.category.save') }}");
                 $modal.modal('show');
@@ -91,7 +93,7 @@
                 const category = $(this).data('category');
                 const action = "{{route('admin.category.save', ':id')}}";
 
-                $modal.find('.modal-title').text('@lang('Edit Category')');
+                $modal.find('.modal-title').text("@lang('Edit Category')");
                 $form.trigger('reset');
                 $modal.find('input[name="name"]').val(category.name);
                 $form.attr('action', action.replace(':id', category.id));

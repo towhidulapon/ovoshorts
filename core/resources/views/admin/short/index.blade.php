@@ -4,7 +4,7 @@
         <div class="col-12">
             <x-admin.ui.card class="table-has-filter">
                 <x-admin.ui.card.body :paddingZero="true">
-                    <x-admin.ui.table.layout searchPlaceholder="">
+                    <x-admin.ui.table.layout searchPlaceholder="" :renderExportButton="false">
                         <x-admin.ui.table>
                             <x-admin.ui.table.header>
                                 <tr>
@@ -40,17 +40,17 @@
                                             @php echo $short->statusBadge @endphp
                                         </td>
                                         <td>
-                                            @if ($short->status == Status::PUBLISHED)
-                                                <button type="button" class="btn btn-outline--danger table-action-btn confirmationBtn" data-action="{{ route('admin.short.status', $short->id) }}" data-question="@lang('Are you sure to unpublish this short?')">
-                                                    <i class="la la-eye-slash"></i> @lang('Unpublish')
-                                                </button>
-                                            @elseif ($short->status != Status::DRAFT && $short->is_approved != Status::SHORT_PENDING)
-                                                <button type="button" class="btn btn-outline--success table-action-btn confirmationBtn" data-action="{{ route('admin.short.status', $short->id) }}" data-question="@lang('Are you sure to publish this short?')">
-                                                    <i class="la la-eye"></i> @lang('Publish')
-                                                </button>
+                                            @if ($short->status !== Status::REJECTED)
+                                                @if ($short->status == Status::PUBLISHED)
+                                                    <button type="button" class="btn btn-outline--danger table-action-btn confirmationBtn" data-action="{{ route('admin.short.status', $short->id) }}" data-question="@lang('Are you sure to unpublish this short?')">
+                                                        <i class="la la-eye-slash"></i> @lang('Unpublish')
+                                                    </button>
+                                                @elseif ($short->status != Status::DRAFT && $short->is_approved != Status::SHORT_PENDING)
+                                                    <button type="button" class="btn btn-outline--success table-action-btn confirmationBtn" data-action="{{ route('admin.short.status', $short->id) }}" data-question="@lang('Are you sure to publish this short?')">
+                                                        <i class="la la-eye"></i> @lang('Publish')
+                                                    </button>
+                                                @endif
                                             @endif
-
-
                                             <a href="{{ route('admin.short.details', $short->id) }}" class="btn  btn-outline--primary ms-1 table-action-btn">
                                                 <i class="las la-info-circle"></i> @lang('Details')
                                             </a>

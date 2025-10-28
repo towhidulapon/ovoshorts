@@ -40,7 +40,7 @@
             "title": "Manage Shorts",
             "icon": "las la-video",
             "counters": [
-                "pendingShortsCount",
+                "unpublishedShortsCount",
                 "draftShortsCount"
             ],
             "menu_active": "admin.short*",
@@ -83,9 +83,9 @@
                         "Short management"
                     ],
                     "title": "Unpublished Shorts",
-                    "route_name": "admin.short.pending",
-                    "menu_active": "admin.short.pending",
-                    "counter": "pendingShortsCount"
+                    "route_name": "admin.short.unpublished",
+                    "menu_active": "admin.short.unpublished",
+                    "counter": "unpublishedShortsCount"
                 },
                 {
                     "keyword": [
@@ -291,7 +291,7 @@
             "title": "Star Recharges",
             "icon": "las la-coins",
             "counters": ["pendingStarRechargeCount"],
-            "menu_active": "admin.star*",
+            "menu_active": "admin.star.recharge*",
             "submenu": [{
                     "keyword": [
                         "Pending Star Recharge",

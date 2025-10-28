@@ -7,7 +7,7 @@
         <div class="col-12">
             <x-admin.ui.card class="table-has-filter">
                 <x-admin.ui.card.body :paddingZero="true">
-                    <x-admin.ui.table.layout searchPlaceholder="Username / TRX" filterBoxLocation="deposit.filter_form">
+                    <x-admin.ui.table.layout searchPlaceholder="Username / TRX" filterBoxLocation="deposit.filter_form" :renderExportButton="false">
                         <x-admin.ui.table>
                             <x-admin.ui.table.header>
                                 <tr>

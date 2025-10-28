@@ -11,14 +11,14 @@ class CategoryController extends Controller
     public function index()
     {
         $pageTitle  = 'Manage Categories';
-        $categories = Category::searchable(['name'])->paginate(getPaginate());
+        $categories = Category::searchable(['name'])->filter(['id'])->orderBy('id', getOrderBy())->paginate(getPaginate());
         return view('admin.category.index', compact('pageTitle', 'categories'));
     }
 
     public function save(Request $request, $id = 0)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|unique:categories|string|max:255',
         ]);
 
         if ($id) {
@@ -28,9 +28,11 @@ class CategoryController extends Controller
             $category = new Category();
             $message  = 'Category created successfully';
         }
+
         $category->name = $request->name;
         $category->save();
         $notify[] = ['success', $message];
+
         return back()->withNotify($notify);
     }
 

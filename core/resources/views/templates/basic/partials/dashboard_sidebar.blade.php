@@ -11,7 +11,7 @@
 
             <div class="dashboard-sidebar__header">
                 <div class="dashboard-sidebar-logo">
-                    <a href="{{ route('user.dashboard.home') }}"> <img src="{{ siteLogo('dark') }}" alt="img"> </a>
+                    <a href="{{ route('user.home') }}"> <img src="{{ siteLogo('dark') }}" alt="img"> </a>
                 </div>
 
                 <div class="dashboard-sidebar-back-btn">

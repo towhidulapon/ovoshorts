@@ -82,6 +82,8 @@ class Short extends Model {
                 $html = '<span class="badge badge--warning">' . trans('Unpublished') . '</span>';
             } elseif ($this->status == Status::PUBLISHED) {
                 $html = '<span class="badge badge--success">' . trans('Published') . '</span>';
+            } elseif ($this->status == Status::REJECTED) {
+                $html = '<span class="badge badge--danger">' . trans('Rejected') . '</span>';
             } else {
                 $html = '<span class="badge badge--primary">' . trans('Scheduled') . '</span>';
             }

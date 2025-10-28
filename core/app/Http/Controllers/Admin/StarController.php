@@ -10,34 +10,30 @@ class StarController extends Controller
 {
     public function index()
     {
-        $pageTitle = 'Star';
-        $stars     = Star::orderBy('id', 'desc')->paginate(getPaginate());
+        $pageTitle = 'Star Packages';
+        $stars     = Star::filter(['id'])->orderBy('id', getOrderBy())->paginate(getPaginate());
         return view('admin.star.index', compact('pageTitle', 'stars'));
     }
 
     public function save(Request $request, $id = 0)
     {
         $request->validate([
-            'stars' => 'required|numeric|gt:0',
-            'price' => 'required|numeric|gt:0',
+            'name'  => 'required|string|max:40',
+            'stars' => 'required|int|gt:0',
+            'price' => 'required|int|gt:0',
         ]);
-        if($id) {
-            $star = Star::findOrFail($id);
-            $star->stars = $request->stars;
-            $star->price = $request->price;
-            $star->save();
-            $message = 'Star package updated successfully';
-        }else {
-            $star = new Star();
-            $star->stars = $request->stars;
-            $star->price = $request->price;
-            $star->save();
-            $message = 'Star package added successfully';
-        }
-        $notify[] = ['success', $message];
-        return back()->withNotify($notify);
-    }
 
+        $star = $id ? Star::findOrFail($id) : new Star();
+
+        $star->name  = $request->name;
+        $star->stars = $request->stars;
+        $star->price = $request->price;
+        $star->save();
+
+        $message = $id ? 'Star package updated successfully' : 'Star package added successfully';
+
+        return back()->withNotify([['success', $message]]);
+    }
     public function status($id)
     {
         return Star::changeStatus($id);

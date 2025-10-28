@@ -115,7 +115,6 @@ Route::middleware('auth')->name('user.')->group(function () {
             });
 
             Route::controller('DashboardController')->prefix('dashboard')->name('dashboard.')->group(function () {
-                Route::get('home', 'home')->name('home');
                 Route::get('analytics', 'analytics')->name('analytics');
                 Route::get('post-analytics/{id}', 'postAnalytics')->name('analytics.post');
                 Route::get('analytics/content', 'analyticsContent')->name('analytics.content');

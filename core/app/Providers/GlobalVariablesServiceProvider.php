@@ -67,7 +67,7 @@ class GlobalVariablesServiceProvider extends ServiceProvider
                 'kycUnverifiedUsersCount'       => User::kycUnverified()->count(),
                 'kycPendingUsersCount'          => User::kycPending()->count(),
                 'verificationPendingUsersCount' => User::verificationPending()->count(),
-                'pendingShortsCount'            => Short::where('is_approved', Status::SHORT_PENDING)->where('status', Status::UNPUBLISHED)->count(),
+                'unpublishedShortsCount'        => Short::where('is_approved', Status::SHORT_PENDING)->orWhere('status', Status::UNPUBLISHED)->count(),
                 'draftShortsCount'              => Short::where('status', Status::DRAFT)->count(),
             ]);
         });
@@ -79,109 +79,18 @@ class GlobalVariablesServiceProvider extends ServiceProvider
             ]);
         });
 
-        View()->composer('*', function ($view) {
-            if (auth()->check()) {
-                $unreadMessageCount = Message::where('to_id', auth()->user()->id)
-                    ->where('is_read', Status::NO)
-                    ->count();
-                $view->with('unreadMessageCount', $unreadMessageCount);
-            } else {
-                $view->with('unreadMessageCount', 0);
-            }
-        });
-
-        // View()->composer('*', function ($view) {
+        // View()->composer('user.message.index, user.message.empty', function ($view) {
         //     if (auth()->check()) {
-        //         $user         = auth()->user();
-        //         $userShortIds = Short::where('user_id', $user->id)->pluck('id');
-
-        //         $likes = UserReaction::whereIn('shorts_id', $userShortIds)->whereNot('user_id', $user->id)
-        //             ->with(['user' => function ($query) {
-        //                 $query->select('id', 'username', 'image');
-        //             }, 'short' => function ($query) {
-        //                 $query->select('id', 'cover_image');
-        //             }])
-        //             ->select('id', 'user_id', 'shorts_id', 'created_at')
-        //             ->get();
-
-        //         $comments = Comment::whereIn('shorts_id', $userShortIds)
-        //             ->whereNot('user_id', $user->id)
-        //             ->whereNull('parent_id')
-        //             ->with([
-        //                 'user'  => function ($query) {
-        //                     $query->select('id', 'username', 'image');
-        //                 },
-        //                 'short' => function ($query) {
-        //                     $query->select('id', 'cover_image');
-        //                 },
-        //             ])
-        //             ->select('id', 'user_id', 'shorts_id', 'message', 'created_at')
-        //             ->get();
-
-        //         $followers = $user->followers()
-        //             ->where('follows.created_at', '>=', now()->subDays(7))
-        //             ->withPivot('created_at')
-        //             ->get()
-        //             ->map(function ($follower) {
-        //                 return [
-        //                     'type'       => 'follower',
-        //                     'user'       => $follower,
-        //                     'created_at' => $follower->pivot->created_at,
-        //                 ];
-        //             });
-
-        //         $commentsArray = $comments->map(function ($comment) {
-        //             return [
-        //                 'type'       => 'comment',
-        //                 'user'       => $comment->user,
-        //                 'short'      => $comment->short,
-        //                 'comment'    => $comment->comment,
-        //                 'created_at' => $comment->created_at,
-        //             ];
-        //         });
-
-        //         $likesArray = $likes->map(function ($like) {
-        //             return [
-        //                 'type'       => 'like',
-        //                 'user'       => $like->user,
-        //                 'short'      => $like->short,
-        //                 'created_at' => $like->created_at,
-        //             ];
-        //         });
-
-        //         $notifications = collect(array_merge(
-        //             $likesArray->toArray(),
-        //             $commentsArray->toArray(),
-        //             $followers->toArray()
-        //         ))->sortByDesc('created_at')->values();
-
-        //         $today          = Carbon::today();
-        //         $yesterday      = Carbon::yesterday();
-        //         $thisMonthStart = Carbon::now()->startOfMonth();
-
-        //         $groupedNotifications = [
-        //             'today'      => $notifications->filter(function ($notification) use ($today) {
-        //                 return $notification['created_at']->isToday();
-        //             })->take(5),
-        //             'yesterday'  => $notifications->filter(function ($notification) use ($yesterday) {
-        //                 return $notification['created_at']->isYesterday();
-        //             })->take(5),
-        //             'this_month' => $notifications->filter(function ($notification) use ($thisMonthStart) {
-        //                 return $notification['created_at']->gte($thisMonthStart) && !$notification['created_at']->isToday() && !$notification['created_at']->isYesterday();
-        //             })->take(5),
-        //         ];
-
-        //         $unreadNotifications = $notifications->count();
-
-        //         $view->with('groupedNotifications', $groupedNotifications)
-        //             ->with('unreadNotifications', $unreadNotifications);
+        //         $unreadMessageCount = Message::where('to_id', auth()->user()->id)
+        //             ->where('is_read', Status::NO)
+        //             ->count();
+        //         $view->with('unreadMessageCount', $unreadMessageCount);
         //     } else {
-        //         $view->with('groupedNotifications', ['today' => collect(), 'yesterday' => collect(), 'this_month' => collect()])
-        //             ->with('unreadNotifications', 0);
+        //         $view->with('unreadMessageCount', 0);
         //     }
         // });
 
-        View()->composer('*', function ($view) {
+        View()->composer(['Template::home', 'Template::user.short.explore', 'Template::user.friend.*', 'Template::user.message.index', 'Template::user.profile_details'], function ($view) {
             if (auth()->check()) {
                 $user         = auth()->user();
                 $userShortIds = Short::where('user_id', $user->id)->pluck('id');

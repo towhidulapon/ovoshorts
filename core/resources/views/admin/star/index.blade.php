@@ -4,10 +4,12 @@
         <div class="col-12">
             <x-admin.ui.card class="table-has-filter">
                 <x-admin.ui.card.body :paddingZero="true">
-                    <x-admin.ui.table.layout renderTableFilter="false">
+                    <x-admin.ui.table.layout :renderExportButton="false">
                         <x-admin.ui.table>
                             <x-admin.ui.table.header>
                                 <tr>
+                                    <th>@lang('S.N.')</th>
+                                    <th>@lang('Name')</th>
                                     <th>@lang('Stars')</th>
                                     <th>@lang('Price')</th>
                                     <th>@lang('Status')</th>
@@ -17,17 +19,19 @@
                             <x-admin.ui.table.body>
                                 @forelse($stars as $star)
                                     <tr>
+                                        <td>{{ $loop->index + $stars->firstItem() }}</td>
+                                        <td>{{ $star->name }}</td>
                                         <td>
-                                            <span class="fw-bold">{{ $star->stars }}</span>
+                                            <span>{{ $star->stars }}</span>
                                         </td>
                                         <td>
-                                            <span class="fw-bold">{{ showAmount($star->price) }}</span>
+                                            <span>{{ showAmount($star->price) }}</span>
                                         </td>
                                         <td>
                                             <x-admin.other.status_switch :status="$star->status" :action="route('admin.star.status', $star->id)" title="Star" />
                                         </td>
                                         <td>
-                                            <x-admin.ui.btn.edit tag="btn" data-star="{{ json_encode($star) }}" :href="route('admin.star.save', $star->id)" />
+                                            <x-admin.ui.btn.edit tag="btn" data-star="{{ json_encode($star) }}" />
                                         </td>
                                     </tr>
                                 @empty
@@ -57,12 +61,21 @@
             <form method="POST">
                 @csrf
                 <div class="form-group">
+                    <label class="form-label">@lang('Name')</label>
+                    <input type="text" name="name" value="{{ old('name') }}" class="form-control" placeholder="@lang('Enter plan name')" required>
+                </div>
+                <div class="form-group">
                     <label class="form-label">@lang('Stars')</label>
-                    <input type="number" name="stars" class="form-control" required placeholder="@lang('Enter number of stars')">
+                    <input type="number" name="stars" value="{{ old('stars') }}" class="form-control" required placeholder="@lang('Enter number of stars')">
                 </div>
                 <div class="form-group">
                     <label class="form-label">@lang('Price')</label>
-                    <input type="number" step="any" name="price" class="form-control" required placeholder="@lang('Enter price')">
+                    <div class="input-group">
+                        <input type="number" step="any" name="price" value="{{ old('price') }}" class="form-control" required placeholder="@lang('Enter price')">
+                        <span class="input-group-text">
+                            {{ gs('cur_text') }}
+                        </span>
+                    </div>
                 </div>
                 <div class="form-group">
                     <x-admin.ui.btn.modal />
@@ -89,7 +102,7 @@
             const $form = $modal.find('form');
 
             $('.addStarBtn').on('click', function () {
-                $modal.find('.modal-title').text('@lang('Add New Star Package')');
+                $modal.find('.modal-title').text("@lang('Add New Star Package')");
                 $form.trigger('reset');
                 $form.attr('action', "{{ route('admin.star.save') }}");
                 $modal.modal('show');
@@ -99,10 +112,11 @@
                 const star = $(this).data('star');
                 const action = "{{route('admin.star.save', ':id')}}";
 
-                $modal.find('.modal-title').text('@lang('Edit Star Packages')');
+                $modal.find('.modal-title').text("@lang('Edit Star Packages')");
                 $form.trigger('reset');
-                $modal.find('input[name="stars"]').val(star.stars);
-                $modal.find('input[name="price"]').val(star.price);
+                $modal.find('input[name=name]').val(star.name);
+                $modal.find('input[name=stars]').val(star.stars);
+                $modal.find('input[name=price]').val(getAmount(star.price));
                 $form.attr('action', action.replace(':id', star.id));
                 $modal.modal('show');
             })

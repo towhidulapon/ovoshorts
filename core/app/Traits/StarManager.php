@@ -163,7 +163,7 @@ trait StarManager
         $otherStarPurchase = StarPurchase::where('user_id', $user->id)->where('id', '!=', $starPurchaseId)->exists();
 
         if (!$otherStarPurchase) {
-            userReferralCommission($user);
+            userReferralCommission($user, $amount);
         }
 
         return [

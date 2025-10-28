@@ -37,7 +37,7 @@
 
                         <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap ps-0">
                             <span class="fs-14 text-muted">@lang('Comment Allow')</span>
-                            <span class="fs-14 text--success">{{ ($short->allow_comments == 1 ? 'Yes' : 'No') }}</span>
+                            <span class="fs-14 text--success">{{ ($short->allow_comments == Status::YES ? 'Yes' : 'No') }}</span>
                         </li>
 
                         <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap ps-0">
@@ -67,11 +67,11 @@
             </x-admin.ui.card>
         </div>
 
-        @if ($short->is_approved == Status::SHORT_PENDING)
+        @if ($short->is_approved !== Status::SHORT_REJECT)
             <div class="col-lg-8 col-md-6">
                 <x-admin.ui.card>
                     <x-admin.ui.card.header>
-                        <h4 class="card-title">@lang('Video Information')</h4>
+                        <h4 class="card-title">@lang('Uploaded Short')</h4>
                     </x-admin.ui.card.header>
                     <x-admin.ui.card.body>
                         @if ($url != null)
@@ -83,10 +83,10 @@
                         @endif
                         @if ($short->status == Status::SHORT_PENDING)
                             <div class="mt-3 d-flex gap-2 flex-wrap">
-                                <button class="btn btn-outline--success " data-bs-toggle="modal" data-bs-target="#approveModal">
+                                <button class="btn btn-outline--success" data-bs-toggle="modal" data-bs-target="#approveModal">
                                     <i class="las la-check-double"></i> @lang('Approve')
                                 </button>
-                                <button class="btn btn-outline--danger " data-bs-toggle="modal" data-bs-target="#rejectModal">
+                                <button class="btn btn-outline--danger" data-bs-toggle="modal" data-bs-target="#rejectModal">
                                     <i class="las la-ban"></i> @lang('Reject')
                                 </button>
                             </div>
@@ -101,7 +101,7 @@
 
     <x-admin.ui.modal id="approveModal">
         <x-admin.ui.modal.header>
-            <h1 class="modal-title">@lang('Short Approve Confirmation')</h1>
+            <h1 class="modal-title">@lang('Short Approval Confirmation')</h1>
             <button type="button" class="btn-close close" data-bs-dismiss="modal" aria-label="Close">
                 <i class="las la-times"></i>
             </button>
@@ -109,7 +109,6 @@
         <x-admin.ui.modal.body>
             <form action="{{ route('admin.short.approve', $short->id) }}" method="POST">
                 @csrf
-                <input type="hidden" name="id" value="{{ $short->id }}">
                 <div class="form-group">
                     <textarea name="details" class="form-control" value="{{ old('details') }}" rows="3" placeholder="@lang('Type your message here ...')" required></textarea>
                 </div>
@@ -122,7 +121,7 @@
 
     <x-admin.ui.modal id="rejectModal">
         <x-admin.ui.modal.header>
-            <h1 class="modal-title">@lang('Reject Short Confirmation')</h1>
+            <h1 class="modal-title">@lang('Short Rejection Confirmation')</h1>
             <button type="button" class="btn-close close" data-bs-dismiss="modal" aria-label="Close">
                 <i class="las la-times"></i>
             </button>
@@ -130,7 +129,6 @@
         <x-admin.ui.modal.body>
             <form action="{{ route('admin.short.reject', $short->id) }}" method="POST">
                 @csrf
-                <input type="hidden" name="id" value="{{ $short->id }}">
                 <div class="form-group">
                     <label>@lang('Reason of Rejection')</label>
                     <textarea name="details" class="form-control" rows="3" value="{{ old('details') }}" required></textarea>

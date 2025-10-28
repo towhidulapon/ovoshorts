@@ -1,13 +1,9 @@
 @extends('admin.layouts.app')
 @section('panel')
-    {{-- <x-admin.ui.widget.group.dashboard.demo_five /> --}}
     <x-admin.ui.widget.group.dashboard.demo_four :widget="$widget" />
     <x-admin.ui.widget.group.dashboard.users :widget="$widget" />
     <x-admin.ui.widget.group.dashboard.trx :widget="$widget" />
     <x-admin.ui.widget.group.dashboard.financial_overview :widget="$widget" />
-    {{-- <x-admin.ui.widget.group.dashboard.demo_one /> --}}
-    {{-- <x-admin.ui.widget.group.dashboard.demo_two /> --}}
-    {{-- <x-admin.ui.widget.group.dashboard.demo_three /> --}}
     <div class="row gy-4 mb-4">
         <x-admin.other.dashboard_trx_chart />
         <div class="col-xl-4">
@@ -15,7 +11,6 @@
         </div>
     </div>
 
-    {{-- <x-admin.other.cron_modal /> --}}
 @endsection
 
 @push('script-lib')

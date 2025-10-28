@@ -15,10 +15,4 @@ class DashboardController extends Controller
         $this->storageConfig = $storageConfig;
     }
 
-    public function home()
-    {
-        $pageTitle = 'Dashboard';
-        return view('Template::user.dashboard.home', compact('pageTitle'));
-    }
-
 }

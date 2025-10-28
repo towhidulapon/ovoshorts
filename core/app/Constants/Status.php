@@ -59,11 +59,6 @@ class Status
     const SCHEDULE    = 3;
     const REJECTED    = 4;
 
-    const RECHARGE_INITIATE = 0;
-    const RECHARGE_SUCCESS  = 1;
-    const RECHARGE_PENDING  = 2;
-    const RECHARGE_REJECT   = 3;
-
     const VERIFICATION_UNVERIFIED = 0;
     const VERIFICATION_SUCCESS    = 1;
     const VERIFICATION_PENDING    = 2;

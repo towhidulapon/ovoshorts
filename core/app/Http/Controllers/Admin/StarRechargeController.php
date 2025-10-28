@@ -14,8 +14,9 @@ class StarRechargeController extends Controller
     {
         return Deposit::whereNotNull('star_purchase_id')
             ->with(['user', 'gateway'])
-            ->searchable(['trx', 'user:username'])
+            ->searchable(['trx', 'user:username', 'gateway:name'])
             ->filter(['user_id'])
+            ->orderBy('id', getOrderBy())
             ->dateFilter();
     }
 
@@ -23,7 +24,7 @@ class StarRechargeController extends Controller
     {
         $pageTitle = 'Pending Star Recharge';
         $recharges = $this->starRechargeQuery()
-            ->where('status', Status::RECHARGE_PENDING)
+            ->pending()
             ->paginate(getPaginate());
 
         return view('admin.star.recharge.log', compact('pageTitle', 'recharges'));
@@ -43,7 +44,7 @@ class StarRechargeController extends Controller
     {
         $pageTitle = 'Rejected Star Recharge';
         $recharges = $this->starRechargeQuery()
-            ->where('status', Status::RECHARGE_REJECT)
+            ->rejected()
             ->paginate(getPaginate());
 
         return view('admin.star.recharge.log', compact('pageTitle', 'recharges'));
@@ -53,7 +54,7 @@ class StarRechargeController extends Controller
     {
         $pageTitle = 'Successful Star Recharge';
         $recharges = $this->starRechargeQuery()
-            ->where('status', Status::RECHARGE_SUCCESS)
+            ->successful()
             ->paginate(getPaginate());
 
         return view('admin.star.recharge.log', compact('pageTitle', 'recharges'));
@@ -63,13 +64,13 @@ class StarRechargeController extends Controller
     {
         $pageTitle = 'Initiated Star Recharge';
         $recharges = $this->starRechargeQuery()
-            ->where('status', Status::RECHARGE_INITIATE)
+            ->initiated()
             ->paginate(getPaginate());
 
         return view('admin.star.recharge.log', compact('pageTitle', 'recharges'));
     }
 
-    public function all()
+    public function allRecharges()
     {
         $pageTitle = 'Star Recharges';
         $recharges = $this->starRechargeQuery()
@@ -88,11 +89,11 @@ class StarRechargeController extends Controller
 
     public function approve($id)
     {
-        $recharge = Deposit::where('id', $id)->where('status', Status::PAYMENT_PENDING)->firstOrFail();
+        $recharge = Deposit::where('status', Status::PAYMENT_PENDING)->findOrFail($id);
 
         PaymentController::userDataUpdate($recharge, true);
 
-        $notify[] = ['success', 'Deposit request approved successfully'];
+        $notify[] = ['success', 'Star recharge request approved successfully'];
 
         return to_route('admin.star.recharge.pending')->withNotify($notify);
     }

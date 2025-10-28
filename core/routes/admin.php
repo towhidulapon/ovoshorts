@@ -334,8 +334,8 @@ Route::middleware('admin')->group(function () {
         Route::post('schedule/log/flush/{id}', 'logFlush')->name('log.flush');
     });
 
-    Route::controller('ShortApprovalController')->name('short.')->prefix('short')->group(function () {
-        Route::get('pending', 'pending')->name('pending');
+    Route::controller('ShortsController')->name('short.')->prefix('short')->group(function () {
+        Route::get('unpublished', 'unpublished')->name('unpublished');
         Route::get('index', 'index')->name('index');
         Route::get('details/{id}', 'details')->name('details');
         Route::post('approve/{id}', 'approve')->name('approve');
@@ -350,7 +350,7 @@ Route::middleware('admin')->group(function () {
     });
 
     Route::controller('StarRechargeController')->prefix('star/recharge')->name('star.recharge.')->group(function () {
-        Route::get('/', 'all')->name('list');
+        Route::get('/', 'allRecharges')->name('list');
         Route::get('pending', 'pending')->name('pending');
         Route::get('approved', 'approved')->name('approved');
         Route::get('successful', 'successful')->name('successful');
@@ -382,7 +382,6 @@ Route::middleware('admin')->group(function () {
     Route::controller('StarController')->name('star.')->prefix('star')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('save/{id?}', 'save')->name('save');
-        Route::post('save/cashback/{id?}', 'saveCashback')->name('cashback.save');
         Route::post('status/{id}', 'status')->name('status');
     });
 

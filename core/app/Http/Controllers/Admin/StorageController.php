@@ -42,13 +42,11 @@ class StorageController extends Controller
 
     public function status($id)
     {
-        $storage = StorageSetting::where('id', $id)->findOrFail($id);
+        $storage = StorageSetting::findOrFail($id);
         StorageSetting::where('id', '!=', $id)->update(['status' => Status::DISABLE]);
-        if ($storage->status == Status::DISABLE) {
-            $storage->status = Status::ENABLE;
-        } else {
-            $storage->status = Status::DISABLE;
-        }
+
+        $storage->status = ($storage->status == Status::ENABLE) ? Status::DISABLE : Status::ENABLE;
+
         $storage->save();
         $notify[] = ['success', 'Storage status updated successfully'];
         return back()->withNotify($notify);

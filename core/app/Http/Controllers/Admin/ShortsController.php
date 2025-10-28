@@ -8,7 +8,7 @@ use App\Lib\StorageConfig;
 use App\Models\Short;
 use Illuminate\Http\Request;
 
-class ShortApprovalController extends Controller
+class ShortsController extends Controller
 {
     protected $storageConfig;
 
@@ -22,7 +22,7 @@ class ShortApprovalController extends Controller
         return $this->getShorts('All Shorts');
     }
 
-    public function pending()
+    public function unpublished()
     {
         return $this->getShorts('Unpublished Shorts', Status::UNPUBLISHED);
     }
@@ -43,8 +43,9 @@ class ShortApprovalController extends Controller
             ->when($status !== null, fn($q) => $q->where('status', $status))
             ->where('status', '!=', Status::DRAFT)
             ->searchable(['name'])
+            ->filter(['id'])
             ->dateFilter()
-            ->orderByDesc('id')
+            ->orderBy('id', getOrderBy())
             ->paginate(getPaginate());
 
         return view('admin.short.index', compact('pageTitle', 'shorts'));
@@ -54,8 +55,9 @@ class ShortApprovalController extends Controller
     {
         $query = Short::with('user')
             ->searchable(['name'])
+            ->filter(['id'])
             ->dateFilter()
-            ->orderByDesc('id');
+            ->orderBy('id', getOrderBy());
 
         if ($status !== null) {
             $query->where('status', $status);
@@ -94,13 +96,18 @@ class ShortApprovalController extends Controller
 
     public function approve(Request $request, $id)
     {
+        $request->validate([
+            'details' => 'required|string|max:255',
+        ]);
         $short              = Short::findOrFail($id);
         $short->is_approved = Status::SHORT_APPROVE;
+
         if ($short->post_at >= now()) {
             $short->status = Status::SCHEDULE;
         } else {
             $short->status = Status::PUBLISHED;
         }
+
         $short->admin_feedback = $request->details;
         $short->save();
 
@@ -111,7 +118,7 @@ class ShortApprovalController extends Controller
         ]);
 
         $notify[] = ['success', 'Short has been approved successfully'];
-        return to_route('admin.short.pending')->withNotify($notify);
+        return to_route('admin.short.unpublished')->withNotify($notify);
     }
 
     public function reject(Request $request, $id)
@@ -139,13 +146,13 @@ class ShortApprovalController extends Controller
         ]);
 
         $notify[] = ['success', 'Short has been rejected successfully'];
-        return to_route('admin.short.pending')->withNotify($notify);
+        return to_route('admin.short.unpublished')->withNotify($notify);
     }
 
     public function details($id)
     {
         $pageTitle = 'Short Detail';
-        $short     = Short::where('id', $id)->with(['user', 'storage'])->firstOrFail();
+        $short     = Short::with(['user', 'storage'])->findOrFail($id);
         $filename  = $short->name;
 
         try {
@@ -162,26 +169,6 @@ class ShortApprovalController extends Controller
         };
 
         return view('admin.short.detail', compact('short', 'pageTitle', 'url'));
-    }
-
-    public function getFile($filename)
-    {
-        $short = Short::where('name', $filename)->firstOrFail();
-        $path  = 'shorts/' . $filename;
-
-        try {
-            $this->storageConfig->configure($short->storage_driver);
-        } catch (\Exception $e) {
-            $notify[] = ['error', 'Storage configuration not found'];
-            return back()->withNotify($notify);
-        }
-
-        if (!$this->storageConfig->fileExists($short->storage_driver, $path)) {
-            $notify[] = ['error', 'File not found'];
-            return back()->withNotify($notify);
-        }
-
-        return $this->storageConfig->getFileResponse($short->storage_driver, $path);
     }
 
     public function status($id)

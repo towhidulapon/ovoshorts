@@ -99,7 +99,7 @@
                             @forelse ($platformShares as $source)
                                 <div class="skill-item">
                                     <div class="skill-text d-flex justify-content-between">
-                                        <p>{{ $source[''] ?? 'Unknown' }}</p>
+                                        <p>{{ $source['platform'] ?? 'Unknown' }}</p>
                                         <p><span>{{ $source['percentage'] }}</span>%</p>
                                     </div>
                                     <div class="progress-bg-line">

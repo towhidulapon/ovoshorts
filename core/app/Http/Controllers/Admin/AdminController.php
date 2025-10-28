@@ -18,10 +18,8 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
-
     public function dashboard()
     {
-
         $userQuery     = User::query();
         $depositQuery  = Deposit::query();
         $withdrawQuery = Withdrawal::query();

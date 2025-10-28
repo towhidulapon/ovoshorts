@@ -801,14 +801,16 @@ function prepareShortData($short)
     return $short;
 }
 
-function userReferralCommission($user)
+function userReferralCommission($user, $amount)
 {
     $referrer       = User::active()->find($user->ref_by);
-    $referralAmount = gs('referral_commission');
+    $referralPercentage = gs('referral_commission');
 
-    if (!$referrer || $referralAmount <= 0) {
+    if (!$referrer || $referralPercentage <= 0) {
         return false;
     }
+
+    $referralAmount = ($amount * $referralPercentage) / 100;
 
     $referrer->balance += $referralAmount;
     $referrer->save();

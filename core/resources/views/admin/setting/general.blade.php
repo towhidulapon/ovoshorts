@@ -147,9 +147,12 @@
                     </div>
                     <div class="col-sm-6">
                         <div class="form-group">
-                            <label>@lang('Referral Commission')</label>
+                            <label>@lang('Referral Commission Percentage')</label>
                             <div class="input-group">
                                 <input class="form-control" type="text" step="any" name="referral_commission" required value="{{ getAmount(gs('referral_commission')) }}">
+                                <span class="input-group-text">
+                                    @lang('%')
+                                </span>
                             </div>
                         </div>
                     </div>
