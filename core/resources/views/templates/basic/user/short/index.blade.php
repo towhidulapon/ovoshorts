@@ -275,7 +275,6 @@
                 const latestFilename = $('.upload-step2').data('filename');
 
                 $('.short-id').val(latestShortId);
-                // $('.video-replace-btn').data('short-id', latestShortId);
                 $('.filename').text(latestFilename);
                 $('.upload-status').text('Upload Completed');
                 $('.progress-label').text('Uploading Progress');
@@ -304,14 +303,6 @@
                     return;
                 }
 
-                // const existingShortId = $('.video-replace-btn').data('short-id');
-                // if (existingShortId) {
-                //     deleteDraft(existingShortId, function () {
-                //         proceedWithUpload();
-                //     });
-                // } else {
-                //     proceedWithUpload();
-                // }
                 proceedWithUpload();
             });
 
@@ -338,7 +329,6 @@
                             uploadId = response.data.upload_id;
                             shortId = response.data.short_id;
                             $('.short-id').val(shortId);
-                            // $('.video-replace-btn').data('short-id', shortId);
                             chunkCount = Math.ceil(videoFile.size / CHUNK_SIZE);
                             currentChunk = 0;
                             uploadNextChunk();
@@ -455,45 +445,7 @@
                 shortId = null;
                 videoPath = null;
                 $('.short-id').val('');
-                // $('.video-replace-btn').data('short-id', '');
             }
-
-            // function deleteDraft(shortId, callback) {
-            //     if (!shortId) {
-            //         callback();
-            //         return;
-            //     }
-            //     $.ajax({
-            //         type: "POST",
-            //         url: '{{ route('user.short.upload.delete.draft', '') }}/' + shortId,
-            //         headers: {
-            //             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            //         },
-            //         success: function (response) {
-            //             if (response.data.success) {
-            //                 notify('success', response.message);
-            //                 callback();
-            //             } else {
-            //                 notify('error', 'Failed to delete draft');
-            //                 callback();
-            //             }
-            //         }
-            //     });
-            // }
-
-            // $('.video-replace-btn').on('click', function () {
-            //     const shortId = $(this).data('short-id');
-            //     deleteDraft(shortId, function () {
-            //         resetUpload();
-            //     });
-            // });
-
-            // $('.discard').on('click', function () {
-            //     const shortId = $('.short-id').val();
-            //     deleteDraft(shortId, function () {
-            //         resetUpload();
-            //     });
-            // });
 
             function saveCoverImageToDraft(shortId, dataUrl) {
                 if (!shortId || !dataUrl) return;
