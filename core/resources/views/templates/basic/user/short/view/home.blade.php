@@ -31,7 +31,8 @@
                         <div class="video-item__action">
                             <div class="cmn-button-item profile-follow" data-user-id="{{ $short->user_id }}">
                                 <a href="{{ route('user.profile', $short->user->username) }}" class="profile-thumb">
-                                    <img src="{{ getImage(getFilePath('userProfile') . '/' . $short->user->image) }}" class="fit-image" alt="img">
+                                    <img src="{{ $short->user->image ? getImage(getFilePath('userProfile') . '/' . $short->user->image) : asset('assets/images/avatar.jpg') }}" class="fit-image" alt="img">
+
                                 </a>
                                 @if ($short->user->id !== auth()->id())
                                     <button class="follower-btn follow-toggle-btn follow-btn" data-following="{{ in_array($short->user->id, $following) ? '1' : '0' }}" data-id="{{ $short->user->id }}" data-action="follow">
@@ -376,11 +377,8 @@
                         success: function (response) {
                             if (response.success) {
                                 var shortId = $('.short-id').val();
-                                var $videoItem = $('.video-item').find(
-                                    `[data-short-id="${shortId}"]`).closest(
-                                        '.video-item');
-                                var $commentCountElement = $videoItem.find(
-                                    '.button-comment .comment-count');
+                                var $videoItem = $('.video-item').find(`[data-short-id="${shortId}"]`).closest('.video-item');
+                                var $commentCountElement = $videoItem.find('.button-comment .comment-count');
                                 $commentCountElement.text(response.comment_count);
                                 $('.comment-form').trigger('reset');
                                 $('.comments-container').prepend(response.html);
@@ -528,6 +526,8 @@
                                     $btn.data("action", "follow");
                                 }
                                 notify('success', response.message);
+
+                                $(".sidebar-following-container").load("{{ route('user.friend.sidebar.following') }}");
                             }
                         }
                     });
@@ -613,8 +613,6 @@
                     var platform = $option.data('platform');
                     var shortsId = $('#shareModal').data('shorts-id');
 
-                    console.log("Sharing shorts ID:", shortsId);
-
                     var $countElement = $('.video-item').find(`[data-shorts-id="${shortsId}"]`).closest(
                         '.video-item').find('.share-count');
 
@@ -627,8 +625,6 @@
                             platform: platform
                         },
                         success: function (response) {
-                            console.log("Server response:", response);
-
                             if (response.data.success) {
                                 var shortUrl = response.data.share_url;
                                 var shareText = 'Check out this video! ' + shortUrl;

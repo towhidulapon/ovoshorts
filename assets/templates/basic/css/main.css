@@ -10,121 +10,201 @@
   --base-s: 100%;
   --base-l: 59%;
   --base: var(--base-h) var(--base-s) var(--base-l);
-  --base-d-100: var(--base-h) var(--base-s) calc(var(--base-l) - var(--base-l) * 0.1);
-  --base-d-200: var(--base-h) var(--base-s) calc(var(--base-l) - var(--base-l) * 0.2);
-  --base-d-300: var(--base-h) var(--base-s) calc(var(--base-l) - var(--base-l) * 0.3);
-  --base-d-400: var(--base-h) var(--base-s) calc(var(--base-l) - var(--base-l) * 0.4);
-  --base-d-500: var(--base-h) var(--base-s) calc(var(--base-l) - var(--base-l) * 0.5);
-  --base-l-100: var(--base-h) calc(var(--base-s)) calc(var(--base-l) + (100% - var(--base-l)) * 0.1);
-  --base-l-200: var(--base-h) calc(var(--base-s)) calc(var(--base-l) + (100% - var(--base-l)) * 0.2);
-  --base-l-300: var(--base-h) calc(var(--base-s)) calc(var(--base-l) + (100% - var(--base-l)) * 0.3);
-  --base-l-400: var(--base-h) calc(var(--base-s)) calc(var(--base-l) + (100% - var(--base-l)) * 0.4);
-  --base-l-500: var(--base-h) calc(var(--base-s)) calc(var(--base-l) + (100% - var(--base-l)) * 0.5);
+  --base-d-100: var(--base-h) var(--base-s)
+    calc(var(--base-l) - var(--base-l) * 0.1);
+  --base-d-200: var(--base-h) var(--base-s)
+    calc(var(--base-l) - var(--base-l) * 0.2);
+  --base-d-300: var(--base-h) var(--base-s)
+    calc(var(--base-l) - var(--base-l) * 0.3);
+  --base-d-400: var(--base-h) var(--base-s)
+    calc(var(--base-l) - var(--base-l) * 0.4);
+  --base-d-500: var(--base-h) var(--base-s)
+    calc(var(--base-l) - var(--base-l) * 0.5);
+  --base-l-100: var(--base-h) calc(var(--base-s))
+    calc(var(--base-l) + (100% - var(--base-l)) * 0.1);
+  --base-l-200: var(--base-h) calc(var(--base-s))
+    calc(var(--base-l) + (100% - var(--base-l)) * 0.2);
+  --base-l-300: var(--base-h) calc(var(--base-s))
+    calc(var(--base-l) + (100% - var(--base-l)) * 0.3);
+  --base-l-400: var(--base-h) calc(var(--base-s))
+    calc(var(--base-l) + (100% - var(--base-l)) * 0.4);
+  --base-l-500: var(--base-h) calc(var(--base-s))
+    calc(var(--base-l) + (100% - var(--base-l)) * 0.5);
   /* Base Two Color */
   --base-two-h: 249;
   --base-two-s: 97%;
   --base-two-l: 66%;
   --base-two: var(--base-two-h) var(--base-two-s) var(--base-two-l);
-  --base-two-d-100: var(--base-two-h) var(--base-two-s) calc(var(--base-two-l) - var(--base-two-l) * 0.1);
-  --base-two-d-200: var(--base-two-h) var(--base-two-s) calc(var(--base-two-l) - var(--base-two-l) * 0.2);
-  --base-two-d-300: var(--base-two-h) var(--base-two-s) calc(var(--base-two-l) - var(--base-two-l) * 0.3);
-  --base-two-d-400: var(--base-two-h) var(--base-two-s) calc(var(--base-two-l) - var(--base-two-l) * 0.4);
-  --base-two-d-500: var(--base-two-h) var(--base-two-s) calc(var(--base-two-l) - var(--base-two-l) * 0.5);
-  --base-two-l-100: var(--base-two-h) calc(var(--base-two-s)) calc(var(--base-two-l) + (100% - var(--base-two-l)) * 0.1);
-  --base-two-l-200: var(--base-two-h) calc(var(--base-two-s)) calc(var(--base-two-l) + (100% - var(--base-two-l)) * 0.2);
-  --base-two-l-300: var(--base-two-h) calc(var(--base-two-s)) calc(var(--base-two-l) + (100% - var(--base-two-l)) * 0.3);
-  --base-two-l-400: var(--base-two-h) calc(var(--base-two-s)) calc(var(--base-two-l) + (100% - var(--base-two-l)) * 0.4);
-  --base-two-l-500: var(--base-two-h) calc(var(--base-two-s)) calc(var(--base-two-l) + (100% - var(--base-two-l)) * 0.5);
+  --base-two-d-100: var(--base-two-h) var(--base-two-s)
+    calc(var(--base-two-l) - var(--base-two-l) * 0.1);
+  --base-two-d-200: var(--base-two-h) var(--base-two-s)
+    calc(var(--base-two-l) - var(--base-two-l) * 0.2);
+  --base-two-d-300: var(--base-two-h) var(--base-two-s)
+    calc(var(--base-two-l) - var(--base-two-l) * 0.3);
+  --base-two-d-400: var(--base-two-h) var(--base-two-s)
+    calc(var(--base-two-l) - var(--base-two-l) * 0.4);
+  --base-two-d-500: var(--base-two-h) var(--base-two-s)
+    calc(var(--base-two-l) - var(--base-two-l) * 0.5);
+  --base-two-l-100: var(--base-two-h) calc(var(--base-two-s))
+    calc(var(--base-two-l) + (100% - var(--base-two-l)) * 0.1);
+  --base-two-l-200: var(--base-two-h) calc(var(--base-two-s))
+    calc(var(--base-two-l) + (100% - var(--base-two-l)) * 0.2);
+  --base-two-l-300: var(--base-two-h) calc(var(--base-two-s))
+    calc(var(--base-two-l) + (100% - var(--base-two-l)) * 0.3);
+  --base-two-l-400: var(--base-two-h) calc(var(--base-two-s))
+    calc(var(--base-two-l) + (100% - var(--base-two-l)) * 0.4);
+  --base-two-l-500: var(--base-two-h) calc(var(--base-two-s))
+    calc(var(--base-two-l) + (100% - var(--base-two-l)) * 0.5);
   /* Primary Color */
   --primary-h: 253;
   --primary-s: 100%;
   --primary-l: 61%;
   --primary: var(--primary-h) var(--primary-s) var(--primary-l);
-  --primary-d-100: var(--primary-h) var(--primary-s) calc(var(--primary-l) - var(--primary-l) * 0.1);
-  --primary-d-200: var(--primary-h) var(--primary-s) calc(var(--primary-l) - var(--primary-l) * 0.2);
-  --primary-d-300: var(--primary-h) var(--primary-s) calc(var(--primary-l) - var(--primary-l) * 0.3);
-  --primary-d-400: var(--primary-h) var(--primary-s) calc(var(--primary-l) - var(--primary-l) * 0.4);
-  --primary-d-500: var(--primary-h) var(--primary-s) calc(var(--primary-l) - var(--primary-l) * 0.5);
-  --primary-l-100: var(--primary-h) calc(var(--primary-s)) calc(var(--primary-l) + (100% - var(--primary-l)) * 0.1);
-  --primary-l-200: var(--primary-h) calc(var(--primary-s)) calc(var(--primary-l) + (100% - var(--primary-l)) * 0.2);
-  --primary-l-300: var(--primary-h) calc(var(--primary-s)) calc(var(--primary-l) + (100% - var(--primary-l)) * 0.3);
-  --primary-l-400: var(--primary-h) calc(var(--primary-s)) calc(var(--primary-l) + (100% - var(--primary-l)) * 0.4);
-  --primary-l-500: var(--primary-h) calc(var(--primary-s)) calc(var(--primary-l) + (100% - var(--primary-l)) * 0.5);
+  --primary-d-100: var(--primary-h) var(--primary-s)
+    calc(var(--primary-l) - var(--primary-l) * 0.1);
+  --primary-d-200: var(--primary-h) var(--primary-s)
+    calc(var(--primary-l) - var(--primary-l) * 0.2);
+  --primary-d-300: var(--primary-h) var(--primary-s)
+    calc(var(--primary-l) - var(--primary-l) * 0.3);
+  --primary-d-400: var(--primary-h) var(--primary-s)
+    calc(var(--primary-l) - var(--primary-l) * 0.4);
+  --primary-d-500: var(--primary-h) var(--primary-s)
+    calc(var(--primary-l) - var(--primary-l) * 0.5);
+  --primary-l-100: var(--primary-h) calc(var(--primary-s))
+    calc(var(--primary-l) + (100% - var(--primary-l)) * 0.1);
+  --primary-l-200: var(--primary-h) calc(var(--primary-s))
+    calc(var(--primary-l) + (100% - var(--primary-l)) * 0.2);
+  --primary-l-300: var(--primary-h) calc(var(--primary-s))
+    calc(var(--primary-l) + (100% - var(--primary-l)) * 0.3);
+  --primary-l-400: var(--primary-h) calc(var(--primary-s))
+    calc(var(--primary-l) + (100% - var(--primary-l)) * 0.4);
+  --primary-l-500: var(--primary-h) calc(var(--primary-s))
+    calc(var(--primary-l) + (100% - var(--primary-l)) * 0.5);
   /* Secondary Color */
   --secondary-h: 210;
   --secondary-s: 3%;
   --secondary-l: 36%;
   --secondary: var(--secondary-h) var(--secondary-s) var(--secondary-l);
-  --secondary-d-100: var(--secondary-h) var(--secondary-s) calc(var(--secondary-l) - var(--secondary-l) * 0.1);
-  --secondary-d-200: var(--secondary-h) var(--secondary-s) calc(var(--secondary-l) - var(--secondary-l) * 0.2);
-  --secondary-d-300: var(--secondary-h) var(--secondary-s) calc(var(--secondary-l) - var(--secondary-l) * 0.3);
-  --secondary-d-400: var(--secondary-h) var(--secondary-s) calc(var(--secondary-l) - var(--secondary-l) * 0.4);
-  --secondary-d-500: var(--secondary-h) var(--secondary-s) calc(var(--secondary-l) - var(--secondary-l) * 0.5);
-  --secondary-l-100: var(--secondary-h) calc(var(--secondary-s)) calc(var(--secondary-l) + (100% - var(--secondary-l)) * 0.1);
-  --secondary-l-200: var(--secondary-h) calc(var(--secondary-s)) calc(var(--secondary-l) + (100% - var(--secondary-l)) * 0.2);
-  --secondary-l-300: var(--secondary-h) calc(var(--secondary-s)) calc(var(--secondary-l) + (100% - var(--secondary-l)) * 0.3);
-  --secondary-l-400: var(--secondary-h) calc(var(--secondary-s)) calc(var(--secondary-l) + (100% - var(--secondary-l)) * 0.4);
-  --secondary-l-500: var(--secondary-h) calc(var(--secondary-s)) calc(var(--secondary-l) + (100% - var(--secondary-l)) * 0.5);
+  --secondary-d-100: var(--secondary-h) var(--secondary-s)
+    calc(var(--secondary-l) - var(--secondary-l) * 0.1);
+  --secondary-d-200: var(--secondary-h) var(--secondary-s)
+    calc(var(--secondary-l) - var(--secondary-l) * 0.2);
+  --secondary-d-300: var(--secondary-h) var(--secondary-s)
+    calc(var(--secondary-l) - var(--secondary-l) * 0.3);
+  --secondary-d-400: var(--secondary-h) var(--secondary-s)
+    calc(var(--secondary-l) - var(--secondary-l) * 0.4);
+  --secondary-d-500: var(--secondary-h) var(--secondary-s)
+    calc(var(--secondary-l) - var(--secondary-l) * 0.5);
+  --secondary-l-100: var(--secondary-h) calc(var(--secondary-s))
+    calc(var(--secondary-l) + (100% - var(--secondary-l)) * 0.1);
+  --secondary-l-200: var(--secondary-h) calc(var(--secondary-s))
+    calc(var(--secondary-l) + (100% - var(--secondary-l)) * 0.2);
+  --secondary-l-300: var(--secondary-h) calc(var(--secondary-s))
+    calc(var(--secondary-l) + (100% - var(--secondary-l)) * 0.3);
+  --secondary-l-400: var(--secondary-h) calc(var(--secondary-s))
+    calc(var(--secondary-l) + (100% - var(--secondary-l)) * 0.4);
+  --secondary-l-500: var(--secondary-h) calc(var(--secondary-s))
+    calc(var(--secondary-l) + (100% - var(--secondary-l)) * 0.5);
   /* Success Color */
   --success-h: 135;
   --success-s: 58%;
   --success-l: 49%;
   --success: var(--success-h) var(--success-s) var(--success-l);
-  --success-d-100: var(--success-h) var(--success-s) calc(var(--success-l) - var(--success-l) * 0.1);
-  --success-d-200: var(--success-h) var(--success-s) calc(var(--success-l) - var(--success-l) * 0.2);
-  --success-d-300: var(--success-h) var(--success-s) calc(var(--success-l) - var(--success-l) * 0.3);
-  --success-d-400: var(--success-h) var(--success-s) calc(var(--success-l) - var(--success-l) * 0.4);
-  --success-d-500: var(--success-h) var(--success-s) calc(var(--success-l) - var(--success-l) * 0.5);
-  --success-l-100: var(--success-h) calc(var(--success-s)) calc(var(--success-l) + (100% - var(--success-l)) * 0.1);
-  --success-l-200: var(--success-h) calc(var(--success-s)) calc(var(--success-l) + (100% - var(--success-l)) * 0.2);
-  --success-l-300: var(--success-h) calc(var(--success-s)) calc(var(--success-l) + (100% - var(--success-l)) * 0.3);
-  --success-l-400: var(--success-h) calc(var(--success-s)) calc(var(--success-l) + (100% - var(--success-l)) * 0.4);
-  --success-l-500: var(--success-h) calc(var(--success-s)) calc(var(--success-l) + (100% - var(--success-l)) * 0.5);
+  --success-d-100: var(--success-h) var(--success-s)
+    calc(var(--success-l) - var(--success-l) * 0.1);
+  --success-d-200: var(--success-h) var(--success-s)
+    calc(var(--success-l) - var(--success-l) * 0.2);
+  --success-d-300: var(--success-h) var(--success-s)
+    calc(var(--success-l) - var(--success-l) * 0.3);
+  --success-d-400: var(--success-h) var(--success-s)
+    calc(var(--success-l) - var(--success-l) * 0.4);
+  --success-d-500: var(--success-h) var(--success-s)
+    calc(var(--success-l) - var(--success-l) * 0.5);
+  --success-l-100: var(--success-h) calc(var(--success-s))
+    calc(var(--success-l) + (100% - var(--success-l)) * 0.1);
+  --success-l-200: var(--success-h) calc(var(--success-s))
+    calc(var(--success-l) + (100% - var(--success-l)) * 0.2);
+  --success-l-300: var(--success-h) calc(var(--success-s))
+    calc(var(--success-l) + (100% - var(--success-l)) * 0.3);
+  --success-l-400: var(--success-h) calc(var(--success-s))
+    calc(var(--success-l) + (100% - var(--success-l)) * 0.4);
+  --success-l-500: var(--success-h) calc(var(--success-s))
+    calc(var(--success-l) + (100% - var(--success-l)) * 0.5);
   /* Danger Color */
   --danger-h: 0;
   --danger-s: 84%;
   --danger-l: 60%;
   --danger: var(--danger-h) var(--danger-s) var(--danger-l);
-  --danger-d-100: var(--danger-h) var(--danger-s) calc(var(--danger-l) - var(--danger-l) * 0.1);
-  --danger-d-200: var(--danger-h) var(--danger-s) calc(var(--danger-l) - var(--danger-l) * 0.2);
-  --danger-d-300: var(--danger-h) var(--danger-s) calc(var(--danger-l) - var(--danger-l) * 0.3);
-  --danger-d-400: var(--danger-h) var(--danger-s) calc(var(--danger-l) - var(--danger-l) * 0.4);
-  --danger-d-500: var(--danger-h) var(--danger-s) calc(var(--danger-l) - var(--danger-l) * 0.5);
-  --danger-l-100: var(--danger-h) calc(var(--danger-s)) calc(var(--danger-l) + (100% - var(--danger-l)) * 0.1);
-  --danger-l-200: var(--danger-h) calc(var(--danger-s)) calc(var(--danger-l) + (100% - var(--danger-l)) * 0.2);
-  --danger-l-300: var(--danger-h) calc(var(--danger-s)) calc(var(--danger-l) + (100% - var(--danger-l)) * 0.3);
-  --danger-l-400: var(--danger-h) calc(var(--danger-s)) calc(var(--danger-l) + (100% - var(--danger-l)) * 0.4);
-  --danger-l-500: var(--danger-h) calc(var(--danger-s)) calc(var(--danger-l) + (100% - var(--danger-l)) * 0.5);
+  --danger-d-100: var(--danger-h) var(--danger-s)
+    calc(var(--danger-l) - var(--danger-l) * 0.1);
+  --danger-d-200: var(--danger-h) var(--danger-s)
+    calc(var(--danger-l) - var(--danger-l) * 0.2);
+  --danger-d-300: var(--danger-h) var(--danger-s)
+    calc(var(--danger-l) - var(--danger-l) * 0.3);
+  --danger-d-400: var(--danger-h) var(--danger-s)
+    calc(var(--danger-l) - var(--danger-l) * 0.4);
+  --danger-d-500: var(--danger-h) var(--danger-s)
+    calc(var(--danger-l) - var(--danger-l) * 0.5);
+  --danger-l-100: var(--danger-h) calc(var(--danger-s))
+    calc(var(--danger-l) + (100% - var(--danger-l)) * 0.1);
+  --danger-l-200: var(--danger-h) calc(var(--danger-s))
+    calc(var(--danger-l) + (100% - var(--danger-l)) * 0.2);
+  --danger-l-300: var(--danger-h) calc(var(--danger-s))
+    calc(var(--danger-l) + (100% - var(--danger-l)) * 0.3);
+  --danger-l-400: var(--danger-h) calc(var(--danger-s))
+    calc(var(--danger-l) + (100% - var(--danger-l)) * 0.4);
+  --danger-l-500: var(--danger-h) calc(var(--danger-s))
+    calc(var(--danger-l) + (100% - var(--danger-l)) * 0.5);
   /* Warning Color */
   --warning-h: 48;
   --warning-s: 100%;
   --warning-l: 50%;
   --warning: var(--warning-h) var(--warning-s) var(--warning-l);
-  --warning-d-100: var(--warning-h) var(--warning-s) calc(var(--warning-l) - var(--warning-l) * 0.1);
-  --warning-d-200: var(--warning-h) var(--warning-s) calc(var(--warning-l) - var(--warning-l) * 0.2);
-  --warning-d-300: var(--warning-h) var(--warning-s) calc(var(--warning-l) - var(--warning-l) * 0.3);
-  --warning-d-400: var(--warning-h) var(--warning-s) calc(var(--warning-l) - var(--warning-l) * 0.4);
-  --warning-d-500: var(--warning-h) var(--warning-s) calc(var(--warning-l) - var(--warning-l) * 0.5);
-  --warning-l-100: var(--warning-h) calc(var(--warning-s)) calc(var(--warning-l) + (100% - var(--warning-l)) * 0.1);
-  --warning-l-200: var(--warning-h) calc(var(--warning-s)) calc(var(--warning-l) + (100% - var(--warning-l)) * 0.2);
-  --warning-l-300: var(--warning-h) calc(var(--warning-s)) calc(var(--warning-l) + (100% - var(--warning-l)) * 0.3);
-  --warning-l-400: var(--warning-h) calc(var(--warning-s)) calc(var(--warning-l) + (100% - var(--warning-l)) * 0.4);
-  --warning-l-500: var(--warning-h) calc(var(--warning-s)) calc(var(--warning-l) + (100% - var(--warning-l)) * 0.5);
+  --warning-d-100: var(--warning-h) var(--warning-s)
+    calc(var(--warning-l) - var(--warning-l) * 0.1);
+  --warning-d-200: var(--warning-h) var(--warning-s)
+    calc(var(--warning-l) - var(--warning-l) * 0.2);
+  --warning-d-300: var(--warning-h) var(--warning-s)
+    calc(var(--warning-l) - var(--warning-l) * 0.3);
+  --warning-d-400: var(--warning-h) var(--warning-s)
+    calc(var(--warning-l) - var(--warning-l) * 0.4);
+  --warning-d-500: var(--warning-h) var(--warning-s)
+    calc(var(--warning-l) - var(--warning-l) * 0.5);
+  --warning-l-100: var(--warning-h) calc(var(--warning-s))
+    calc(var(--warning-l) + (100% - var(--warning-l)) * 0.1);
+  --warning-l-200: var(--warning-h) calc(var(--warning-s))
+    calc(var(--warning-l) + (100% - var(--warning-l)) * 0.2);
+  --warning-l-300: var(--warning-h) calc(var(--warning-s))
+    calc(var(--warning-l) + (100% - var(--warning-l)) * 0.3);
+  --warning-l-400: var(--warning-h) calc(var(--warning-s))
+    calc(var(--warning-l) + (100% - var(--warning-l)) * 0.4);
+  --warning-l-500: var(--warning-h) calc(var(--warning-s))
+    calc(var(--warning-l) + (100% - var(--warning-l)) * 0.5);
   /* Info Color */
   --info-h: 217;
   --info-s: 91%;
   --info-l: 60%;
   --info: var(--info-h) var(--info-s) var(--info-l);
-  --info-d-100: var(--info-h) var(--info-s) calc(var(--info-l) - var(--info-l) * 0.1);
-  --info-d-200: var(--info-h) var(--info-s) calc(var(--info-l) - var(--info-l) * 0.2);
-  --info-d-300: var(--info-h) var(--info-s) calc(var(--info-l) - var(--info-l) * 0.3);
-  --info-d-400: var(--info-h) var(--info-s) calc(var(--info-l) - var(--info-l) * 0.4);
-  --info-d-500: var(--info-h) var(--info-s) calc(var(--info-l) - var(--info-l) * 0.5);
-  --info-l-100: var(--info-h) calc(var(--info-s)) calc(var(--info-l) + (100% - var(--info-l)) * 0.1);
-  --info-l-200: var(--info-h) calc(var(--info-s)) calc(var(--info-l) + (100% - var(--info-l)) * 0.2);
-  --info-l-300: var(--info-h) calc(var(--info-s)) calc(var(--info-l) + (100% - var(--info-l)) * 0.3);
-  --info-l-400: var(--info-h) calc(var(--info-s)) calc(var(--info-l) + (100% - var(--info-l)) * 0.4);
-  --info-l-500: var(--info-h) calc(var(--info-s)) calc(var(--info-l) + (100% - var(--info-l)) * 0.5);
+  --info-d-100: var(--info-h) var(--info-s)
+    calc(var(--info-l) - var(--info-l) * 0.1);
+  --info-d-200: var(--info-h) var(--info-s)
+    calc(var(--info-l) - var(--info-l) * 0.2);
+  --info-d-300: var(--info-h) var(--info-s)
+    calc(var(--info-l) - var(--info-l) * 0.3);
+  --info-d-400: var(--info-h) var(--info-s)
+    calc(var(--info-l) - var(--info-l) * 0.4);
+  --info-d-500: var(--info-h) var(--info-s)
+    calc(var(--info-l) - var(--info-l) * 0.5);
+  --info-l-100: var(--info-h) calc(var(--info-s))
+    calc(var(--info-l) + (100% - var(--info-l)) * 0.1);
+  --info-l-200: var(--info-h) calc(var(--info-s))
+    calc(var(--info-l) + (100% - var(--info-l)) * 0.2);
+  --info-l-300: var(--info-h) calc(var(--info-s))
+    calc(var(--info-l) + (100% - var(--info-l)) * 0.3);
+  --info-l-400: var(--info-h) calc(var(--info-s))
+    calc(var(--info-l) + (100% - var(--info-l)) * 0.4);
+  --info-l-500: var(--info-h) calc(var(--info-s))
+    calc(var(--info-l) + (100% - var(--info-l)) * 0.5);
   /* Color Variables */
   --white: 0 0% 100%;
   --black: 0 0% 0%;
@@ -146,9 +226,11 @@
   /* Shadow Variables */
   --box-shadow: 0px 2px 15px hsl(var(--black) / 0.05);
   /* Gradient Variable */
-  --gradient: linear-gradient(90deg,
-      hsl(var(--base-two)) -177.5%,
-      hsl(var(--base)) 64.5%);
+  --gradient: linear-gradient(
+    90deg,
+    hsl(var(--base-two)) -177.5%,
+    hsl(var(--base)) 64.5%
+  );
 }
 
 /* ========================= CSS Variables End ========================= */
@@ -223,12 +305,12 @@ h6 {
   font-size: clamp(1rem, 0.9404rem + 0.2981vw, 1.125rem);
 }
 
-h1>a,
-h2>a,
-h3>a,
-h4>a,
-h5>a,
-h6>a {
+h1 > a,
+h2 > a,
+h3 > a,
+h4 > a,
+h5 > a,
+h6 > a {
   font-weight: inherit;
   font-size: inherit;
   color: inherit;
@@ -402,7 +484,6 @@ ol {
 }
 
 @media screen and (max-width: 991px) {
-
   .body-overlay.show,
   .sidebar-overlay.show {
     visibility: visible;
@@ -950,8 +1031,10 @@ ol {
 
 .border--gradient {
   --border-width: 1px;
-  --border-gradient: linear-gradient(180deg hsl(var(--base)),
-      hsl(var(--base-two)));
+  --border-gradient: linear-gradient(
+    180deg hsl(var(--base)),
+    hsl(var(--base-two))
+  );
   position: relative;
   z-index: 1;
 }
@@ -963,13 +1046,17 @@ ol {
   inset: 0;
   background: var(--border-gradient) border-box;
   border: var(--border-width) solid transparent;
-  -webkit-mask: -webkit-gradient(linear,
-      left top,
-      left bottom,
-      color-stop(0, #fff)) padding-box,
+  -webkit-mask: -webkit-gradient(
+        linear,
+        left top,
+        left bottom,
+        color-stop(0, #fff)
+      )
+      padding-box,
     -webkit-gradient(linear, left top, left bottom, color-stop(0, #fff));
   -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-  mask: -webkit-gradient(linear, left top, left bottom, color-stop(0, #fff)) padding-box,
+  mask: -webkit-gradient(linear, left top, left bottom, color-stop(0, #fff))
+      padding-box,
     -webkit-gradient(linear, left top, left bottom, color-stop(0, #fff));
   mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -1360,8 +1447,8 @@ ol {
   font-size: calc(var(--size) * 0.5 - 4px);
 }
 
-.btn--icon>svg,
-.btn--icon>img {
+.btn--icon > svg,
+.btn--icon > img {
   width: calc(var(--size) * 0.5);
   height: calc(var(--size) * 0.5);
 }
@@ -1899,13 +1986,17 @@ ol {
 .btn-outline--gradient.disabled::before {
   background: var(--gradient) border-box;
   border: 1px solid transparent;
-  -webkit-mask: -webkit-gradient(linear,
-      left top,
-      left bottom,
-      color-stop(0, #fff)) padding-box,
+  -webkit-mask: -webkit-gradient(
+        linear,
+        left top,
+        left bottom,
+        color-stop(0, #fff)
+      )
+      padding-box,
     -webkit-gradient(linear, left top, left bottom, color-stop(0, #fff));
   -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-  mask: -webkit-gradient(linear, left top, left bottom, color-stop(0, #fff)) padding-box,
+  mask: -webkit-gradient(linear, left top, left bottom, color-stop(0, #fff))
+      padding-box,
     -webkit-gradient(linear, left top, left bottom, color-stop(0, #fff));
   mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -1991,7 +2082,6 @@ ol {
 }
 
 @media screen and (max-width: 575px) {
-
   .custom--card .card-header,
   .custom--card .card-body,
   .custom--card .card-footer {
@@ -2664,11 +2754,15 @@ input[type="number"] {
   }
 }
 
-.form--control[type="file"]:hover:not(:disabled):not([readonly])::-webkit-file-upload-button {
+.form--control[type="file"]:hover:not(:disabled):not(
+    [readonly]
+  )::-webkit-file-upload-button {
   background-color: hsl(var(--base)) !important;
 }
 
-.form--control[type="file"]:hover:not(:disabled):not([readonly])::file-selector-button {
+.form--control[type="file"]:hover:not(:disabled):not(
+    [readonly]
+  )::file-selector-button {
   background-color: hsl(var(--base)) !important;
 }
 
@@ -2871,23 +2965,47 @@ textarea.form--control {
   --select2-border-radius: 250px 0px 0px 250px;
 }
 
-.input--group .select2-wrapper:first-child .select2-container--default.select2-container .select2-selection--single,
-.input--group .select2-wrapper:first-child .select2-container--default.select2-container .select2-selection--multiple {
+.input--group
+  .select2-wrapper:first-child
+  .select2-container--default.select2-container
+  .select2-selection--single,
+.input--group
+  .select2-wrapper:first-child
+  .select2-container--default.select2-container
+  .select2-selection--multiple {
   border-right: 1px solid hsl(var(--white) / 0.23);
 }
 
-.input--group .select2-wrapper:first-child .select2-container.select2-container--open .select2-selection--single,
-.input--group .select2-wrapper:first-child .select2-container.select2-container--open .select2-selection--multipe {
+.input--group
+  .select2-wrapper:first-child
+  .select2-container.select2-container--open
+  .select2-selection--single,
+.input--group
+  .select2-wrapper:first-child
+  .select2-container.select2-container--open
+  .select2-selection--multipe {
   border-right-color: hsl(var(--base)) !important;
 }
 
-.input--group .select2-wrapper:first-child .select2-container--default.select2-container--below.select2-container--open .select2-selection--single,
-.input--group .select2-wrapper:first-child .select2-container--default.select2-container--below.select2-container--open .select2-selection--multiple {
+.input--group
+  .select2-wrapper:first-child
+  .select2-container--default.select2-container--below.select2-container--open
+  .select2-selection--single,
+.input--group
+  .select2-wrapper:first-child
+  .select2-container--default.select2-container--below.select2-container--open
+  .select2-selection--multiple {
   border-top-right-radius: 0px;
 }
 
-.input--group .select2-wrapper:first-child .select2-container--default.select2-container--above.select2-container--open .select2-selection--single,
-.input--group .select2-wrapper:first-child .select2-container--default.select2-container--above.select2-container--open .select2-selection--multiple {
+.input--group
+  .select2-wrapper:first-child
+  .select2-container--default.select2-container--above.select2-container--open
+  .select2-selection--single,
+.input--group
+  .select2-wrapper:first-child
+  .select2-container--default.select2-container--above.select2-container--open
+  .select2-selection--multiple {
   border-bottom-right-radius: 0px;
 }
 
@@ -2895,23 +3013,47 @@ textarea.form--control {
   --select2-border-radius: 0px 250px 250px 0px;
 }
 
-.input--group .select2-wrapper:last-child .select2-container .select2-selection--single,
-.input--group .select2-wrapper:last-child .select2-container .select2-selection--multiple {
+.input--group
+  .select2-wrapper:last-child
+  .select2-container
+  .select2-selection--single,
+.input--group
+  .select2-wrapper:last-child
+  .select2-container
+  .select2-selection--multiple {
   border-left: 1px solid hsl(var(--white) / 0.23);
 }
 
-.input--group .select2-wrapper:last-child .select2-container.select2-container--open .select2-selection--single,
-.input--group .select2-wrapper:last-child .select2-container.select2-container--open .select2-selection--multipe {
+.input--group
+  .select2-wrapper:last-child
+  .select2-container.select2-container--open
+  .select2-selection--single,
+.input--group
+  .select2-wrapper:last-child
+  .select2-container.select2-container--open
+  .select2-selection--multipe {
   border-left-color: hsl(var(--base)) !important;
 }
 
-.input--group .select2-wrapper:last-child .select2-container--default.select2-container--below.select2-container--open .select2-selection--single,
-.input--group .select2-wrapper:last-child .select2-container--default.select2-container--below.select2-container--open .select2-selection--multiple {
+.input--group
+  .select2-wrapper:last-child
+  .select2-container--default.select2-container--below.select2-container--open
+  .select2-selection--single,
+.input--group
+  .select2-wrapper:last-child
+  .select2-container--default.select2-container--below.select2-container--open
+  .select2-selection--multiple {
   border-top-left-radius: 0px;
 }
 
-.input--group .select2-wrapper:last-child .select2-container--default.select2-container--above.select2-container--open .select2-selection--single,
-.input--group .select2-wrapper:last-child .select2-container--default.select2-container--above.select2-container--open .select2-selection--multiple {
+.input--group
+  .select2-wrapper:last-child
+  .select2-container--default.select2-container--above.select2-container--open
+  .select2-selection--single,
+.input--group
+  .select2-wrapper:last-child
+  .select2-container--default.select2-container--above.select2-container--open
+  .select2-selection--multiple {
   border-bottom-left-radius: 0px;
 }
 
@@ -3100,19 +3242,27 @@ textarea.form--control {
   outline: none !important;
 }
 
-.input-group-custom__input:focus:not(:disabled):not([readonly])::-webkit-input-placeholder {
+.input-group-custom__input:focus:not(:disabled):not(
+    [readonly]
+  )::-webkit-input-placeholder {
   color: hsl(var(--white)) !important;
 }
 
-.input-group-custom__input:focus:not(:disabled):not([readonly])::-moz-placeholder {
+.input-group-custom__input:focus:not(:disabled):not(
+    [readonly]
+  )::-moz-placeholder {
   color: hsl(var(--white)) !important;
 }
 
-.input-group-custom__input:focus:not(:disabled):not([readonly]):-ms-input-placeholder {
+.input-group-custom__input:focus:not(:disabled):not(
+    [readonly]
+  ):-ms-input-placeholder {
   color: hsl(var(--white)) !important;
 }
 
-.input-group-custom__input:focus:not(:disabled):not([readonly])::-ms-input-placeholder {
+.input-group-custom__input:focus:not(:disabled):not(
+    [readonly]
+  )::-ms-input-placeholder {
   color: hsl(var(--white)) !important;
 }
 
@@ -3472,7 +3622,6 @@ textarea.form--control {
 .action-btn.analytics-btn:hover {
   color: hsl(var(--white));
 }
-
 
 .action-btn svg {
   width: 20px;
@@ -4127,7 +4276,7 @@ textarea.form--control {
     transition: 0.2s;
   }
 
-  .header .nav-menu .nav-item .nav-link:hover+ :is(.dropdown-menu) {
+  .header .nav-menu .nav-item .nav-link:hover + :is(.dropdown-menu) {
     visibility: visible;
     opacity: 1;
     top: 100% !important;
@@ -4198,7 +4347,7 @@ textarea.form--control {
     margin: 0;
   }
 
-  .header .nav-menu .nav-item:last-child>.nav-link {
+  .header .nav-menu .nav-item:last-child > .nav-link {
     border-bottom: 0;
   }
 
@@ -4915,13 +5064,13 @@ body:has(.mobile-bottom-menu) {
   --bottom-nav-h: 60px;
 }
 
-.video__wrapper .slick-initialized.slick-slider .slick-slide>div {
+.video__wrapper .slick-initialized.slick-slider .slick-slide > div {
   --inner-p: 24px;
   height: calc(100dvh - var(--inner-p) * 2);
 }
 
 @media screen and (max-width: 767px) {
-  .video__wrapper .slick-initialized.slick-slider .slick-slide>div {
+  .video__wrapper .slick-initialized.slick-slider .slick-slide > div {
     height: calc(100dvh - var(--bottom-nav-h)) !important;
     padding: 0 !important;
   }
@@ -5157,7 +5306,10 @@ body:has(.mobile-bottom-menu) {
   color: hsl(var(--base));
 }
 
-.video-item__action.video-action-button-group .cmn-button-item .button-item.save-btn:hover svg {
+.video-item__action.video-action-button-group
+  .cmn-button-item
+  .button-item.save-btn:hover
+  svg {
   color: hsl(var(--warning));
 }
 .cmn-button-item.save-button .button-item:hover {
@@ -5170,6 +5322,10 @@ body:has(.mobile-bottom-menu) {
 
 .cmn-button-item .button-item.saved {
   color: hsl(var(--warning)) !important;
+}
+
+.explore-item__video .explore-action .liked {
+  color: hsl(var(--base)) !important;
 }
 
 @media screen and (max-width: 767px) {
@@ -6316,7 +6472,10 @@ body:has(.mobile-bottom-menu) {
     text-align: center;
   }
 
-  .sidebar-menu.show-by-default .sidebar-menu__inner .sidebar-menu-list__link .text {
+  .sidebar-menu.show-by-default
+    .sidebar-menu__inner
+    .sidebar-menu-list__link
+    .text {
     display: none;
   }
 
@@ -6339,7 +6498,6 @@ body:has(.mobile-bottom-menu) {
 }
 
 @media screen and (min-width: 768px) {
-
   .sidebar-menu.show-by-default .sidebar-menu__following,
   .sidebar-menu.show-by-default .profile__content__title {
     display: none;
@@ -6409,7 +6567,7 @@ body:has(.mobile-bottom-menu) {
   }
 }
 
-.sidebar-menu-list__item.active>a {
+.sidebar-menu-list__item.active > a {
   color: hsl(var(--white));
   background-color: hsl(var(--white) / 0.03);
 }
@@ -6726,11 +6884,13 @@ body:has(.mobile-bottom-menu) {
 
 .scroll-wrapper .scroll-btn.left::before {
   left: 100%;
-  background: -webkit-gradient(linear,
-      left top,
-      right top,
-      from(#0e0e0e),
-      to(rgba(14, 14, 14, 0)));
+  background: -webkit-gradient(
+    linear,
+    left top,
+    right top,
+    from(#0e0e0e),
+    to(rgba(14, 14, 14, 0))
+  );
   background: linear-gradient(-270deg, #0e0e0e 0%, rgba(14, 14, 14, 0) 100%);
 }
 
@@ -6740,11 +6900,13 @@ body:has(.mobile-bottom-menu) {
 
 .scroll-wrapper .scroll-btn.right:before {
   right: 100%;
-  background: -webkit-gradient(linear,
-      right top,
-      left top,
-      from(#0e0e0e),
-      to(rgba(14, 14, 14, 0)));
+  background: -webkit-gradient(
+    linear,
+    right top,
+    left top,
+    from(#0e0e0e),
+    to(rgba(14, 14, 14, 0))
+  );
   background: linear-gradient(270deg, #0e0e0e 0%, rgba(14, 14, 14, 0) 100%);
 }
 
@@ -6802,7 +6964,6 @@ body:has(.mobile-bottom-menu) {
   -ms-flex-direction: column;
   flex-direction: column;
 }
-
 
 @media screen and (max-width: 1399px) {
   .explore-item {
@@ -7151,7 +7312,7 @@ body:has(.mobile-bottom-menu) {
   color: rgba(255, 255, 255, 0.6);
 }
 
-.single-message+.single-message {
+.single-message + .single-message {
   margin-top: 0.75rem;
 }
 
@@ -7594,11 +7755,17 @@ body textarea.form--control {
   height: 40px;
 }
 
-.video-item__action.video-action-button-group .cmn-button-item .button-item.liked svg {
+.video-item__action.video-action-button-group
+  .cmn-button-item
+  .button-item.liked
+  svg {
   color: hsl(var(--base)) !important;
 }
 
-.video-item__action.video-action-button-group .cmn-button-item .button-item.saved svg {
+.video-item__action.video-action-button-group
+  .cmn-button-item
+  .button-item.saved
+  svg {
   color: hsl(var(--warning)) !important;
 }
 
@@ -7609,20 +7776,29 @@ body textarea.form--control {
   }
 }
 
-.video-item__action.video-action-button-group .cmn-button-item .button-item svg {
+.video-item__action.video-action-button-group
+  .cmn-button-item
+  .button-item
+  svg {
   color: hsl(var(--white));
   width: 20px;
   height: 20px;
 }
 
 @media screen and (max-width: 1399px) {
-  .video-item__action.video-action-button-group .cmn-button-item .button-item svg {
+  .video-item__action.video-action-button-group
+    .cmn-button-item
+    .button-item
+    svg {
     width: 16px;
     height: 16px;
   }
 }
 
-.video-item__action.video-action-button-group .cmn-button-item .button-item:hover svg {
+.video-item__action.video-action-button-group
+  .cmn-button-item
+  .button-item:hover
+  svg {
   color: hsl(var(--base));
 }
 
@@ -8026,7 +8202,9 @@ body textarea.form--control {
   }
 }
 
-.video-details-header .input-group-custom .form--control::-webkit-input-placeholder {
+.video-details-header
+  .input-group-custom
+  .form--control::-webkit-input-placeholder {
   color: hsl(var(--white));
   font-weight: 700;
   font-size: 1rem;
@@ -8044,7 +8222,9 @@ body textarea.form--control {
   font-size: 1rem;
 }
 
-.video-details-header .input-group-custom .form--control::-ms-input-placeholder {
+.video-details-header
+  .input-group-custom
+  .form--control::-ms-input-placeholder {
   color: hsl(var(--white));
   font-weight: 700;
   font-size: 1rem;
@@ -8093,7 +8273,6 @@ body textarea.form--control {
 }
 
 @media screen and (max-width: 767px) {
-
   .video-details-header .dropdown-btn,
   .video-details-header .common-search-btn {
     width: 40px;
@@ -8142,7 +8321,9 @@ body textarea.form--control {
   --select2-dropdown-padding-y: 12px;
   --select2-dropdown-padding-x: var(--select2-dropdown-padding-y);
   --select2-dropdown-field-padding-y: 7px;
-  --select2-dropdown-field-padding-x: calc(var(--select2-dropdown-field-padding-y) * 1.5);
+  --select2-dropdown-field-padding-x: calc(
+    var(--select2-dropdown-field-padding-y) * 1.5
+  );
   --select2-dropdown-field-radius: var(--select2-border-radius);
   --select2-dropdown-field-color: hsl(var(--gray-d-300));
   --select2-dropdown-field-bg-color: transparent;
@@ -8231,8 +8412,10 @@ body textarea.form--control {
   gap: 6px;
 }
 
-.select2-container--focus:not(.select2-container--disabled) .select2-selection--single,
-.select2-container--focus:not(.select2-container--disabled) .select2-selection--multiple,
+.select2-container--focus:not(.select2-container--disabled)
+  .select2-selection--single,
+.select2-container--focus:not(.select2-container--disabled)
+  .select2-selection--multiple,
 .select2-container--open .select2-selection--single,
 .select2-container--open .select2-selection--multiple {
   border-color: var(--select2-border-color-focus) !important;
@@ -8253,7 +8436,8 @@ body textarea.form--control {
   color: var(--select2-color-placeholder) !important;
 }
 
-.select2-container--focus:not(.select2-container--disabled) .select2-selection__placeholder,
+.select2-container--focus:not(.select2-container--disabled)
+  .select2-selection__placeholder,
 .select2-container--open .select2-selection__placeholder {
   color: var(--select2-color) !important;
 }
@@ -8278,13 +8462,20 @@ body textarea.form--control {
   color: var(--select2-color-placeholder);
 }
 
-.select2-selection--single[aria-expanded="true"] .select2-selection__arrow::after {
+.select2-selection--single[aria-expanded="true"]
+  .select2-selection__arrow::after {
   content: "\f106";
 }
 
-.select2-container--focus:not(.select2-container--disabled) .select2-selection--single .select2-selection__arrow::after,
-.select2-container--open .select2-selection--single .select2-selection__arrow::after,
-.select2-container--selected .select2-selection--single .select2-selection__arrow::after {
+.select2-container--focus:not(.select2-container--disabled)
+  .select2-selection--single
+  .select2-selection__arrow::after,
+.select2-container--open
+  .select2-selection--single
+  .select2-selection__arrow::after,
+.select2-container--selected
+  .select2-selection--single
+  .select2-selection__arrow::after {
   color: var(--select2-color) !important;
 }
 
@@ -8318,7 +8509,8 @@ body textarea.form--control {
   font-size: var(--select2-font-size);
   border-color: var(--select2-border-color) !important;
   border-radius: var(--select2-dropdown-field-radius);
-  padding: var(--select2-dropdown-field-padding-y) var(--select2-dropdown-field-padding-x);
+  padding: var(--select2-dropdown-field-padding-y)
+    var(--select2-dropdown-field-padding-x);
   color: var(--select2-dropdown-field-color);
   background-color: var(--select2-dropdown-field-bg-color);
 }
@@ -8328,7 +8520,7 @@ body textarea.form--control {
   outline: none;
 }
 
-.select2-container--default .select2-results>.select2-results__options {
+.select2-container--default .select2-results > .select2-results__options {
   scrollbar-width: thin;
   scrollbar-color: hsl(var(--white) / 0.1) hsl(var(--white) / 0.05);
 }
@@ -8420,7 +8612,7 @@ body textarea.form--control {
   width: unset !important;
 }
 
-.slick-initialized.slick-slider .slick-slide>div {
+.slick-initialized.slick-slider .slick-slide > div {
   height: 100%;
 }
 
@@ -8748,7 +8940,9 @@ body textarea.form--control {
   color: hsl(var(--text-mute)) !important;
 }
 
-.account-form .input-group-custom .input-group-custom__input::-webkit-input-placeholder {
+.account-form
+  .input-group-custom
+  .input-group-custom__input::-webkit-input-placeholder {
   color: hsl(var(--text-mute)) !important;
 }
 
@@ -8756,11 +8950,15 @@ body textarea.form--control {
   color: hsl(var(--text-mute)) !important;
 }
 
-.account-form .input-group-custom .input-group-custom__input:-ms-input-placeholder {
+.account-form
+  .input-group-custom
+  .input-group-custom__input:-ms-input-placeholder {
   color: hsl(var(--text-mute)) !important;
 }
 
-.account-form .input-group-custom .input-group-custom__input::-ms-input-placeholder {
+.account-form
+  .input-group-custom
+  .input-group-custom__input::-ms-input-placeholder {
   color: hsl(var(--text-mute)) !important;
 }
 
@@ -9531,7 +9729,6 @@ body textarea.form--control {
 }
 
 @media screen and (max-width: 575px) {
-
   .setting-option__item .language-btn,
   .setting-option__item .arrow-btn,
   .setting-option__item .setting-common-btn {
@@ -9547,7 +9744,6 @@ body textarea.form--control {
 }
 
 @media screen and (max-width: 575px) {
-
   .setting-option__item .language-btn i,
   .setting-option__item .arrow-btn i,
   .setting-option__item .setting-common-btn i {
@@ -9745,7 +9941,6 @@ body textarea.form--control {
 }
 
 @media screen and (max-width: 575px) {
-
   .dashboard .overview__menu-link.active::after,
   .dashboard .overview__menu-link:hover::after {
     display: none;
@@ -9954,27 +10149,29 @@ body textarea.form--control {
   margin-bottom: 0px;
 }
 
-.dashboard .dashboard-sidebar-menu-list__item:last-child .dashboard-sidebar-menu-list__link {
+.dashboard
+  .dashboard-sidebar-menu-list__item:last-child
+  .dashboard-sidebar-menu-list__link {
   border-bottom: 0;
 }
 
-.dashboard .dashboard-sidebar-menu-list__item.active>a {
+.dashboard .dashboard-sidebar-menu-list__item.active > a {
   border: 1px solid hsl(var(--gray-300));
   background-color: hsl(var(--gray-200));
 }
 
-.dashboard .dashboard-sidebar-menu-list__item.has-dropdown.active>a {
+.dashboard .dashboard-sidebar-menu-list__item.has-dropdown.active > a {
   color: hsl(var(--base));
 }
 
-.dashboard .dashboard-sidebar-menu-list__item.has-dropdown.active>a:after {
+.dashboard .dashboard-sidebar-menu-list__item.has-dropdown.active > a:after {
   -webkit-transform: rotate(90deg);
   transform: rotate(90deg);
   right: 18px;
   color: hsl(var(--base));
 }
 
-.dashboard .dashboard-sidebar-menu-list__item.has-dropdown>a:after {
+.dashboard .dashboard-sidebar-menu-list__item.has-dropdown > a:after {
   position: absolute;
   content: "\f105";
   font-family: "Font Awesome 5 Free";
@@ -10038,7 +10235,7 @@ body textarea.form--control {
   margin-bottom: 6px;
 }
 
-.dashboard .dashboard-sidebar-submenu-list__item.active>a {
+.dashboard .dashboard-sidebar-submenu-list__item.active > a {
   color: hsl(var(--base));
   background-color: hsl(var(--base) / 0.06);
 }
@@ -11139,7 +11336,7 @@ body textarea.form--control {
 
 /* ======================  Pages Design End  ======================*/
 
-.user-data-profile-image .image-uploader  {
+.user-data-profile-image .image-uploader {
   width: 100%;
   height: 100%;
 }
@@ -11173,7 +11370,6 @@ body textarea.form--control {
 .select2-container--default .select2-selection--single {
   background-color: hsl(var(--common-bg)) !important;
 }
-
 
 .explore-item-follower {
   display: -webkit-box;
@@ -11286,7 +11482,7 @@ body textarea.form--control {
 }
 
 .follower-profile__author .following-username svg {
-  color: #20D5EC;
+  color: #20d5ec;
 }
 
 .follower-profile__author .btn {
@@ -11303,7 +11499,7 @@ body textarea.form--control {
 .gets-coin__card {
   padding: 32px;
   border-radius: 12px;
-  background-color: hsl(var(--base-two)/0.1);
+  background-color: hsl(var(--base-two) / 0.1);
   border: 1px solid hsl(var(--border-color));
   background-color: hsl(var(--common-bg));
 }
@@ -11404,7 +11600,7 @@ body textarea.form--control {
 
 .form-check-label:has(.form-check-input:checked) {
   border-color: hsl(var(--base)) !important;
-  background: hsl(var(--base)/0.06);
+  background: hsl(var(--base) / 0.06);
 }
 
 .choose-recharge textarea.form--control {
@@ -11413,7 +11609,7 @@ body textarea.form--control {
 
 .input--group .input-group-text {
   height: unset !important;
-  background-color: hsl(var(--base)/0.1) !important;
+  background-color: hsl(var(--base) / 0.1) !important;
   border-radius: 8px !important;
   font-weight: 600;
 }
@@ -11621,7 +11817,7 @@ body textarea.form--control {
   margin-top: 20px;
   font-size: 13px;
   color: hsl(var(--success));
-  background-color: hsl(var(--base)/0.2);
+  background-color: hsl(var(--base) / 0.2);
   padding: 5px 12px;
   border-radius: 20px;
   display: inline-block;
@@ -11738,7 +11934,7 @@ body textarea.form--control {
 }
 
 .invite-btn:hover {
-  background: hsl(var(--base)/0.9);
+  background: hsl(var(--base) / 0.9);
 }
 
 .invite-earn {

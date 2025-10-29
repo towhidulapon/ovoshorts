@@ -80,7 +80,7 @@ class UserController extends Controller {
     public function profileDetails() {
         $pageTitle = 'Profile Details';
         $user      = auth()->user();
-        $shorts = Short::with('likes')->where('user_id', $user->id)->where('status', Status::PUBLISHED)->orderBy('created_at', 'desc')->paginate();
+        $shorts = Short::with('likes')->where('user_id', $user->id)->published()->orderBy('created_at', 'desc')->paginate();
 
         $userProfile = route('user.profile.details', $user->username);
         $userQR = cryptoQR($userProfile);

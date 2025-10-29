@@ -89,9 +89,9 @@ class AppController extends Controller {
         }
 
         $shorts = Short::with('user', 'comments.user', 'comments.replies.user', 'savedShorts')
-            ->where('is_approved', Status::SHORT_APPROVE)
-            ->where('status', Status::PUBLISHED)
-            ->where('is_visible', Status::EVERYONE)
+            ->approved()
+            ->published()
+            ->publicShort()
             ->where(function ($query) {
                 $query->where('storage_driver', 'local')
                     ->orWhereIn('storage_driver', function ($subQuery) {
@@ -185,8 +185,7 @@ class AppController extends Controller {
             'play_time' => 'nullable|integer|min:0',
         ]);
 
-        $short = Short::where('id', $id)->where('is_approved', Status::SHORT_APPROVE)->first();
-
+        $short = Short::where('id', $id)->approved()->publicShort()
         if (!$short) {
             return apiResponse("short", "error", ['Short not found']);
         }
@@ -201,8 +200,7 @@ class AppController extends Controller {
     }
 
     public function getAnalytics($id) {
-        $short = Short::where('id', $id)->where('is_approved', Status::SHORT_APPROVE)->first();
-
+        $short = Short::where('id', $id)->approved()->publicShort()
         if (!$short) {
             return apiResponse("short", "error", ['Short not found']);
         }
@@ -247,9 +245,9 @@ class AppController extends Controller {
     public function hashtag($hashtag) {
         $pageTitle = '#' . $hashtag;
         $shorts    = Short::with('user', 'storage', 'comments.user', 'comments.replies.user', 'savedShorts')
-            ->where('is_approved', Status::SHORT_APPROVE)
-            ->where('description', 'like', '%' . '#' . $hashtag . '%')
-            ->orderBy('id', 'desc')
+            ->approved()
+            ->published()
+            ->publicShort()
             ->get();
 
         $view = 'Template::user.short.hashtag';
@@ -288,7 +286,7 @@ class AppController extends Controller {
             return redirect()->route('user.profile.details');
         }
 
-        $shorts     = Short::with('likes')->where('user_id', $user->id)->where('status', Status::PUBLISHED)->orderBy('created_at', 'desc')->paginate();
+        $shorts     = Short::with('likes')->where('user_id', $user->id)->published()->orderBy('created_at', 'desc')->paginate();
 
         $totalLikes = $shorts->sum(function ($short) {
             return $short->likes->count();

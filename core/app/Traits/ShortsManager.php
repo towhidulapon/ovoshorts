@@ -160,35 +160,73 @@ trait ShortsManager
     {
         $isUpdate = $id != 0;
 
-        $rules = $isUpdate ? [
-            'description' => 'nullable|string|max:4000',
-            'cover_image' => ['nullable', 'image', new FileTypeValidate(['jpg', 'jpeg', 'png'])],
-            'visibility'  => 'required|in:1,2',
-            'comment'     => 'nullable',
-            'category_id' => 'required|exists:categories,id',
-        ] : [
-            'short_id'         => 'required|exists:shorts,id',
+        $baseRules = [
             'description'      => 'nullable|string|max:4000',
             'cover_image'      => ['nullable', 'image', new FileTypeValidate(['jpg', 'jpeg', 'png'])],
-            'cover_image_data' => ['nullable', 'string'],
+            'cover_image_data' => 'nullable|string',
             'visibility'       => 'required|in:1,2',
-            'comment'          => 'nullable',
-            'category_id'      => 'required|exists:categories,id',
+            'comment'          => 'nullable|boolean',
+            'category_id'      => 'required',
             'post_at'          => 'required|in:1,2',
             'schedule_time'    => 'nullable|required_if:post_at,2|after:now',
         ];
 
+        if (!$isUpdate) {
+            $baseRules['short_id'] = 'required|exists:shorts,id';
+        }
+
+        $rules = $baseRules;
+
         $messages = [
             'description.max'           => 'Description cannot exceed 4000 characters.',
             'cover_image.image'         => 'Cover image must be a valid image file.',
-            'cover_image.mimes'         => 'Cover image must be a file of type: jpg, jpeg, png.',
+            'cover_image.mimes'         => 'Cover image must be of type: jpg, jpeg, png.',
             'category_id.required'      => 'Please select a category.',
             'category_id.exists'        => 'Selected category does not exist.',
             'schedule_time.required_if' => 'Schedule time is required when post type is scheduled.',
-            'schedule_time.after'       => 'Schedule time must be a future date and time.',
+            'schedule_time.after'       => 'Schedule time must be in the future.',
+            'short_id.required'         => 'Short ID is required.',
+            'short_id.exists'           => 'Invalid short ID provided.',
         ];
 
         $request->validate($rules, $messages);
+
+        // $rules = $isUpdate ? [
+        //     'description' => 'nullable|string|max:4000',
+        //     'cover_image' => ['nullable', 'image', new FileTypeValidate(['jpg', 'jpeg', 'png'])],
+        //     'visibility'  => 'required|in:1,2',
+        //     'comment'     => 'nullable',
+        //     'category_id' => 'required|exists:categories,id',
+        // ] : [
+        //     'short_id'         => 'required|exists:shorts,id',
+        //     'description'      => 'nullable|string|max:4000',
+        //     'cover_image'      => ['nullable', 'image', new FileTypeValidate(['jpg', 'jpeg', 'png'])],
+        //     'cover_image_data' => ['nullable', 'string'],
+        //     'visibility'       => 'required|in:1,2',
+        //     'comment'          => 'nullable',
+        //     'category_id'      => 'required|exists:categories,id',
+        //     'post_at'          => 'required|in:1,2',
+        //     'schedule_time'    => 'nullable|required_if:post_at,2|after:now',
+        // ];
+
+        // $messages = [
+        //     'description.max'           => 'Description cannot exceed 4000 characters.',
+        //     'cover_image.image'         => 'Cover image must be a valid image file.',
+        //     'cover_image.mimes'         => 'Cover image must be a file of type: jpg, jpeg, png.',
+        //     'category_id.required'      => 'Please select a category.',
+        //     'category_id.exists'        => 'Selected category does not exist.',
+        //     'schedule_time.required_if' => 'Schedule time is required when post type is scheduled.',
+        //     'schedule_time.after'       => 'Schedule time must be a future date and time.',
+        // ];
+
+        // $request->validate($rules, $messages);
+
+        $category = Category::active()->find($request->category_id);
+
+        if (!$category) {
+            $message = 'Category not found';
+            return responseManager("short", $message, 'error');
+        }
 
         if (!$isUpdate && !$request->hasFile('cover_image') && !$request->filled('cover_image_data')) {
             $message = 'A cover image is required';
@@ -211,7 +249,7 @@ trait ShortsManager
             $short->allow_comments = $request->comment ?? 0;
             $short->category_id    = $request->category_id;
 
-            if ($request->post_at == '2') {
+            if ($request->post_at == Status::LATER) {
                 $short->post_at = $request->schedule_time;
                 $short->status  = Status::SCHEDULE;
             } else {
@@ -271,13 +309,13 @@ trait ShortsManager
 
         $uploadMode = gs('short_approval');
 
-        if ($uploadMode == 0) {
+        if ($uploadMode == Status::SHORT_PENDING) {
             $short->is_approved = Status::SHORT_PENDING;
             $short->post_at     = $request->schedule_time;
             $short->status      = Status::UNPUBLISHED;
         } else {
             $short->is_approved = Status::SHORT_APPROVE;
-            if ($request->post_at == '2') {
+            if ($request->post_at == Status::LATER) {
                 $short->post_at = $request->schedule_time;
                 $short->status  = Status::SCHEDULE;
             } else {
@@ -319,7 +357,7 @@ trait ShortsManager
 
     public function getCategories()
     {
-        $categories = Category::where('status', Status::ENABLE)
+        $categories = Category::active()
             ->orderBy('id', 'desc')
             ->get();
 
@@ -338,6 +376,13 @@ trait ShortsManager
             'comment'     => 'nullable',
             'category_id' => 'nullable|exists:categories,id',
         ]);
+
+        $category = Category::active()->find($request->category_id);
+
+        if (!$category) {
+            $message = 'Category not found';
+            return responseManager("short", $message, 'error');
+        }
 
         $user = auth()->user();
 
@@ -398,13 +443,13 @@ trait ShortsManager
 
         $uploadMode = gs('short_approval');
 
-        if ($uploadMode == 0) {
+        if ($uploadMode == Status::SHORT_PENDING) {
             $short->is_approved = Status::SHORT_PENDING;
             $short->post_at     = $request->schedule_time;
             $short->status      = Status::UNPUBLISHED;
         } else {
             $short->is_approved = Status::SHORT_APPROVE;
-            if ($request->post_at == '2') {
+            if ($request->post_at == Status::LATER) {
                 $short->post_at = $request->schedule_time;
                 $short->status  = Status::SCHEDULE;
             } else {
@@ -505,9 +550,6 @@ trait ShortsManager
         }
 
         $short->delete();
-
-        // $notify[] = ['success', 'Draft deleted, select another video'];
-        // return redirect()->route('user.short.upload.index')->withNotify($notify);
 
         $redirect = 'user.short.upload.index';
         $message  = 'Draft deleted, select another video';

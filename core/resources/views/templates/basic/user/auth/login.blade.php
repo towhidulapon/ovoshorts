@@ -1,5 +1,4 @@
 @extends($activeTemplate . 'layouts.app')
-
 @section('app-content')
     <section class="account position-relative bg-img" data-background-image="{{ asset($activeTemplateTrue . 'images/account-bg.png') }}">
 
