@@ -387,27 +387,6 @@
             nextArrow: '<button type="button" class="slick-next"><i class="las la-arrow-right"></i></button>',
         };
 
-        $('.shorts-video_sliders').slick({
-            infinite: false,
-            dots: false,
-            arrows: true,
-            vertical: true,
-            verticalSwiping: true,
-            prevArrow: '<button type="button" class="slick-prev"><i class="las la-angle-up"></i></button>',
-            nextArrow: '<button type="button" class="slick-next"><i class="las la-angle-down"></i></button>',
-            appendArrows: $('.shorts-video_arrows')
-        });
-
-        $('.shorts-video_sliders').on('wheel', function (e) {
-            e.preventDefault();
-            if (e.originalEvent.deltaY < 0) {
-                $(this).slick('slickPrev');
-            } else {
-                $(this).slick('slickNext');
-            }
-        });
-
-
         /* ==================== Slick Slider Initialization JS End ====================== */
 
 

@@ -1,6 +1,6 @@
 <div class="video__wrapper">
-    <div class="video__wrapper-slider shorts-container">
-        <div class="shorts-video_sliders shorts-list">
+    <div class="video__wrapper-slider">
+        <div class="shorts-video_sliders video-slider">
             @forelse ($shorts as $short)
                 @include('Template::user.short.view.video_item', ['short' => $short])
             @empty
@@ -16,6 +16,10 @@
     </div>
 
     <div class="shorts-video_arrows"></div>
+
+    <input type="hidden" id="next-page" value="2">
+    <input type="hidden" id="has-more" value="{{ $hasMorePages ? '1' : '0' }}">
+
 </div>
 <div class="video-comment">
     <div class="right-sidebar">
@@ -128,1041 +132,602 @@
     </div>
 </div>
 
-
 @push('script')
     <script>
         (function ($) {
             "use strict";
-
-            // ==================== CONFIG & STATE ====================
             const isLoggedIn = {{ auth()->check() ? 'true' : 'false' }};
-            let page = 2;
-            let loading = false;
-            let hasMore = {{$hasMorePages ?? false}};
-
-            const $container = $('.shorts-container');
-            const $list = $('.shorts-list');
-            const $loader = $('.shorts-loading');
-
+            const loadMoreUrl = "{{ route('load.more.shorts') }}";
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
-            });
+            })
 
-            function initPlyr() {
-                $('.video-player').not('.plyr-initialized').each(function () {
-                    const player = new Plyr(this, {
-                        controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
-                        autoplay: false
+            $(document).ready(function () {
+
+
+                let isLoading = false;
+
+                const $slider = $('.shorts-video_sliders');
+                const $arrows = $('.shorts-video_arrows');
+                const nextPageInput = $('#next-page');
+                const hasMoreInput = $('#has-more');
+
+                if (!$slider.length) return;
+
+                $slider.slick({
+                    infinite: false,
+                    dots: false,
+                    arrows: true,
+                    vertical: true,
+                    verticalSwiping: true,
+                    prevArrow: '<button type="button" class="slick-prev"><i class="las la-angle-up"></i></button>',
+                    nextArrow: '<button type="button" class="slick-next"><i class="las la-angle-down"></i></button>',
+                    appendArrows: $arrows
+                });
+
+                $slider.on('wheel', function (e) {
+                    e.preventDefault();
+                    if (e.originalEvent.deltaY < 0) $(this).slick('slickPrev');
+                    else $(this).slick('slickNext');
+                });
+
+                function initPlyr() {
+                    $('.video-player').each(function () {
+                        if (!$(this).data('plyr-initialized')) {
+                            const player = new Plyr(this);
+                            $(this).data('plyr-initialized', true);
+                        }
                     });
-                    $(this).addClass('plyr-initialized');
-                });
-            }
-
-            $container.on('scroll', function () {
-                console.log('scroll');
-                if (loading || !hasMore) return;
-
-                const scrollTop = $container.scrollTop();
-                const innerHeight = $container.innerHeight();
-                const scrollHeight = $container[0].scrollHeight;
-
-                if (scrollTop + innerHeight >= scrollHeight - 400) {
-                    loadMoreShorts();
                 }
-            });
 
-            function loadMoreShorts() {
-                loading = true;
-                $loader.removeClass('d-none');
+                initPlyr();
 
-                $.get("{{ route('load.more.shorts') }}", { page: page })
-                    .done(function (res) {
-                        if (res.success) {
-                            $list.append(res.data.html);
-                            initPlyr();
-                            page++;
-                            hasMore = res.data.hasMore;
-                        } else {
-                            notify('error', 'Failed to load more videos');
+                $slider.on('afterChange', function (event, slick, currentSlide) {
+                    const totalSlides = slick.slideCount;
+                    if (currentSlide === totalSlides - 1) loadMoreShorts();
+                });
+
+                function loadMoreShorts() {
+                    const hasMore = hasMoreInput.val() === '1';
+                    const nextPage = parseInt(nextPageInput.val());
+                    if (!hasMore || isLoading) return;
+                    isLoading = true;
+
+                    $.ajax({
+                        url: loadMoreUrl,
+                        type: 'GET',
+                        data: { page: nextPage },
+                        success: function (response) {
+                            console.log('success');
+                            if (response.status === 'success') {
+
+                                $slider.slick('slickAdd', response.data.html);
+                                $slider.slick('setPosition');
+
+                                initPlyr();
+
+
+                                nextPageInput.val(nextPage + 1);
+                                hasMoreInput.val(response.data.hasMore ? '1' : '0');
+                            }
+                        },
+                        complete: function () {
+                            isLoading = false;
                         }
-                    })
-                    .fail(function () {
-                        notify('error', 'Network error');
-                    })
-                    .always(function () {
-                        loading = false;
-                        $loader.addClass('d-none');
                     });
-            }
-
-            // ==================== YOUR ORIGINAL FUNCTIONALITY (UNTOUCHED) ====================
-            let currentPage = 1;
-            let isLoading = false;
-            let hasMoreComments = true;
-            let currentShortId = null;
-
-            function showSkeletonLoader() {
-                $('.comments-skeleton').removeClass('d-none');
-                $('.comments-container').addClass('d-none');
-                $('.comments-loading').addClass('d-none');
-            }
-
-            function hideSkeletonLoader() {
-                $('.comments-skeleton').addClass('d-none');
-                $('.comments-container').removeClass('d-none');
-            }
-
-            function showLoadingIndicator() {
-                $('.comments-loading').removeClass('d-none');
-            }
-
-            function hideLoadingIndicator() {
-                $('.comments-loading').addClass('d-none');
-            }
-
-            $(document).on('click', ".like-btn", function (e) {
-                e.preventDefault();
-                if (!isLoggedIn) {
-                    window.location.href = "{{ route('user.login') }}";
-                    return;
                 }
-                var $button = $(this);
-                var $countElement = $button.closest(".cmn-button-item").find(".like-count");
-                var shortsId = $button.data("shorts-id");
-                var shortsOwnerId = $button.data("shorts-owner-id");
-                var formData = new FormData();
-                formData.append("_token", "{{ csrf_token() }}");
-                formData.append("shorts_id", shortsId);
-                formData.append("shorts_owner_id", shortsOwnerId);
-                $.ajax({
-                    url: "{{ route('user.reaction.like') }}",
-                    method: 'POST',
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    success: function (response) {
-                        if (response.data.status === 'liked') {
-                            $button.addClass("liked");
-                        } else {
-                            $button.removeClass("liked");
-                        }
-                        $countElement.text(response.data.like_count);
+
+
+
+                let currentPage = 1;
+                // let isLoading = false;
+                let hasMoreComments = true;
+                let currentShortId = null;
+
+                function showSkeletonLoader() {
+                    $('.comments-skeleton').removeClass('d-none');
+                    $('.comments-container').addClass('d-none');
+                    $('.comments-loading').addClass('d-none');
+                }
+
+                function hideSkeletonLoader() {
+                    $('.comments-skeleton').addClass('d-none');
+                    $('.comments-container').removeClass('d-none');
+                }
+
+                function showLoadingIndicator() {
+                    $('.comments-loading').removeClass('d-none');
+                }
+
+                function hideLoadingIndicator() {
+                    $('.comments-loading').addClass('d-none');
+                }
+
+
+                $(document).on('click', ".like-btn", function (e) {
+                    e.preventDefault();
+                    if (!isLoggedIn) {
+                        window.location.href = "{{ route('user.login') }}";
+                        return;
                     }
-                });
-            });
-
-            function loadComments(shortId, page = 1, append = false) {
-                if (isLoading || !hasMoreComments) return;
-
-                isLoading = true;
-                if (page === 1) {
-                    showSkeletonLoader();
-                    $('.comments-container').empty();
-                } else {
-                    showLoadingIndicator();
-                }
-
-                $.ajax({
-                    type: "GET",
-                    url: "{{ route('user.comment.get') }}",
-                    data: { shorts_id: shortId, page: page },
-                    success: function (response) {
-                        if (response.data && response.data.success) {
-                            hideSkeletonLoader();
-                            hideLoadingIndicator();
-                            if (append) {
-                                $('.comments-container').append(response.data.html);
-                            } else {
-                                $('.comments-container').html(response.data.html);
-                            }
-                            hasMoreComments = response.data.has_more;
-                            currentPage = response.data.next_page;
-                        } else {
-                            notify('error', 'Failed to load comments');
-                        }
-                        isLoading = false;
-                    }
-                });
-            }
-
-            $('.button-comment').on('click', function () {
-                var $button = $(this);
-                var $videoItem = $button.closest('.video-item');
-                var shortId = $videoItem.find('.video-player').data('short-id');
-                $('.short-id').val(shortId);
-                currentShortId = shortId;
-                currentPage = 1;
-                hasMoreComments = true;
-
-                $('.video-comment').addClass('active');
-                $('.right-sidebar').addClass('active');
-
-                loadComments(shortId);
-            });
-
-            $('.common-action-close').on('click', function () {
-                $('.video-comment').removeClass('active');
-                $('.right-sidebar').removeClass('active');
-                $('.comments-container').empty();
-                currentShortId = null;
-                currentPage = 1;
-                hasMoreComments = true;
-            });
-
-            $('.right-sidebar__body').on('scroll', function () {
-                var $this = $(this);
-                if (
-                    $this.scrollTop() + $this.innerHeight() >= $this[0].scrollHeight - 50 &&
-                    !isLoading &&
-                    hasMoreComments &&
-                    currentShortId
-                ) {
-                    loadComments(currentShortId, currentPage, true);
-                }
-            });
-
-            $('.comment-form').on('submit', function (e) {
-                e.preventDefault();
-                if (!isLoggedIn) {
-                    window.location.href = "{{ route('user.login') }}";
-                    return;
-                }
-                var $btn = $(this);
-                var formData = new FormData(this);
-                formData.append("_token", "{{ csrf_token() }}");
-                $.ajax({
-                    url: "{{ route('user.comment.store') }}",
-                    method: "POST",
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    success: function (response) {
-                        if (response.success) {
-                            var shortId = $('.short-id').val();
-                            var $videoItem = $('.video-item').find(`[data-short-id="${shortId}"]`).closest('.video-item');
-                            var $commentCountElement = $videoItem.find('.button-comment .comment-count');
-                            $commentCountElement.text(response.comment_count);
-                            $('.comment-form').trigger('reset');
-                            $('.comments-container').prepend(response.html);
-                        }
-                    }
-                });
-            });
-
-            $(document).on('submit', '.reply-form', function (e) {
-                e.preventDefault();
-                if (!isLoggedIn) {
-                    window.location.href = "{{ route('user.login') }}";
-                    return;
-                }
-                var $form = $(this);
-                var formData = new FormData(this);
-                formData.append("_token", "{{ csrf_token() }}");
-                $.ajax({
-                    url: "{{ route('user.comment.reply.store') }}",
-                    method: "POST",
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    success: function (response) {
-                        if (response.success) {
-                            $form[0].reset();
-                            $form.closest('.reply-form-container').addClass('d-none');
-
-                            var $repliesContainer = $form.closest('.comment-item').find('.replies-container');
-                            $repliesContainer.prepend(response.html);
-                            $repliesContainer.show();
-
-                            var $viewRepliesBtn = $form.closest('.comment-item').find('.view-replies');
-                            if ($viewRepliesBtn.length) {
-                                var currentCount = parseInt($viewRepliesBtn.find('.count-text').text().match(/\d+/)[0]);
-                                $viewRepliesBtn.find('.count-text').text('― View ' + (currentCount + 1) + ' replies');
-                            } else {
-                                var newBtnHtml = '<button class="common-action-btn view-replies" data-comment-id="' + $form.data('comment-id') + '">' +
-                                    '<span class="count-text">― View 1 reply </span> <i class="las la-angle-down"></i></button>';
-                                $form.closest('.comment-item').find('.comment-item__action').append(newBtnHtml);
-                            }
-                        }
-                    }
-                });
-            });
-
-            $('.send-stars-btn').on('click', function () {
-                var receiverId = $(this).data('receiver-id');
-                var shortId = $(this).data('short-id');
-
-                $('#sendStarsForm').data('clickedButton', this);
-
-                if (!isLoggedIn) {
-                    window.location.href = "{{ route('user.login') }}";
-                    return;
-                }
-
-                $('#receiverId').val(receiverId);
-                $('#shortId').val(shortId);
-                $('#sendStarsModal').modal('show');
-            });
-
-            $('#sendStarsForm').on('submit', function (e) {
-                e.preventDefault();
-
-                var $form = $(this);
-                var formData = new FormData(this);
-                $.ajax({
-                    url: "{{ route('user.star.transaction.send') }}",
-                    type: "POST",
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    success: function (response) {
-                        if (response.status == 'success') {
-                            var $btn = $($form.data('clickedButton'));
-                            $btn.siblings('.star-count').text(response.data.stars_count);
-                            notify('success', response.message);
-                            $('.available-stars').text(response.data.stars_available);
-                            $form.trigger('reset');
-                            $('#sendStarsModal').modal('hide');
-                        } else {
-                            notify('error', response.message);
-                        }
-                    }
-                });
-            });
-
-            $(document).on('click', '.reply-btn', function (e) {
-                e.preventDefault();
-                var $btn = $(this);
-                var $commentItem = $btn.closest('.comment-item');
-                var $replyFormContainer = $commentItem.find('.reply-form-container');
-                $replyFormContainer.toggleClass('d-none');
-                if (!$replyFormContainer.hasClass('d-none')) {
-                    $replyFormContainer.find('input[name="message"]').focus();
-                }
-            });
-
-            $(document).on('click', '.view-replies', function (e) {
-                e.preventDefault();
-                var $btn = $(this);
-                var $commentItem = $btn.closest('.comment-item');
-                var $repliesContainer = $commentItem.find('.replies-container');
-                $repliesContainer.toggleClass('d-none');
-                $btn.find('i').toggleClass('la-angle-down la-angle-up');
-            });
-
-            $(document).on("click", ".follow-btn", function (e) {
-                e.preventDefault();
-                let $btn = $(this);
-                let userId = $btn.data("id");
-                let action = $btn.data("action");
-
-                $.ajax({
-                    url: action === "follow" ? "{{ url('user/friend/follow') }}/" + userId : "{{ url('user/friend/unfollow') }}/" + userId,
-                    type: "POST",
-                    data: { _token: "{{ csrf_token() }}" },
-                    success: function (response) {
-                        if (response.status === "success") {
-                            let $icon = $btn.find("i");
-                            if (action === "follow") {
-                                $icon.removeClass("la-plus").addClass("la-check");
-                                $btn.data("action", "unfollow");
-                            } else {
-                                $icon.removeClass("la-check").addClass("la-plus");
-                                $btn.data("action", "follow");
-                            }
-                            notify('success', response.message);
-                            $(".sidebar-following-container").load("{{ route('user.friend.sidebar.following') }}");
-                        }
-                    }
-                });
-            });
-
-            $(document).on('click', '.comment-reaction-btn', function (e) {
-                e.preventDefault();
-                if (!isLoggedIn) {
-                    window.location.href = "{{ route('user.login') }}";
-                    return;
-                }
-                var $btn = $(this);
-                var commentId = $btn.data('comment-id');
-                var $likesCount = $btn.find('.likes-count');
-                $.ajax({
-                    url: "{{ route('user.comment.reaction') }}",
-                    method: "POST",
-                    data: { _token: "{{ csrf_token() }}", comment_id: commentId },
-                    success: function (response) {
-                        if (response.data.success) {
-                            $likesCount.text(response.data.likes);
+                    var $button = $(this);
+                    var $countElement = $button.closest(".cmn-button-item").find(".like-count");
+                    var shortsId = $button.data("shorts-id");
+                    var shortsOwnerId = $button.data("shorts-owner-id");
+                    var formData = new FormData();
+                    formData.append("_token", "{{ csrf_token() }}");
+                    formData.append("shorts_id", shortsId);
+                    formData.append("shorts_owner_id", shortsOwnerId);
+                    $.ajax({
+                        url: "{{ route('user.reaction.like') }}",
+                        method: 'POST',
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function (response) {
                             if (response.data.status === 'liked') {
-                                $btn.addClass('liked');
+                                $button.addClass("liked");
                             } else {
-                                $btn.removeClass('liked');
+                                $button.removeClass("liked");
                             }
-                            notify('success', response.data.message);
+                            $countElement.text(response.data.like_count);
                         }
-                    }
+                    });
                 });
-            });
 
-            $(document).on('click', '.save-btn', function (e) {
-                e.preventDefault();
-                if (!isLoggedIn) {
-                    window.location.href = "{{ route('user.login') }}";
-                    return;
+
+                function loadComments(shortId, page = 1, append = false) {
+                    if (isLoading || !hasMoreComments) return;
+
+                    isLoading = true;
+                    if (page === 1) {
+                        showSkeletonLoader();
+                        $('.comments-container').empty();
+                    } else {
+                        showLoadingIndicator();
+                    }
+
+                    $.ajax({
+                        type: "GET",
+                        url: "{{ route('user.comment.get') }}",
+                        data: {
+                            shorts_id: shortId,
+                            page: page
+                        },
+                        success: function (response) {
+                            if (response.data && response.data.success) {
+                                hideSkeletonLoader();
+                                hideLoadingIndicator();
+                                if (append) {
+                                    $('.comments-container').append(response.data.html);
+                                } else {
+                                    $('.comments-container').html(response.data.html);
+                                }
+                                hasMoreComments = response.data.has_more;
+                                currentPage = response.data.next_page;
+                            } else {
+                                notify('error', 'Failed to load comments');
+                            }
+                            isLoading = false;
+                        }
+                    });
                 }
-                var $btn = $(this);
-                var $countElement = $btn.closest('.cmn-button-item').find('.save-count');
-                var shortsId = $btn.data('shorts-id');
-                $.ajax({
-                    url: "{{ route('user.saved.short') }}",
-                    method: "POST",
-                    data: { _token: "{{ csrf_token() }}", shorts_id: shortsId },
-                    success: function (response) {
-                        if (response.data.success) {
-                            $countElement.text(response.data.saved_count);
-                            if (response.data.status === 'saved') {
-                                $btn.addClass('saved');
-                            } else {
-                                $btn.removeClass('saved');
-                            }
-                            notify('success', response.data.message);
-                        }
+
+                $('.button-comment').on('click', function () {
+                    var $button = $(this);
+                    var $videoItem = $button.closest('.video-item');
+                    var shortId = $videoItem.find('.video-player').data('short-id');
+                    $('.short-id').val(shortId);
+                    currentShortId = shortId;
+                    currentPage = 1;
+                    hasMoreComments = true;
+
+                    $('.video-comment').addClass('active');
+                    $('.right-sidebar').addClass('active');
+
+                    loadComments(shortId);
+                });
+
+                $('.common-action-close').on('click', function () {
+                    $('.video-comment').removeClass('active');
+                    $('.right-sidebar').removeClass('active');
+                    $('.comments-container').empty();
+                    currentShortId = null;
+                    currentPage = 1;
+                    hasMoreComments = true;
+                });
+
+                $('.right-sidebar__body').on('scroll', function () {
+                    var $this = $(this);
+                    if (
+                        $this.scrollTop() + $this.innerHeight() >= $this[0].scrollHeight - 50 &&
+                        !isLoading &&
+                        hasMoreComments &&
+                        currentShortId
+                    ) {
+                        loadComments(currentShortId, currentPage, true);
                     }
                 });
-            });
 
-            $('.share-btn').on('click', function (e) {
-                e.preventDefault();
-                var $btn = $(this);
-                var shortsId = $btn.data('shorts-id');
-                $('#shareModal').data('shorts-id', shortsId).modal('show');
-            });
 
-            $(document).on('click', '.share-option', function (e) {
-                e.preventDefault();
-                var $option = $(this);
-                var platform = $option.data('platform');
-                var shortsId = $('#shareModal').data('shorts-id');
-                var $countElement = $('.video-item').find(`[data-shorts-id="${shortsId}"]`).closest('.video-item').find('.share-count');
+                $('.comment-form').on('submit', function (e) {
+                    e.preventDefault();
+                    if (!isLoggedIn) {
+                        window.location.href = "{{ route('user.login') }}";
+                        return;
+                    }
+                    var $btn = $(this);
+                    var formData = new FormData(this);
+                    formData.append("_token", "{{ csrf_token() }}");
+                    $.ajax({
+                        url: "{{ route('user.comment.store') }}",
+                        method: "POST",
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function (response) {
+                            if (response.success) {
+                                var shortId = $('.short-id').val();
+                                var $videoItem = $('.video-item').find(`[data-short-id="${shortId}"]`).closest('.video-item');
+                                var $commentCountElement = $videoItem.find('.button-comment .comment-count');
+                                $commentCountElement.text(response.comment_count);
+                                $('.comment-form').trigger('reset');
+                                $('.comments-container').prepend(response.html);
+                            }
+                        }
+                    });
+                });
 
-                $.ajax({
-                    url: "{{ route('short.share') }}",
-                    method: "POST",
-                    data: { _token: "{{ csrf_token() }}", shorts_id: shortsId, platform: platform },
-                    success: function (response) {
-                        if (response.data.success) {
-                            var shortUrl = response.data.share_url;
-                            var shareText = 'Check out this video! ' + shortUrl;
-                            $countElement.text(response.data.shares_count);
-                            $('#shareModal').data('short-url', shortUrl);
+                $(document).on('submit', '.reply-form', function (e) {
+                    e.preventDefault();
+                    if (!isLoggedIn) {
+                        window.location.href = "{{ route('user.login') }}";
+                        return;
+                    }
+                    var $form = $(this);
+                    var formData = new FormData(this);
+                    formData.append("_token", "{{ csrf_token() }}");
+                    $.ajax({
+                        url: "{{ route('user.comment.reply.store') }}",
+                        method: "POST",
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function (response) {
+                            if (response.success) {
+                                $form[0].reset();
+                                $form.closest('.reply-form-container').addClass('d-none');
 
-                            switch (platform) {
-                                case 'whatsapp':
-                                    window.open('https://wa.me/?text=' + encodeURIComponent(shareText), '_blank');
-                                    break;
-                                case 'facebook':
-                                    window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(shortUrl), '_blank');
-                                    break;
-                                case 'telegram':
-                                    window.open('https://telegram.me/share/url?url=' + encodeURIComponent(shortUrl) + '&text=' + encodeURIComponent(shareText), '_blank');
-                                    break;
-                                case 'link':
-                                    $('.referralURL').val(shortUrl).removeClass('d-none').select();
-                                    if (navigator.clipboard) {
-                                        navigator.clipboard.writeText(shortUrl).then(() => {
-                                            notify('success', 'Link copied!');
+                                var $repliesContainer = $form.closest('.comment-item').find(
+                                    '.replies-container');
+                                $repliesContainer.prepend(response.html);
+                                $repliesContainer.show();
+
+                                var $viewRepliesBtn = $form.closest('.comment-item').find(
+                                    '.view-replies');
+                                if ($viewRepliesBtn.length) {
+                                    var currentCount = parseInt($viewRepliesBtn.find(
+                                        '.count-text').text().match(/\d+/)[0]);
+                                    $viewRepliesBtn.find('.count-text').text('― View ' + (
+                                        currentCount + 1) + ' replies');
+                                } else {
+                                    var newBtnHtml =
+                                        '<button class="common-action-btn view-replies" data-comment-id="' +
+                                        $form.data('comment-id') + '">' +
+                                        '<span class="count-text">― View 1 reply </span> <i class="las la-angle-down"></i>' +
+                                        '</button>';
+                                    $form.closest('.comment-item').find(
+                                        '.comment-item__action').append(newBtnHtml);
+                                }
+                            }
+                        }
+                    });
+                });
+
+                $('.send-stars-btn').on('click', function () {
+                    var receiverId = $(this).data('receiver-id');
+                    var shortId = $(this).data('short-id');
+
+                    $('#sendStarsForm').data('clickedButton', this);
+
+                    if (!isLoggedIn) {
+                        window.location.href = "{{ route('user.login') }}";
+                        return;
+                    }
+
+                    $('#receiverId').val(receiverId);
+                    $('#shortId').val(shortId);
+                    $('#sendStarsModal').modal('show');
+                });
+
+                $('#sendStarsForm').on('submit', function (e) {
+                    e.preventDefault();
+
+                    var $form = $(this);
+                    var formData = new FormData(this);
+                    $.ajax({
+                        url: "{{ route('user.star.transaction.send') }}",
+                        type: "POST",
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function (response) {
+                            if (response.status == 'success') {
+                                var $btn = $($form.data('clickedButton'));
+                                $btn.siblings('.star-count').text(response.data
+                                    .stars_count);
+                                notify('success', response.message);
+                                $('.available-stars').text(response.data.stars_available);
+                                $form.trigger('reset');
+                                $('#sendStarsModal').modal('hide');
+                            } else {
+                                notify('error', response.message);
+                            }
+                        }
+                    });
+                });
+
+                $(document).on('click', '.reply-btn', function (e) {
+                    e.preventDefault();
+
+                    var $btn = $(this);
+                    var $commentItem = $btn.closest('.comment-item');
+                    var $replyFormContainer = $commentItem.find('.reply-form-container');
+
+                    $replyFormContainer.toggleClass('d-none');
+
+                    if (!$replyFormContainer.hasClass('d-none')) {
+                        $replyFormContainer.find('input[name="message"]').focus();
+                    }
+                });
+
+                $(document).on('click', '.view-replies', function (e) {
+                    e.preventDefault();
+
+                    var $btn = $(this);
+                    var $commentItem = $btn.closest('.comment-item');
+                    var $repliesContainer = $commentItem.find('.replies-container');
+
+                    $repliesContainer.toggleClass('d-none');
+                    $btn.find('i').toggleClass('la-angle-down la-angle-up');
+                });
+
+                $(document).on("click", ".follow-btn", function (e) {
+                    e.preventDefault();
+                    let $btn = $(this);
+                    let userId = $btn.data("id");
+                    let action = $btn.data("action");
+
+                    $.ajax({
+                        url: action === "follow" ?
+                            "{{ url('user/friend/follow') }}/" + userId :
+                            "{{ url('user/friend/unfollow') }}/" + userId,
+                        type: "POST",
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                        },
+                        success: function (response) {
+                            if (response.status === "success") {
+                                let $icon = $btn.find("i");
+                                if (action === "follow") {
+                                    $icon.removeClass("la-plus").addClass("la-check");
+                                    $btn.data("action", "unfollow");
+                                } else {
+                                    $icon.removeClass("la-check").addClass("la-plus");
+                                    $btn.data("action", "follow");
+                                }
+                                notify('success', response.message);
+
+                                $(".sidebar-following-container").load("{{ route('user.friend.sidebar.following') }}");
+                            }
+                        }
+                    });
+                });
+
+                $(document).on('click', '.comment-reaction-btn', function (e) {
+                    e.preventDefault();
+                    if (!isLoggedIn) {
+                        window.location.href = "{{ route('user.login') }}";
+                        return;
+                    }
+                    var $btn = $(this);
+                    var commentId = $btn.data('comment-id');
+                    var $likesCount = $btn.find('.likes-count');
+                    $.ajax({
+                        url: "{{ route('user.comment.reaction') }}",
+                        method: "POST",
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            comment_id: commentId
+                        },
+                        success: function (response) {
+                            if (response.data.success) {
+                                $likesCount.text(response.data.likes);
+                                if (response.data.status === 'liked') {
+                                    $btn.addClass('liked');
+                                } else {
+                                    $btn.removeClass('liked');
+                                }
+                                notify('success', response.data.message);
+                            }
+                        }
+                    });
+                });
+
+                $(document).on('click', '.save-btn', function (e) {
+                    e.preventDefault();
+                    if (!isLoggedIn) {
+                        window.location.href = "{{ route('user.login') }}";
+                        return;
+                    }
+                    var $btn = $(this);
+                    var $countElement = $btn.closest('.cmn-button-item').find('.save-count');
+                    var shortsId = $btn.data('shorts-id');
+                    $.ajax({
+                        url: "{{ route('user.saved.short') }}",
+                        method: "POST",
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            shorts_id: shortsId
+                        },
+                        success: function (response) {
+                            if (response.data.success) {
+                                $countElement.text(response.data.saved_count);
+                                if (response.data.status === 'saved') {
+                                    $btn.addClass('saved');
+                                } else {
+                                    $btn.removeClass('saved');
+                                }
+                                notify('success', response.data.message);
+                            }
+                        }
+                    });
+                });
+
+                $('.share-btn').on('click', function (e) {
+                    e.preventDefault();
+                    var $btn = $(this);
+                    var shortsId = $btn.data('shorts-id');
+                    $('#shareModal').data('shorts-id', shortsId).modal('show');
+                });
+
+                $(document).on('click', '.share-btn', function (e) {
+                    e.preventDefault();
+                    var $btn = $(this);
+                    var shortsId = $btn.data('shorts-id');
+                    $('#shareModal').data('shorts-id', shortsId).modal('show');
+                });
+
+                $(document).on('click', '.share-option', function (e) {
+                    e.preventDefault();
+                    var $option = $(this);
+                    var platform = $option.data('platform');
+                    var shortsId = $('#shareModal').data('shorts-id');
+
+                    var $countElement = $('.video-item').find(`[data-shorts-id="${shortsId}"]`).closest(
+                        '.video-item').find('.share-count');
+
+                    $.ajax({
+                        url: "{{ route('short.share') }}",
+                        method: "POST",
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            shorts_id: shortsId,
+                            platform: platform
+                        },
+                        success: function (response) {
+                            if (response.data.success) {
+                                var shortUrl = response.data.share_url;
+                                var shareText = 'Check out this video! ' + shortUrl;
+                                $countElement.text(response.data.shares_count);
+                                $('#shareModal').data('short-url', shortUrl);
+
+                                switch (platform) {
+                                    case 'whatsapp':
+                                        window.open('https://wa.me/?text=' +
+                                            encodeURIComponent(shareText), '_blank');
+                                        break;
+                                    case 'facebook':
+                                        window.open(
+                                            'https://www.facebook.com/sharer/sharer.php?u=' +
+                                            encodeURIComponent(shortUrl), '_blank');
+                                        break;
+                                    case 'telegram':
+                                        window.open('https://telegram.me/share/url?url=' +
+                                            encodeURIComponent(shortUrl) + '&text=' +
+                                            encodeURIComponent(shareText), '_blank');
+                                        break;
+                                    case 'link':
+                                        $('.referralURL').val(shortUrl).removeClass(
+                                            'd-none').select();
+
+                                        if (navigator.clipboard) {
+                                            navigator.clipboard.writeText(shortUrl).then(
+                                                function () {
+                                                    notify('success',
+                                                        'Link copied to clipboard!');
+                                                    $('#shareModal').modal('hide');
+                                                    $('.referralURL').addClass(
+                                                        'd-none');
+                                                },
+                                                function (err) {
+                                                    notify('error',
+                                                        'Failed to copy link: ' +
+                                                        err);
+                                                }
+                                            );
+                                        } else {
+                                            $('.referralURL').select();
+                                            document.execCommand('copy');
+                                            notify('success', 'Link copied to clipboard!');
                                             $('#shareModal').modal('hide');
                                             $('.referralURL').addClass('d-none');
-                                        });
-                                    } else {
-                                        document.execCommand('copy');
-                                        notify('success', 'Link copied!');
-                                        $('#shareModal').modal('hide');
-                                        $('.referralURL').addClass('d-none');
-                                    }
-                                    break;
+                                        }
+                                        break;
+                                }
+                            } else {
+                                notify('error', (response.data.message));
                             }
-                        } else {
-                            notify('error', response.data.message);
                         }
-                    }
+                    });
                 });
-            });
 
-            $('.video-player').each(function () {
-                var $video = $(this);
-                var shortId = $video.data('short-id');
-                var $viewCountSpan = $video.closest('.video-item').find('.view-count');
-                var playTime = 0;
-                var lastSentTime = 0;
 
-                $video.on('timeupdate', function () {
-                    playTime = $video[0].currentTime;
-                    if (Math.floor(playTime) % 5 === 0 && playTime > lastSentTime) {
+                $('.video-player').each(function () {
+                    var $video = $(this);
+                    var shortId = $video.data('short-id');
+                    var $viewCountSpan = $video.closest('.video-item').find('.view-count');
+                    var playTime = 0;
+                    var lastSentTime = 0;
+
+                    $video.on('timeupdate', function () {
+                        playTime = $video[0].currentTime;
+
+                        if (Math.floor(playTime) % 5 === 0 && playTime > lastSentTime) {
+                            $.ajax({
+                                url: '{{ route('short.track.analytics', ':id') }}'
+                                    .replace(':id', shortId),
+                                type: 'POST',
+                                data: {
+                                    play_time: Math.floor(playTime - lastSentTime),
+                                    _token: '{{ csrf_token() }}'
+                                },
+                                success: function (response) {
+                                    if (response.success) {
+                                        lastSentTime = Math.floor(playTime);
+                                        console.log(
+                                            'Playtime recorded for short ID: ' +
+                                            shortId);
+                                    }
+                                }
+                            });
+                        }
+                    });
+
+                    $video.on('ended', function () {
                         $.ajax({
-                            url: '{{ route('short.track.analytics', ':id') }}'.replace(':id', shortId),
+                            url: '{{ route('short.record.view') }}',
                             type: 'POST',
-                            data: { play_time: Math.floor(playTime - lastSentTime), _token: '{{ csrf_token() }}' },
+                            data: {
+                                shorts_id: shortId,
+                                _token: '{{ csrf_token() }}'
+                            },
                             success: function (response) {
                                 if (response.success) {
-                                    lastSentTime = Math.floor(playTime);
+                                    $viewCountSpan.text(response.views_count);
                                 }
                             }
                         });
-                    }
-                });
+                    });
 
-                $video.on('ended', function () {
-                    $.ajax({
-                        url: '{{ route('short.record.view') }}',
-                        type: 'POST',
-                        data: { shorts_id: shortId, _token: '{{ csrf_token() }}' },
-                        success: function (response) {
-                            if (response.success) {
-                                $viewCountSpan.text(response.views_count);
-                            }
-                        }
+                    $video.on('pause', function () {
+                        playTime = 0;
+                        lastSentTime = 0;
                     });
                 });
-
-                $video.on('pause', function () {
-                    playTime = 0;
-                    lastSentTime = 0;
-                });
             });
-
-            // ==================== INITIALIZE ON DOM READY ====================
-            $(function () {
-                initPlyr(); // First 5 videos
-            });
-
         })(jQuery);
     </script>
 @endpush
-
-
-
-{{-- @push('script')
-<script>
-    (function ($) {
-        "use strict";
-        const isLoggedIn = {{ auth() -> check() ? 'true' : 'false'
-    }};
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    })
-
-    $(document).ready(function () {
-        let currentPage = 1;
-        let isLoading = false;
-        let hasMoreComments = true;
-        let currentShortId = null;
-
-        function showSkeletonLoader() {
-            $('.comments-skeleton').removeClass('d-none');
-            $('.comments-container').addClass('d-none');
-            $('.comments-loading').addClass('d-none');
-        }
-
-        function hideSkeletonLoader() {
-            $('.comments-skeleton').addClass('d-none');
-            $('.comments-container').removeClass('d-none');
-        }
-
-        function showLoadingIndicator() {
-            $('.comments-loading').removeClass('d-none');
-        }
-
-        function hideLoadingIndicator() {
-            $('.comments-loading').addClass('d-none');
-        }
-
-
-        $(document).on('click', ".like-btn", function (e) {
-            e.preventDefault();
-            if (!isLoggedIn) {
-                window.location.href = "{{ route('user.login') }}";
-                return;
-            }
-            var $button = $(this);
-            var $countElement = $button.closest(".cmn-button-item").find(".like-count");
-            var shortsId = $button.data("shorts-id");
-            var shortsOwnerId = $button.data("shorts-owner-id");
-            var formData = new FormData();
-            formData.append("_token", "{{ csrf_token() }}");
-            formData.append("shorts_id", shortsId);
-            formData.append("shorts_owner_id", shortsOwnerId);
-            $.ajax({
-                url: "{{ route('user.reaction.like') }}",
-                method: 'POST',
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function (response) {
-                    if (response.data.status === 'liked') {
-                        $button.addClass("liked");
-                    } else {
-                        $button.removeClass("liked");
-                    }
-                    $countElement.text(response.data.like_count);
-                }
-            });
-        });
-
-
-        function loadComments(shortId, page = 1, append = false) {
-            if (isLoading || !hasMoreComments) return;
-
-            isLoading = true;
-            if (page === 1) {
-                showSkeletonLoader();
-                $('.comments-container').empty();
-            } else {
-                showLoadingIndicator();
-            }
-
-            $.ajax({
-                type: "GET",
-                url: "{{ route('user.comment.get') }}",
-                data: {
-                    shorts_id: shortId,
-                    page: page
-                },
-                success: function (response) {
-                    if (response.data && response.data.success) {
-                        hideSkeletonLoader();
-                        hideLoadingIndicator();
-                        if (append) {
-                            $('.comments-container').append(response.data.html);
-                        } else {
-                            $('.comments-container').html(response.data.html);
-                        }
-                        hasMoreComments = response.data.has_more;
-                        currentPage = response.data.next_page;
-                    } else {
-                        notify('error', 'Failed to load comments');
-                    }
-                    isLoading = false;
-                }
-            });
-        }
-
-        $('.button-comment').on('click', function () {
-            var $button = $(this);
-            var $videoItem = $button.closest('.video-item');
-            var shortId = $videoItem.find('.video-player').data('short-id');
-            $('.short-id').val(shortId);
-            currentShortId = shortId;
-            currentPage = 1;
-            hasMoreComments = true;
-
-            $('.video-comment').addClass('active');
-            $('.right-sidebar').addClass('active');
-
-            loadComments(shortId);
-        });
-
-        $('.common-action-close').on('click', function () {
-            $('.video-comment').removeClass('active');
-            $('.right-sidebar').removeClass('active');
-            $('.comments-container').empty();
-            currentShortId = null;
-            currentPage = 1;
-            hasMoreComments = true;
-        });
-
-        $('.right-sidebar__body').on('scroll', function () {
-            var $this = $(this);
-            if (
-                $this.scrollTop() + $this.innerHeight() >= $this[0].scrollHeight - 50 &&
-                !isLoading &&
-                hasMoreComments &&
-                currentShortId
-            ) {
-                loadComments(currentShortId, currentPage, true);
-            }
-        });
-
-
-        $('.comment-form').on('submit', function (e) {
-            e.preventDefault();
-            if (!isLoggedIn) {
-                window.location.href = "{{ route('user.login') }}";
-                return;
-            }
-            var $btn = $(this);
-            var formData = new FormData(this);
-            formData.append("_token", "{{ csrf_token() }}");
-            $.ajax({
-                url: "{{ route('user.comment.store') }}",
-                method: "POST",
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function (response) {
-                    if (response.success) {
-                        var shortId = $('.short-id').val();
-                        var $videoItem = $('.video-item').find(`[data-short-id="${shortId}"]`).closest('.video-item');
-                        var $commentCountElement = $videoItem.find('.button-comment .comment-count');
-                        $commentCountElement.text(response.comment_count);
-                        $('.comment-form').trigger('reset');
-                        $('.comments-container').prepend(response.html);
-                    }
-                }
-            });
-        });
-
-        $(document).on('submit', '.reply-form', function (e) {
-            e.preventDefault();
-            if (!isLoggedIn) {
-                window.location.href = "{{ route('user.login') }}";
-                return;
-            }
-            var $form = $(this);
-            var formData = new FormData(this);
-            formData.append("_token", "{{ csrf_token() }}");
-            $.ajax({
-                url: "{{ route('user.comment.reply.store') }}",
-                method: "POST",
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function (response) {
-                    if (response.success) {
-                        $form[0].reset();
-                        $form.closest('.reply-form-container').addClass('d-none');
-
-                        var $repliesContainer = $form.closest('.comment-item').find(
-                            '.replies-container');
-                        $repliesContainer.prepend(response.html);
-                        $repliesContainer.show();
-
-                        var $viewRepliesBtn = $form.closest('.comment-item').find(
-                            '.view-replies');
-                        if ($viewRepliesBtn.length) {
-                            var currentCount = parseInt($viewRepliesBtn.find(
-                                '.count-text').text().match(/\d+/)[0]);
-                            $viewRepliesBtn.find('.count-text').text('― View ' + (
-                                currentCount + 1) + ' replies');
-                        } else {
-                            var newBtnHtml =
-                                '<button class="common-action-btn view-replies" data-comment-id="' +
-                                $form.data('comment-id') + '">' +
-                                '<span class="count-text">― View 1 reply </span> <i class="las la-angle-down"></i>' +
-                                '</button>';
-                            $form.closest('.comment-item').find(
-                                '.comment-item__action').append(newBtnHtml);
-                        }
-                    }
-                }
-            });
-        });
-
-        $('.send-stars-btn').on('click', function () {
-            var receiverId = $(this).data('receiver-id');
-            var shortId = $(this).data('short-id');
-
-            $('#sendStarsForm').data('clickedButton', this);
-
-            if (!isLoggedIn) {
-                window.location.href = "{{ route('user.login') }}";
-                return;
-            }
-
-            $('#receiverId').val(receiverId);
-            $('#shortId').val(shortId);
-            $('#sendStarsModal').modal('show');
-        });
-
-        $('#sendStarsForm').on('submit', function (e) {
-            e.preventDefault();
-
-            var $form = $(this);
-            var formData = new FormData(this);
-            $.ajax({
-                url: "{{ route('user.star.transaction.send') }}",
-                type: "POST",
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function (response) {
-                    if (response.status == 'success') {
-                        var $btn = $($form.data('clickedButton'));
-                        $btn.siblings('.star-count').text(response.data
-                            .stars_count);
-                        notify('success', response.message);
-                        $('.available-stars').text(response.data.stars_available);
-                        $form.trigger('reset');
-                        $('#sendStarsModal').modal('hide');
-                    } else {
-                        notify('error', response.message);
-                    }
-                }
-            });
-        });
-
-        $(document).on('click', '.reply-btn', function (e) {
-            e.preventDefault();
-
-            var $btn = $(this);
-            var $commentItem = $btn.closest('.comment-item');
-            var $replyFormContainer = $commentItem.find('.reply-form-container');
-
-            $replyFormContainer.toggleClass('d-none');
-
-            if (!$replyFormContainer.hasClass('d-none')) {
-                $replyFormContainer.find('input[name="message"]').focus();
-            }
-        });
-
-        $(document).on('click', '.view-replies', function (e) {
-            e.preventDefault();
-
-            var $btn = $(this);
-            var $commentItem = $btn.closest('.comment-item');
-            var $repliesContainer = $commentItem.find('.replies-container');
-
-            $repliesContainer.toggleClass('d-none');
-            $btn.find('i').toggleClass('la-angle-down la-angle-up');
-        });
-
-        $(document).on("click", ".follow-btn", function (e) {
-            e.preventDefault();
-            let $btn = $(this);
-            let userId = $btn.data("id");
-            let action = $btn.data("action");
-
-            $.ajax({
-                url: action === "follow" ?
-                    "{{ url('user/friend/follow') }}/" + userId :
-                    "{{ url('user/friend/unfollow') }}/" + userId,
-                type: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                },
-                success: function (response) {
-                    if (response.status === "success") {
-                        let $icon = $btn.find("i");
-                        if (action === "follow") {
-                            $icon.removeClass("la-plus").addClass("la-check");
-                            $btn.data("action", "unfollow");
-                        } else {
-                            $icon.removeClass("la-check").addClass("la-plus");
-                            $btn.data("action", "follow");
-                        }
-                        notify('success', response.message);
-
-                        $(".sidebar-following-container").load("{{ route('user.friend.sidebar.following') }}");
-                    }
-                }
-            });
-        });
-
-        $(document).on('click', '.comment-reaction-btn', function (e) {
-            e.preventDefault();
-            if (!isLoggedIn) {
-                window.location.href = "{{ route('user.login') }}";
-                return;
-            }
-            var $btn = $(this);
-            var commentId = $btn.data('comment-id');
-            var $likesCount = $btn.find('.likes-count');
-            $.ajax({
-                url: "{{ route('user.comment.reaction') }}",
-                method: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    comment_id: commentId
-                },
-                success: function (response) {
-                    if (response.data.success) {
-                        $likesCount.text(response.data.likes);
-                        if (response.data.status === 'liked') {
-                            $btn.addClass('liked');
-                        } else {
-                            $btn.removeClass('liked');
-                        }
-                        notify('success', response.data.message);
-                    }
-                }
-            });
-        });
-
-        $(document).on('click', '.save-btn', function (e) {
-            e.preventDefault();
-            if (!isLoggedIn) {
-                window.location.href = "{{ route('user.login') }}";
-                return;
-            }
-            var $btn = $(this);
-            var $countElement = $btn.closest('.cmn-button-item').find('.save-count');
-            var shortsId = $btn.data('shorts-id');
-            $.ajax({
-                url: "{{ route('user.saved.short') }}",
-                method: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    shorts_id: shortsId
-                },
-                success: function (response) {
-                    if (response.data.success) {
-                        $countElement.text(response.data.saved_count);
-                        if (response.data.status === 'saved') {
-                            $btn.addClass('saved');
-                        } else {
-                            $btn.removeClass('saved');
-                        }
-                        notify('success', response.data.message);
-                    }
-                }
-            });
-        });
-
-        $('.share-btn').on('click', function (e) {
-            e.preventDefault();
-            var $btn = $(this);
-            var shortsId = $btn.data('shorts-id');
-            $('#shareModal').data('shorts-id', shortsId).modal('show');
-        });
-
-        $(document).on('click', '.share-btn', function (e) {
-            e.preventDefault();
-            var $btn = $(this);
-            var shortsId = $btn.data('shorts-id');
-            $('#shareModal').data('shorts-id', shortsId).modal('show');
-        });
-
-        $(document).on('click', '.share-option', function (e) {
-            e.preventDefault();
-            var $option = $(this);
-            var platform = $option.data('platform');
-            var shortsId = $('#shareModal').data('shorts-id');
-
-            var $countElement = $('.video-item').find(`[data-shorts-id="${shortsId}"]`).closest(
-                '.video-item').find('.share-count');
-
-            $.ajax({
-                url: "{{ route('short.share') }}",
-                method: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    shorts_id: shortsId,
-                    platform: platform
-                },
-                success: function (response) {
-                    if (response.data.success) {
-                        var shortUrl = response.data.share_url;
-                        var shareText = 'Check out this video! ' + shortUrl;
-                        $countElement.text(response.data.shares_count);
-                        $('#shareModal').data('short-url', shortUrl);
-
-                        switch (platform) {
-                            case 'whatsapp':
-                                window.open('https://wa.me/?text=' +
-                                    encodeURIComponent(shareText), '_blank');
-                                break;
-                            case 'facebook':
-                                window.open(
-                                    'https://www.facebook.com/sharer/sharer.php?u=' +
-                                    encodeURIComponent(shortUrl), '_blank');
-                                break;
-                            case 'telegram':
-                                window.open('https://telegram.me/share/url?url=' +
-                                    encodeURIComponent(shortUrl) + '&text=' +
-                                    encodeURIComponent(shareText), '_blank');
-                                break;
-                            case 'link':
-                                $('.referralURL').val(shortUrl).removeClass(
-                                    'd-none').select();
-
-                                if (navigator.clipboard) {
-                                    navigator.clipboard.writeText(shortUrl).then(
-                                        function () {
-                                            notify('success',
-                                                'Link copied to clipboard!');
-                                            $('#shareModal').modal('hide');
-                                            $('.referralURL').addClass(
-                                                'd-none');
-                                        },
-                                        function (err) {
-                                            notify('error',
-                                                'Failed to copy link: ' +
-                                                err);
-                                        }
-                                    );
-                                } else {
-                                    $('.referralURL').select();
-                                    document.execCommand('copy');
-                                    notify('success', 'Link copied to clipboard!');
-                                    $('#shareModal').modal('hide');
-                                    $('.referralURL').addClass('d-none');
-                                }
-                                break;
-                        }
-                    } else {
-                        notify('error', (response.data.message));
-                    }
-                }
-            });
-        });
-
-
-        $('.video-player').each(function () {
-            var $video = $(this);
-            var shortId = $video.data('short-id');
-            var $viewCountSpan = $video.closest('.video-item').find('.view-count');
-            var playTime = 0;
-            var lastSentTime = 0;
-
-            $video.on('timeupdate', function () {
-                playTime = $video[0].currentTime;
-
-                if (Math.floor(playTime) % 5 === 0 && playTime > lastSentTime) {
-                    $.ajax({
-                        url: '{{ route('short.track.analytics', ': id') }}'
-                                    .replace(':id', shortId),
-                        type: 'POST',
-                        data: {
-                            play_time: Math.floor(playTime - lastSentTime),
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function (response) {
-                            if (response.success) {
-                                lastSentTime = Math.floor(playTime);
-                                console.log(
-                                    'Playtime recorded for short ID: ' +
-                                    shortId);
-                            }
-                        }
-                    });
-                }
-            });
-
-            $video.on('ended', function () {
-                $.ajax({
-                    url: '{{ route('short.record.view') }}',
-                    type: 'POST',
-                    data: {
-                        shorts_id: shortId,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function (response) {
-                        if (response.success) {
-                            $viewCountSpan.text(response.views_count);
-                        }
-                    }
-                });
-            });
-
-            $video.on('pause', function () {
-                playTime = 0;
-                lastSentTime = 0;
-            });
-        });
-    });
-        }) (jQuery);
-</script>
-@endpush --}}

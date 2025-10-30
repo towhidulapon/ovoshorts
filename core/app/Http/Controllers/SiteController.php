@@ -45,26 +45,6 @@ class SiteController extends Controller
         $users     = User::active()->where('id', '!=', auth()->id())->searchable(['username'])->get();
         $following = auth()->check() ? auth()->user()->followings->pluck('id')->toArray() : [];
 
-        // $shorts = Short::with('user', 'storage', 'comments.user', 'comments.replies.user', 'savedShorts')
-        //     ->approved()
-        //     ->published()
-        //     ->publicShort()
-        //     ->where(function ($query) {
-        //         $query->where('storage_driver', 'local')
-        //             ->orWhereIn('storage_driver', function ($subQuery) {
-        //                 $subQuery->select('alias')
-        //                     ->from('storage_settings')
-        //                     ->where('status', Status::ENABLE);
-        //             });
-        //     })
-        //     ->withCount('likes')
-        //     ->withSum('stars', 'stars')
-        //     ->orderBy('id', 'desc')
-        //     ->paginate(getPaginate(5))
-        //     ->map(function ($short) {
-        //         return prepareShortData($short);
-        //     });
-
         $shortsQuery = Short::with('user', 'storage', 'comments.user', 'comments.replies.user', 'savedShorts')
             ->approved()
             ->published()
@@ -109,13 +89,12 @@ class SiteController extends Controller
             ->withCount('likes')
             ->withSum('stars', 'stars')
             ->orderBy('id', 'desc')
-            ->paginate(5, ['*'], 'page', $request->page);
+            ->paginate(getPaginate(5), ['*'], 'page', $request->page);
 
-        $shorts->getCollection()->transform(function ($short) {
-            return prepareShortData($short);
-        });
-
-        $html = view('Template::user.short.view.video_items', compact('shorts'))->render();
+        $html = '';
+        foreach ($shorts as $short) {
+            $html .= view('Template::user.short.view.video_item', ['short' => $short])->render();
+        }
 
         return response()->json([
             'success' => true,
