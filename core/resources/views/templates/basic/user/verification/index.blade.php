@@ -30,7 +30,7 @@
                                     <span class="text-muted">@lang('OR')</span>
                                 </div>
 
-                                <form action="{{ route('user.verification.purchase') }}" method="POST">
+                                <form action="{{ route('user.verification.purchase') }}" class="no-submit-loader" method="POST">
                                     @csrf
                                     <input type="hidden" name="amount" value="{{ gs('verification_price') }}">
                                     <button type="submit" class="btn btn-success w-100">

@@ -199,7 +199,7 @@ class PaymentController extends Controller
         $data  = Deposit::with('gateway')->where('status', Status::PAYMENT_INITIATE)->where('trx', $track)->first();
         abort_if(!$data, 404);
         if ($data->method_code > 999) {
-            if ($data->star_purchase_id) {
+            if ($data->star_purchase_id || $data->is_verification) {
                 $pageTitle = 'Confirm Payment';
             } else {
                 $pageTitle = 'Confirm Deposit';

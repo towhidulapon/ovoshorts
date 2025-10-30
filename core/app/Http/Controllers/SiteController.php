@@ -45,7 +45,56 @@ class SiteController extends Controller
         $users     = User::active()->where('id', '!=', auth()->id())->searchable(['username'])->get();
         $following = auth()->check() ? auth()->user()->followings->pluck('id')->toArray() : [];
 
-        $shorts = Short::with('user', 'storage', 'comments.user', 'comments.replies.user', 'savedShorts')
+        // $shorts = Short::with('user', 'storage', 'comments.user', 'comments.replies.user', 'savedShorts')
+        //     ->approved()
+        //     ->published()
+        //     ->publicShort()
+        //     ->where(function ($query) {
+        //         $query->where('storage_driver', 'local')
+        //             ->orWhereIn('storage_driver', function ($subQuery) {
+        //                 $subQuery->select('alias')
+        //                     ->from('storage_settings')
+        //                     ->where('status', Status::ENABLE);
+        //             });
+        //     })
+        //     ->withCount('likes')
+        //     ->withSum('stars', 'stars')
+        //     ->orderBy('id', 'desc')
+        //     ->paginate(getPaginate(5))
+        //     ->map(function ($short) {
+        //         return prepareShortData($short);
+        //     });
+
+        $shortsQuery = Short::with('user', 'storage', 'comments.user', 'comments.replies.user', 'savedShorts')
+            ->approved()
+            ->published()
+            ->publicShort()
+            ->where(function ($query) {
+                $query->where('storage_driver', 'local')
+                    ->orWhereIn('storage_driver', function ($subQuery) {
+                        $subQuery->select('alias')
+                            ->from('storage_settings')
+                            ->where('status', Status::ENABLE);
+                    });
+            })
+            ->withCount('likes')
+            ->withSum('stars', 'stars')
+            ->orderBy('id', 'desc');
+
+        $shorts = $shortsQuery->paginate(getPaginate(5));
+
+        $hasMorePages = $shorts->hasMorePages();
+
+        $shorts->getCollection()->transform(function ($short) {
+            return prepareShortData($short);
+        });
+
+        return view('Template::home', compact('pageTitle', 'sections', 'following', 'shorts', 'seoContents', 'seoImage', 'hasMorePages'));
+    }
+
+    public function loadMoreShorts(Request $request)
+    {
+        $shorts = Short::with('user', 'comments.user', 'comments.replies.user')
             ->approved()
             ->published()
             ->publicShort()
@@ -60,12 +109,21 @@ class SiteController extends Controller
             ->withCount('likes')
             ->withSum('stars', 'stars')
             ->orderBy('id', 'desc')
-            ->get()
-            ->map(function ($short) {
-                return prepareShortData($short);
-            });
+            ->paginate(5, ['*'], 'page', $request->page);
 
-        return view('Template::home', compact('pageTitle', 'sections', 'following', 'shorts', 'seoContents', 'seoImage'));
+        $shorts->getCollection()->transform(function ($short) {
+            return prepareShortData($short);
+        });
+
+        $html = view('Template::user.short.view.video_items', compact('shorts'))->render();
+
+        return response()->json([
+            'success' => true,
+            'data'    => [
+                'html'    => $html,
+                'hasMore' => $shorts->hasMorePages(),
+            ],
+        ]);
     }
 
     public function recordView(Request $request)
