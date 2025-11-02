@@ -96,6 +96,7 @@ class GlobalVariablesServiceProvider extends ServiceProvider
             }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         View()->composer(['Template::home', 'Template::user.short.explore', 'Template::user.friend.*', 'Template::user.message.index', 'Template::user.profile_details', 'Template::user.short.hashtag'], function ($view) {
             if (auth()->check()) {
 =======
@@ -103,6 +104,11 @@ class GlobalVariablesServiceProvider extends ServiceProvider
 
             if ($cached === null) {
 >>>>>>> main
+=======
+            static $cached = null;
+
+            if ($cached === null) {
+>>>>>>> c6d46051200d062442e0e1b33211ab488d80b241
                 $user         = auth()->user();
                 $userShortIds = Short::where('user_id', $user->id)->pluck('id');
 

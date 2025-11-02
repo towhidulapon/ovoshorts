@@ -3,6 +3,7 @@
         <div class="shorts-video_sliders video-slider">
             @forelse ($shorts as $short)
 <<<<<<< HEAD
+<<<<<<< HEAD
                 <div class="video-item">
                     <div class="video-item-wrapper">
                         <video class="video-player" playsinline preload="metadata"
@@ -129,6 +130,9 @@
 =======
                 @include('Template::user.short.view.video_item', ['short' => $short])
 >>>>>>> main
+=======
+                @include('Template::user.short.view.video_item', ['short' => $short])
+>>>>>>> c6d46051200d062442e0e1b33211ab488d80b241
             @empty
                 <x-empty-message message="No short found" />
             @endforelse
@@ -278,6 +282,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
 <<<<<<< HEAD
+<<<<<<< HEAD
             <form id="sendStarsForm" class="no-submit-loader" method="POST"
                 action="{{ route('user.star.transaction.send') }}>
                 @csrf
@@ -286,6 +291,8 @@
                 <h5 class="modal-title">@lang('Send Stars')</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 =======
+=======
+>>>>>>> c6d46051200d062442e0e1b33211ab488d80b241
             <form id="sendStarsForm" class="no-submit-loader" method="POST" action="{{ route('user.star.transaction.send') }}">
                 @csrf
                 <div class="modal-header">
@@ -307,7 +314,10 @@
                     <button type="submit" class="btn btn--primary">@lang('Send')</button>
                 </div>
             </form>
+<<<<<<< HEAD
 >>>>>>> main
+=======
+>>>>>>> c6d46051200d062442e0e1b33211ab488d80b241
         </div>
     </div>
 </div>
@@ -324,14 +334,20 @@
                 }
             })
 <<<<<<< HEAD
+<<<<<<< HEAD
             $(document).ready(function() {
                 let currentPage = 1;
 =======
+=======
+>>>>>>> c6d46051200d062442e0e1b33211ab488d80b241
 
             $(document).ready(function () {
 
 
+<<<<<<< HEAD
 >>>>>>> main
+=======
+>>>>>>> c6d46051200d062442e0e1b33211ab488d80b241
                 let isLoading = false;
 
                 const $slider = $('.shorts-video_sliders');
@@ -556,6 +572,7 @@
                             if (response.success) {
                                 var shortId = $('.short-id').val();
 <<<<<<< HEAD
+<<<<<<< HEAD
                                 var $videoItem = $('.video-item').find(
                                     `[data-short-id="${shortId}"]`).closest(
                                     '.video-item');
@@ -565,6 +582,10 @@
                                 var $videoItem = $('.video-item').find(`[data-short-id="${shortId}"]`).closest('.video-item');
                                 var $commentCountElement = $videoItem.find('.button-comment .comment-count');
 >>>>>>> main
+=======
+                                var $videoItem = $('.video-item').find(`[data-short-id="${shortId}"]`).closest('.video-item');
+                                var $commentCountElement = $videoItem.find('.button-comment .comment-count');
+>>>>>>> c6d46051200d062442e0e1b33211ab488d80b241
                                 $commentCountElement.text(response.comment_count);
                                 $('.comment-form').trigger('reset');
                                 $('.comments-container').prepend(response.html);
@@ -811,12 +832,16 @@
                             platform: platform
                         },
 <<<<<<< HEAD
+<<<<<<< HEAD
                         success: function(response) {
                             console.log("Server response:", response);
 
 =======
                         success: function (response) {
 >>>>>>> main
+=======
+                        success: function (response) {
+>>>>>>> c6d46051200d062442e0e1b33211ab488d80b241
                             if (response.data.success) {
                                 var shortUrl = response.data.share_url;
                                 var shareText = 'Check out this video! ' + shortUrl;
