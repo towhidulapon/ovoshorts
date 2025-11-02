@@ -235,8 +235,8 @@
                     else $(this).slick('slickNext');
                 });
 
-                function initPlyr($container = $(document)) {
-                    $container.find('.video-player').each(function () {
+                function initPlyr() {
+                    $('.video-player').each(function () {
                         if (!$(this).data('plyr-initialized')) {
                             const player = new Plyr(this);
                             $(this).data('plyr-initialized', true);
