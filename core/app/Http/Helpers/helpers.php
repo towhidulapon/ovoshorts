@@ -659,35 +659,46 @@ function supportedThousandSeparator(): array
         "none"  => "None",
     ];
 }
+
 function getS3FileUri($fileName)
 {
-    $wasabi = StorageSetting::where('alias', 'wasabi')->first();
+    static $wasabi     = null;
+    static $s3Client   = null;
+    static $bucketName = null;
 
-    if (!$wasabi || !isset($wasabi->parameters)) {
-        return null;
+    if ($wasabi === null) {
+        $wasabi = StorageSetting::where('alias', 'wasabi')->first();
+
+        if (!$wasabi || !isset($wasabi->parameters)) {
+            return null;
+        }
+
+        $config = $wasabi->parameters;
+
+        $accessKey  = $config->key->value ?? null;
+        $secretKey  = $config->secret->value ?? null;
+        $bucketName = $config->bucket->value ?? null;
+        $region     = $config->region->value ?? null;
+        $endpoint   = $config->endpoint->value ?? null;
+
+        if (!$accessKey || !$secretKey || !$bucketName || !$endpoint) {
+            return null;
+        }
+
+        $credentials = new Credentials($accessKey, $secretKey);
+
+        $s3Client = new S3Client([
+            'version'                 => 'latest',
+            'region'                  => $region,
+            'endpoint'                => $endpoint,
+            'credentials'             => $credentials,
+            'use_path_style_endpoint' => true,
+        ]);
     }
 
-    $config = $wasabi->parameters;
-
-    $accessKey  = $config->key->value ?? null;
-    $secretKey  = $config->secret->value ?? null;
-    $bucketName = $config->bucket->value ?? null;
-    $region     = $config->region->value;
-    $endpoint   = $config->endpoint->value;
-
-    if (!$accessKey || !$secretKey || !$bucketName || !$endpoint) {
+    if (!$s3Client || !$bucketName) {
         return null;
     }
-
-    $credentials = new Credentials($accessKey, $secretKey);
-
-    $s3Client = new S3Client([
-        'version'                 => 'latest',
-        'region'                  => $region,
-        'endpoint'                => $endpoint,
-        'credentials'             => $credentials,
-        'use_path_style_endpoint' => true,
-    ]);
 
     $objectKey = 'shorts/' . $fileName;
 
@@ -702,8 +713,53 @@ function getS3FileUri($fileName)
     } catch (Exception $ex) {
         return null;
     }
-
 }
+
+// function getS3FileUri($fileName)
+// {
+//     $wasabi = StorageSetting::where('alias', 'wasabi')->first();
+
+//     if (!$wasabi || !isset($wasabi->parameters)) {
+//         return null;
+//     }
+
+//     $config = $wasabi->parameters;
+
+//     $accessKey  = $config->key->value ?? null;
+//     $secretKey  = $config->secret->value ?? null;
+//     $bucketName = $config->bucket->value ?? null;
+//     $region     = $config->region->value;
+//     $endpoint   = $config->endpoint->value;
+
+//     if (!$accessKey || !$secretKey || !$bucketName || !$endpoint) {
+//         return null;
+//     }
+
+//     $credentials = new Credentials($accessKey, $secretKey);
+
+//     $s3Client = new S3Client([
+//         'version'                 => 'latest',
+//         'region'                  => $region,
+//         'endpoint'                => $endpoint,
+//         'credentials'             => $credentials,
+//         'use_path_style_endpoint' => true,
+//     ]);
+
+//     $objectKey = 'shorts/' . $fileName;
+
+//     try {
+//         $command = $s3Client->getCommand('GetObject', [
+//             'Bucket' => $bucketName,
+//             'Key'    => $objectKey,
+//         ]);
+
+//         $request = $s3Client->createPresignedRequest($command, '+1 hour');
+//         return (string) $request->getUri();
+//     } catch (Exception $ex) {
+//         return null;
+//     }
+
+// }
 
 if (!function_exists('s3Client')) {
     function s3Client($storage)
@@ -737,7 +793,6 @@ if (!function_exists('getFileUrl')) {
                 ]);
                 $expiry           = '+5 hours';
                 $presignedRequest = s3Client($storage)->createPresignedRequest($command, $expiry);
-                \Log::info($presignedRequest);
                 return (string) $presignedRequest->getUri();
             } elseif ($storage->alias == 'ftp') {
                 return @$storage->parameters->host->value . "/" . $file;
@@ -747,13 +802,13 @@ if (!function_exists('getFileUrl')) {
     }
 }
 
-if (!function_exists('getShortVideoUrl')) {
-    function getShortVideoUrl($file, $storageId)
-    {
-        $storage = StorageSetting::find($storageId);
-        return getFileUrl($file, $storage, 'shorts');
-    }
-}
+// if (!function_exists('getShortVideoUrl')) {
+//     function getShortVideoUrl($file, $storageId)
+//     {
+//         $storage = StorageSetting::find($storageId);
+//         return getFileUrl($file, $storage, 'shorts');
+//     }
+// }
 
 function showFormatCount($num)
 {
@@ -775,7 +830,33 @@ function formatPlayTime($seconds)
     return sprintf('%dh:%02dm:%02ds', $hours, $minutes, $seconds);
 }
 
-function prepareShortData($short)
+// function prepareShortData($short)
+// {
+//     if ($short->storage_driver === 'wasabi') {
+//         $short->fileUrl = getS3FileUri($short->name);
+//     } elseif ($short->storage_driver === 'local') {
+//         $short->fileUrl = asset(getFilePath('shorts') . '/' . $short->name);
+//     } else {
+//         $short->fileUrl = route('short.file', $short->name);
+//     }
+
+//     $short->extension = pathinfo($short->name, PATHINFO_EXTENSION);
+
+//     $short->is_liked = auth()->check() && UserReaction::where('shorts_id', $short->id)
+//         ->where('user_id', auth()->id())
+//         ->exists();
+
+//     $escapedDescription = e($short->description);
+//     $short->description = preg_replace(
+//         '/#(\w+)/',
+//         '<a href="' . url('/$1') . '" class="hashtag"><strong>#$1</strong></a>',
+//         $escapedDescription
+//     );
+
+//     return $short;
+// }
+
+function prepareShortData($short, $userReactions = [])
 {
     if ($short->storage_driver === 'wasabi') {
         $short->fileUrl = getS3FileUri($short->name);
@@ -787,11 +868,9 @@ function prepareShortData($short)
 
     $short->extension = pathinfo($short->name, PATHINFO_EXTENSION);
 
-    $short->is_liked = auth()->check() && UserReaction::where('shorts_id', $short->id)
-        ->where('user_id', auth()->id())
-        ->exists();
+    $short->is_liked = in_array($short->id, $userReactions);
 
-    $escapedDescription      = e($short->description);
+    $escapedDescription = e($short->description);
     $short->description = preg_replace(
         '/#(\w+)/',
         '<a href="' . url('/$1') . '" class="hashtag"><strong>#$1</strong></a>',
@@ -801,9 +880,10 @@ function prepareShortData($short)
     return $short;
 }
 
+
 function userReferralCommission($user, $amount)
 {
-    $referrer       = User::active()->find($user->ref_by);
+    $referrer           = User::active()->find($user->ref_by);
     $referralPercentage = gs('referral_commission');
 
     if (!$referrer || $referralPercentage <= 0) {

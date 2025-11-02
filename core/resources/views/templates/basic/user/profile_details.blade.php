@@ -86,10 +86,10 @@
 
                 <div class="tab-content" id="pills-tabContent">
                     @foreach ([
-            'home' => $shorts,
-            'profile' => $favShorts,
-            'contact' => $likedShorts,
-        ] as $tab => $collection)
+                                'home' => $shorts,
+                                'profile' => $favShorts,
+                                'contact' => $likedShorts,
+                            ] as $tab => $collection)
                         <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="pills-{{ $tab }}"
                             role="tabpanel">
                             @include('Template::user.tab_content', compact('collection', 'tab'))

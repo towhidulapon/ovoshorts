@@ -14,17 +14,17 @@
                 @endif
             </div>
             <form action="{{ route('short.search', 'index') }}" method="GET">
-            <div class="sidebar-search">
-                <div class="input-group-custom">
-                    <span class="input-group-custom__icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M11.5 2C16.75 2 21 6.25 21 11.5C21 16.75 16.75 21 11.5 21C6.25 21 2 16.75 2 11.5C2 7.8 4.11 4.6 7.2 3.03" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M22 22L20 20" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </span>
-                    <input class="input-group-custom__input form-control form--control" type="search" name="search" value="{{ request()->search }}" placeholder="@lang('Search')">
+                <div class="sidebar-search">
+                    <div class="input-group-custom">
+                        <span class="input-group-custom__icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M11.5 2C16.75 2 21 6.25 21 11.5C21 16.75 16.75 21 11.5 21C6.25 21 2 16.75 2 11.5C2 7.8 4.11 4.6 7.2 3.03" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M22 22L20 20" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </span>
+                        <input class="input-group-custom__input form-control form--control" type="search" name="search" value="{{ request()->search }}" placeholder="@lang('Search')">
+                    </div>
                 </div>
-            </div>
             </form>
 
             <ul class="sidebar-menu-list">
@@ -118,7 +118,7 @@
                         <li class="sidebar-menu-list__profile sidebar-menu-list__item">
                             <a href="{{ route('user.profile.details') }}" class="sidebar-menu-list__link">
                                 <div class="profile__thumb">
-                                    <img src="{{ getImage(getFilePath('userProfile') . '/' . auth()->user()->image, getFileSize('userProfile')) }}" class="user-img">
+                                    <img src="{{ auth()->user()->image ? getImage(getFilePath('userProfile') . '/' . auth()->user()->image, getFileSize('userProfile')) : asset('assets/images/avatar.jpg') }}" class="user-img" alt="img">
                                 </div>
                                 <h6 class="profile__content__title">
                                     {{ auth()->user()->username }}
@@ -128,26 +128,11 @@
                     </ul>
 
                     @php
-    $followings = auth()->user()->followings()->take(5)->get();
+                        $followings = auth()->user()->followings()->take(5)->get();
                     @endphp
 
-                    <div class="sidebar-menu__following">
-                        <span class="sidebar-menu__following__title fs-14 fw-700 mb-3">
-                            @lang('Following Accounts')
-                        </span>
-                        @foreach ($followings as $following)
-                            <a href="{{ route('user.profile', $following->username) }}" class="following__author">
-                                <div class="following__thumb">
-                                    <img class="fit-image" src="{{ getImage(getFilePath('userProfile') . '/' . $following->image, getFileSize('userProfile')) }}" alt="author">
-                                </div>
-                                <div class="following__content">
-                                    <h6 class="following__content__title">
-                                        {{ $following->firstname }}
-                                    </h6>
-                                    <span class="following__content__meta">{{ $following->username }}</span>
-                                </div>
-                            </a>
-                        @endforeach
+                    <div class="sidebar-menu__following sidebar-following-container">
+                        @include('Template::partials.sidebar_followings')
                     </div>
                 @endif
         </div>
@@ -168,7 +153,7 @@
                     @foreach ($groupedNotifications['today'] as $notification)
                         <div class="notification-item">
                             @if ($notification['type'] !== 'follower')
-                            <a href="{{ route('user.short.view', $notification['short']->id) }}" class="notification-item__link"></a>
+                                <a href="{{ route('user.short.view', $notification['short']->id) }}" class="notification-item__link"></a>
                             @endif
                             <div class="notification-item__left">
                                 <div class="notification-item__thumb">
@@ -176,7 +161,7 @@
                                 </div>
                                 <div class="notification-item__content">
                                     <a href="{{ route('user.profile', $notification['user']->username) }}">
-                                    <h6 class="name">{{ $notification['user']->username }}</h6>
+                                        <h6 class="name">{{ $notification['user']->username }}</h6>
                                     </a>
 
                                     <span class="desc">
@@ -196,11 +181,11 @@
                                 </div>
                             </div>
                             @if ($notification['type'] !== 'follower')
-                            <div class="notification-item__right">
-                                <div class="thumb">
-                                    <img src="{{ getImage(getFilePath('coverImage') . '/' . $notification['short']->cover_image) }}" alt="img">
+                                <div class="notification-item__right">
+                                    <div class="thumb">
+                                        <img src="{{ getImage(getFilePath('coverImage') . '/' . $notification['short']->cover_image) }}" alt="img">
+                                    </div>
                                 </div>
-                            </div>
                             @endif
                         </div>
                     @endforeach
@@ -210,8 +195,8 @@
                     <span class="sidebar-left__title">@lang('Yesterday')</span>
                     @foreach ($groupedNotifications['yesterday'] as $notification)
                         <div class="notification-item">
-                             @if ($notification['type'] !== 'follower')
-                            <a href="{{ route('user.short.view', $notification['short']->id) }}" class="notification-item__link"></a>
+                            @if ($notification['type'] !== 'follower')
+                                <a href="{{ route('user.short.view', $notification['short']->id) }}" class="notification-item__link"></a>
                             @endif
                             <div class="notification-item__left">
                                 <div class="notification-item__thumb">
@@ -219,7 +204,7 @@
                                 </div>
                                 <div class="notification-item__content">
                                     <a href="{{ route('user.profile', $notification['user']->username) }}">
-                                    <h6 class="name">{{ $notification['user']->username }}</h6>
+                                        <h6 class="name">{{ $notification['user']->username }}</h6>
                                     </a>
 
                                     <span class="desc">
@@ -254,7 +239,7 @@
                     @foreach ($groupedNotifications['this_month'] as $notification)
                         <div class="notification-item">
                             @if ($notification['type'] !== 'follower')
-                            <a href="{{ route('user.short.view', $notification['short']->id) }}" class="notification-item__link"></a>
+                                <a href="{{ route('user.short.view', $notification['short']->id) }}" class="notification-item__link"></a>
                             @endif
                             <div class="notification-item__left">
                                 <div class="notification-item__thumb">
@@ -262,7 +247,7 @@
                                 </div>
                                 <div class="notification-item__content">
                                     <a href="{{ route('user.profile', $notification['user']->username) }}">
-                                    <h6 class="name">{{ $notification['user']->username }}</h6>
+                                        <h6 class="name">{{ $notification['user']->username }}</h6>
                                     </a>
                                     <span class="desc">
                                         @if ($notification['type'] === 'like')
@@ -281,22 +266,22 @@
                                 </div>
                             </div>
                             @if ($notification['type'] !== 'follower')
-                            <div class="notification-item__right">
-                                <div class="thumb">
-                                    <img src="{{ getImage(getFilePath('coverImage') . '/' . $notification['short']->cover_image) }}" alt="img">
+                                <div class="notification-item__right">
+                                    <div class="thumb">
+                                        <img src="{{ getImage(getFilePath('coverImage') . '/' . $notification['short']->cover_image) }}" alt="img">
+                                    </div>
                                 </div>
-                            </div>
                             @endif
                         </div>
                     @endforeach
                 @endif
 
                 @if (
-    $groupedNotifications['today']->isEmpty() &&
-    $groupedNotifications['yesterday']->isEmpty() &&
-    $groupedNotifications['this_month']->isEmpty()
-)
-                    <p>@lang('No notifications found')</p>
+                        $groupedNotifications['today']->isEmpty() &&
+                        $groupedNotifications['yesterday']->isEmpty() &&
+                        $groupedNotifications['this_month']->isEmpty()
+                    )
+                        <p>@lang('No notifications found')</p>
                 @endif
             </div>
         </div>
