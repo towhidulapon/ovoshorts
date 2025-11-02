@@ -3,7 +3,7 @@
 
     <div class="dashboard-body">
         <div class="dashboard-body__bar d-lg-none d-block">
-            <span class="dashboard-body__bar-icon"><i class="fas fa-bars"></i></span>
+            <span class="dashboard-body__bar-icon mb-4"><i class="fas fa-bars"></i></span>
         </div>
         <div class="dashboard-action-header flex-wrap gap-2 mb-4">
             <h5 class="card-header__title mb-0 text-white flex-align gap-2">@lang('Your top posts')<span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Tooltip on top">
@@ -16,7 +16,7 @@
             </h5>
         </div>
 
-        <div class="card custom--card ">
+        <div class="card custom--card">
             <div class="card-header">
                 <div class="post__menu">
                     <a href="#" class="post__menu-btn active" data-sort="views">@lang('Most Views')</a>

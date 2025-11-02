@@ -191,7 +191,7 @@
                                             </label>
                                         </div>
                                         <div class="schedule-datetime d-none mt-2">
-                                            <input type="text" class="form-control schedule-input" name="schedule_time" placeholder="Select date & time">
+                                            <input type="text" class="form-control form--control schedule-input" name="schedule_time" placeholder="Select date & time">
                                         </div>
                                     </div>
                                 @endif
@@ -219,7 +219,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="video-edit-user">
+                                <div class="video-edit-user mb-0">
                                     <h6 class="video-edit-location__title">
                                         @lang('Allow users to'):
                                     </h6>
