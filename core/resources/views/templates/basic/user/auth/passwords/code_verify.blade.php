@@ -8,7 +8,7 @@
             <div class="container">
                 <div class="row gy-4 align-items-center justify-content-center">
                     <div class="account-form__wrapper d-flex justify-content-center pb-4">
-                        <div class="account-form col-6">
+                        <div class="account-form login-form">
                             <h3 class="mt-4 text-center">@lang('Verify Email Address')</h3>
                             <div class="login-form__wrapper">
                                 <form action="{{ route('user.password.verify.code') }}" method="POST" class="submit-form">

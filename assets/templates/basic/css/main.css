@@ -226,11 +226,16 @@
   /* Shadow Variables */
   --box-shadow: 0px 2px 15px hsl(var(--black) / 0.05);
   /* Gradient Variable */
+  --gradient: linear-gradient(90deg,
+      hsl(var(--base-two)) -177.5%,
+      hsl(var(--base)) 64.5%);
+
   --gradient: linear-gradient(
     90deg,
     hsl(var(--base-two)) -177.5%,
     hsl(var(--base)) 64.5%
   );
+
 }
 
 
@@ -8968,7 +8973,6 @@ body:has(.mobile-bottom-menu) {
 .account-form {
   background: rgba(14, 14, 14, 0.8);
   border-radius: 20px;
-  overflow: hidden;
   border: 1px solid hsl(var(--base-two) / 0.5);
 }
 
@@ -9133,6 +9137,7 @@ body:has(.mobile-bottom-menu) {
   padding: 15px;
   text-align: center;
   background-color: hsl(var(--bg-one));
+  border-radius: 0px 0px 20px 20px !important;
 }
 
 .have-account__text {
