@@ -74,7 +74,8 @@ class SiteController extends Controller
 
     public function loadMoreShorts(Request $request)
     {
-        $shorts = Short::with('user', 'comments.user', 'comments.replies.user')
+        $following = auth()->check() ? auth()->user()->followings->pluck('id')->toArray() : [];
+        $shorts    = Short::with('user', 'comments.user', 'comments.replies.user')
             ->approved()
             ->published()
             ->publicShort()
@@ -92,8 +93,13 @@ class SiteController extends Controller
             ->paginate(getPaginate(5), ['*'], 'page', $request->page);
 
         $html = '';
+
+        $shorts->getCollection()->transform(function ($short) {
+            return prepareShortData($short);
+        });
+
         foreach ($shorts as $short) {
-            $html .= view('Template::user.short.view.video_item', ['short' => $short])->render();
+            $html .= view('Template::user.short.view.video_item', ['short' => $short, 'following' => $following])->render();
         }
 
         return response()->json([
@@ -521,6 +527,7 @@ class SiteController extends Controller
 
         $query = Short::query()
             ->with('user', 'likes')
+            ->approved()
             ->published()
             ->publicShort()
             ->where(function ($query) {
