@@ -165,6 +165,7 @@ class ProfileController extends Controller {
     private function baseQuery() {
         return Short::query()
             ->with('likes', 'user')
+            ->approved()
             ->published()
             ->where(function ($query) {
                 $query->where('storage_driver', 'local')

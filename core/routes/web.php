@@ -38,14 +38,14 @@ Route::controller('SiteController')->group(function () {
 
     Route::get('user/details/{username?}', 'userProfile')->name('user.profile');
     Route::get('user/{username}/shorts', 'userProfileShorts')->name('user.profile.shorts');
+    Route::get('/load-more-shorts',  'loadMoreShorts')->name('load.more.shorts');
 
     Route::get('/search/{index}', 'search')->name('short.search');
-    Route::get('/{hashtag}', 'hashtag')->name('short.hashtag');
+    Route::get('/short/{hashtag}', 'hashtag')->name('short.hashtag');
 
     Route::get('/{slug}', 'pages')->name('pages');
     Route::get('/', 'index')->name('home');
 
-    Route::get('/load-more-shorts',  'loadMoreShorts')->name('load.more.shorts');
 
     Route::get('user/shorts/get',  'getShorts')->name('user.shorts.get');
     Route::get('/get/stars', 'getStars')->name('get.stars');
