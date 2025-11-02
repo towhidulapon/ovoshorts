@@ -90,7 +90,7 @@ class GlobalVariablesServiceProvider extends ServiceProvider
         //     }
         // });
 
-        View()->composer(['Template::home', 'Template::user.short.explore', 'Template::user.friend.*', 'Template::user.message.index', 'Template::user.profile_details'], function ($view) {
+        View()->composer(['Template::home', 'Template::user.short.explore', 'Template::user.friend.*', 'Template::user.message.index', 'Template::user.profile_details', 'Template::user.short.hashtag'], function ($view) {
             if (auth()->check()) {
                 $user         = auth()->user();
                 $userShortIds = Short::where('user_id', $user->id)->pluck('id');

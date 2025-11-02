@@ -178,10 +178,10 @@
         });
 
         $(".has-sidebar").on("click", function () {
-            $(".sidebar-menu").toggleClass("show-sm").removeClass('show');
+            $(".sidebar-menu").toggleClass("show-sm").removeClass('show-sm');
         });
         $(".sidebar_left-close").on("click", function () {
-            $(".sidebar-menu").removeClass("show-sm").addClass('show');
+            $(".sidebar-menu").removeClass("show-sm").addClass('show-sm');
         });
         // Body click to close sidebar if open
 
@@ -208,6 +208,10 @@
         $(".body-overlay, .sidebar-menu__close").on("click", function () {
             $(".body-overlay").removeClass("show");
             $(".comment__details").removeClass("show");
+        });
+
+        $('.showFilterBtn').on('click', function () {
+            $('.responsive-filter-card').toggleClass('show');
         });
 
 
@@ -257,8 +261,8 @@
             $(".dashboard-sidebar-submenu").slideUp(200);
             if (
                 $(this)
-                .parent()
-                .hasClass("active")
+                    .parent()
+                    .hasClass("active")
             ) {
                 $(".has-dropdown").removeClass("active");
                 $(this)

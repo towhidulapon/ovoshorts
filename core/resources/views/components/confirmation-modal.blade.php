@@ -1,11 +1,11 @@
 @props(['isFrontend' => false])
 
-<div id="confirmationModal" class="modal @if($isFrontend) custom--modal @endif fade" tabindex="-1" role="dialog" data-bs-backdrop="static" data-bs-keyboard="false">
+<div id="confirmationModal" class="modal custom--modal @if($isFrontend)  @endif fade" tabindex="-1" role="dialog" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <form method="POST">
                 @csrf
-                <div class="modal-body  py-4 px-5">
+                <div class="modal-body">
                     <div class="text-center mb-4">
                         <h1 class=" text--warning mb-0"><i class="la la-warning"></i></h1>
                         <h4 class="mb-2 text--warning">@lang('Please Confirm!')</h4>

@@ -75,10 +75,10 @@
                             <form method="POST" class="send__msg no-submit-loader" enctype="multipart/form-data"
                                 id="messageForm">
                                 @csrf
+                                <div class="image-preview-container d-none mb-2"></div>
                                 <div class="d-flex gap-2 align-center">
                                     <div class="input-group position-relative">
 
-                                        <div class="image-preview-container d-none mb-2"></div>
 
                                         <input id="message" class="form--control" name="message"
                                             placeholder="@lang('Type your message here ...')" />
@@ -177,8 +177,6 @@
         }
 
         .previewImg {
-            max-height: 40px;
-            max-width: 100px;
             object-fit: cover;
             border-radius: 4px;
             padding: 5px;
