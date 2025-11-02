@@ -52,7 +52,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <hr>
                                             <div class="deposit-info">
                                                 <div class="deposit-info__title">
                                                     <p class="text has-icon"> @lang('Limit')</p>

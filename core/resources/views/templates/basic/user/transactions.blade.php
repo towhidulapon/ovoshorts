@@ -1,6 +1,6 @@
 @extends($activeTemplate.'layouts.dashboard_frontend')
 @section('content')
-<div class="py-lg-5 py-sm-4 py-3">
+<div class="dashboard-body">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-12">
@@ -40,8 +40,7 @@
                     </div>
                 </div>
                 <div class="card custom--card">
-                    <div class="card-body p-0">
-                        <div class="dashboard-table">
+                    <div class="card-body">
                             <table class="table table--responsive--xl">
                                 <thead>
                                     <tr>
@@ -85,7 +84,6 @@
                                 @endforelse
                                 </tbody>
                             </table>
-                        </div>
                     </div>
                     @if($transactions->hasPages())
                     <div class="card-footer">
@@ -106,11 +104,5 @@
             width: 100% !important;
         }
 
-        .trx-form .form--control {
-            padding: 11.5px 20px;
-        }
-        .trx-form select.form--control {
-            padding: 16px 20px;
-        }
     </style>
 @endpush

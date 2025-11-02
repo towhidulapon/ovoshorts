@@ -1,6 +1,3 @@
-<div class="dashboard-body__bar d-lg-none d-block">
-    <span class="dashboard-body__bar-icon"><i class="fas fa-bars"></i></span>
-</div>
 
 <div class="video-studio__profile mb-4">
     <div class="video-studio__profile__thumb">
