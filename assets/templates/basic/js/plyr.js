@@ -2313,13 +2313,7 @@
           "play",
           "progress",
           "current-time",
-          "mute",
-          "volume",
-          "captions",
-          "settings",
-          "pip",
           "airplay",
-          "fullscreen",
         ],
         settings: ["captions", "quality", "speed"],
         i18n: {

@@ -226,24 +226,17 @@
   /* Shadow Variables */
   --box-shadow: 0px 2px 15px hsl(var(--black) / 0.05);
   /* Gradient Variable */
-<<<<<<< HEAD
-<<<<<<< HEAD
+
   --gradient: linear-gradient(90deg,
       hsl(var(--base-two)) -177.5%,
       hsl(var(--base)) 64.5%);
 
-=======
-=======
->>>>>>> c6d46051200d062442e0e1b33211ab488d80b241
   --gradient: linear-gradient(
     90deg,
     hsl(var(--base-two)) -177.5%,
     hsl(var(--base)) 64.5%
   );
-<<<<<<< HEAD
->>>>>>> main
-=======
->>>>>>> c6d46051200d062442e0e1b33211ab488d80b241
+
 }
 
 
