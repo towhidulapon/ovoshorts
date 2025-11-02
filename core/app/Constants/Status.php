@@ -64,6 +64,9 @@ class Status
     const VERIFICATION_PENDING    = 2;
     const VERIFICATION_REJECTED   = 3;
 
+    const NOW   = 1;
+    const LATER = 2;
+
     const FREE = 1;
     const PAID = 2;
 

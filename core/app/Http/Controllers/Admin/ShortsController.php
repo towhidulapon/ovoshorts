@@ -152,7 +152,7 @@ class ShortsController extends Controller
     public function details($id)
     {
         $pageTitle = 'Short Detail';
-        $short     = Short::with(['user', 'storage'])->findOrFail($id);
+        $short     = Short::with(['user', 'storage', 'category'])->findOrFail($id);
         $filename  = $short->name;
 
         try {

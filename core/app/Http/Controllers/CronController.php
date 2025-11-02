@@ -66,7 +66,7 @@ class CronController extends Controller {
 
     public function fetchSchedule() {
         $shorts = Short::where('status', Status::SCHEDULE)
-            ->where('is_approved', Status::SHORT_APPROVE)
+            ->approved()
             ->where('post_at', '<=', now())
             ->get();
 

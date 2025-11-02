@@ -105,13 +105,9 @@ Route::middleware('auth')->name('user.')->group(function () {
                 Route::post('delete-draft/{id?}', 'deleteDraft')->name('delete.draft');
             });
 
-            Route::controller('VideoProcessController')->prefix('video-process')->name('video.process.')->group(function () {
-                Route::post('/process', 'processVideo')->name('process');
-            });
-
             Route::controller('StarTransactionController')->prefix('star-transaction')->name('star.transaction.')->group(function () {
-                Route::post('/send-stars', 'sendStars')->name('send');
-                Route::post('/convert-to-balance', 'convertStarsToBalance')->name('convert');
+                Route::post('send-stars', 'sendStars')->name('send');
+                Route::post('convert-to-balance', 'convertStarsToBalance')->name('convert');
             });
 
             Route::controller('DashboardController')->prefix('dashboard')->name('dashboard.')->group(function () {
@@ -134,7 +130,7 @@ Route::middleware('auth')->name('user.')->group(function () {
                 Route::get('following-list', 'followingList')->name('following.list');
                 Route::get('followers/{id}', 'followers')->name('follower.all');
                 Route::get('following/{id}',  'followingUsers')->name('following.all');
-
+                Route::get('sidebar-followings', 'sidebarFollowingUsers')->name('sidebar.following');
             });
 
             Route::controller('ReactionController')->prefix('reaction')->name('reaction.')->group(function () {
@@ -143,25 +139,25 @@ Route::middleware('auth')->name('user.')->group(function () {
 
             Route::controller('CommentController')->prefix('comment')->name('comment.')->group(function () {
                 Route::post('/', 'store')->name('store');
-                Route::post('/reply/store', 'replyStore')->name('reply.store');
-                Route::post('/reaction', 'reaction')->name('reaction');
+                Route::post('reply/store', 'replyStore')->name('reply.store');
+                Route::post('reaction', 'reaction')->name('reaction');
             });
 
             Route::controller('SavedShortController')->prefix('saved')->name('saved.')->group(function () {
-                Route::post('/short', 'toggle')->name('short');
+                Route::post('short', 'toggle')->name('short');
             });
 
             Route::controller('StarController')->prefix('star')->name('star.')->group(function () {
-                Route::get('/recharge', 'rechargeIndex')->name('recharge');
-                Route::post('/store/info', 'storePaymentInfo')->name('store.info');
+                Route::get('recharge', 'rechargeIndex')->name('recharge');
+                Route::post('store/info', 'storePaymentInfo')->name('store.info');
             });
 
             Route::controller('VerificationController')->prefix('verification')->name('verification.')->group(function () {
                 Route::get('/', 'index')->name('index');
-                Route::get('/verification-data', 'verificationData')->name('data');
-                Route::post('/apply-verification', 'applyVerification')->name('apply');
-                Route::post('/purchase-verification', 'purchaseVerification')->name('purchase');
-                Route::post('/store-info', 'storePaymentInfo')->name('store.payment.info');
+                Route::get('verification-data', 'verificationData')->name('data');
+                Route::post('apply-verification', 'applyVerification')->name('apply');
+                Route::post('purchase-verification', 'purchaseVerification')->name('purchase');
+                Route::post('store-info', 'storePaymentInfo')->name('store.payment.info');
             });
 
             // Withdraw
