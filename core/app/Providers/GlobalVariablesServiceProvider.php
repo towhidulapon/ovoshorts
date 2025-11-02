@@ -78,7 +78,7 @@ class GlobalVariablesServiceProvider extends ServiceProvider
             ]);
         });
 
-        View()->composer([
+         View()->composer([
             'Template::home',
             'Template::user.short.explore',
             'Template::user.friend.*',
@@ -95,20 +95,9 @@ class GlobalVariablesServiceProvider extends ServiceProvider
                 ])->with('unreadNotifications', 0);
             }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-        View()->composer(['Template::home', 'Template::user.short.explore', 'Template::user.friend.*', 'Template::user.message.index', 'Template::user.profile_details', 'Template::user.short.hashtag'], function ($view) {
-            if (auth()->check()) {
-=======
             static $cached = null;
 
             if ($cached === null) {
->>>>>>> main
-=======
-            static $cached = null;
-
-            if ($cached === null) {
->>>>>>> c6d46051200d062442e0e1b33211ab488d80b241
                 $user         = auth()->user();
                 $userShortIds = Short::where('user_id', $user->id)->pluck('id');
 
@@ -190,6 +179,7 @@ class GlobalVariablesServiceProvider extends ServiceProvider
             $view->with('groupedNotifications', $cached['groupedNotifications'])
                 ->with('unreadNotifications', $cached['unreadNotifications']);
         });
+
 
         // View()->composer(['Template::home', 'Template::user.short.explore', 'Template::user.friend.*', 'Template::user.message.index', 'Template::user.profile_details'], function ($view) {
         //     if (auth()->check()) {

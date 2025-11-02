@@ -113,7 +113,7 @@
             bottom: calc(100% + 8px);
             background: hsl(var(--bg-one));
             box-shadow: 0 0 40px 0 rgba(29, 35, 58, .12);
-            border: 1px solid #ebebeb;
+            border: 1px solid hsl(var(--border-color));
             border-radius: 8px;
             padding: 15px;
             display: none;
