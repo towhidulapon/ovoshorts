@@ -78,7 +78,7 @@ class GlobalVariablesServiceProvider extends ServiceProvider
             ]);
         });
 
-        View()->composer([
+         View()->composer([
             'Template::home',
             'Template::user.short.explore',
             'Template::user.friend.*',
@@ -179,6 +179,7 @@ class GlobalVariablesServiceProvider extends ServiceProvider
             $view->with('groupedNotifications', $cached['groupedNotifications'])
                 ->with('unreadNotifications', $cached['unreadNotifications']);
         });
+
 
         // View()->composer(['Template::home', 'Template::user.short.explore', 'Template::user.friend.*', 'Template::user.message.index', 'Template::user.profile_details'], function ($view) {
         //     if (auth()->check()) {

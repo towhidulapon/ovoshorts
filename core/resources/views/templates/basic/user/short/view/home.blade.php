@@ -172,6 +172,7 @@
                     <button type="submit" class="btn btn--primary">@lang('Send')</button>
                 </div>
             </form>
+
         </div>
     </div>
 </div>
@@ -189,6 +190,7 @@
             })
 
             $(document).ready(function () {
+
                 let isLoading = false;
                 const $slider = $('.shorts-video_sliders');
                 const $arrows = $('.shorts-video_arrows');
@@ -495,6 +497,7 @@
                                 var shortId = $('.short-id').val();
                                 var $videoItem = $('.video-item').find(`[data-short-id="${shortId}"]`).closest('.video-item');
                                 var $commentCountElement = $videoItem.find('.button-comment .comment-count');
+
                                 $commentCountElement.text(response.comment_count);
                                 $('.comment-form').trigger('reset');
                                 $('.comments-container').prepend(response.html);
@@ -730,6 +733,7 @@
                             platform: platform
                         },
                         success: function (response) {
+
                             if (response.data.success) {
                                 var shortUrl = response.data.share_url;
                                 var shareText = 'Check out this video! ' + shortUrl;
