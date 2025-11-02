@@ -366,12 +366,7 @@
                     $('.comments-loading').addClass('d-none');
                 }
 
-<<<<<<< HEAD
                 $(document).on('click', ".like-btn", function (e) {
-=======
-
-                $(document).on('click', ".like-btn", function(e) {
->>>>>>> c6d46051200d062442e0e1b33211ab488d80b241
                     e.preventDefault();
                     if (!isLoggedIn) {
                         window.location.href = "{{ route('user.login') }}";
@@ -439,13 +434,9 @@
                     });
                 }
 
-<<<<<<< HEAD
 
                 $(document).on('click', '.comment-btn', function (e) {
                     e.preventDefault();
-=======
-                $('.button-comment').on('click', function() {
->>>>>>> c6d46051200d062442e0e1b33211ab488d80b241
                     var $button = $(this);
                     var shortId = $button.data('short-id')
 
@@ -463,15 +454,9 @@
                     loadComments(shortId);
                 });
 
-<<<<<<< HEAD
                 $('.common-action-close').on('click', function () {
                     $('.video-comment').removeClass('show');
                     $('.right-sidebar').removeClass('show');
-=======
-                $('.common-action-close').on('click', function() {
-                    $('.video-comment').removeClass('active');
-                    $('.right-sidebar').removeClass('active');
->>>>>>> c6d46051200d062442e0e1b33211ab488d80b241
                     $('.comments-container').empty();
                     currentShortId = null;
                     currentPage = 1;
@@ -490,12 +475,7 @@
                     }
                 });
 
-<<<<<<< HEAD
                 $('.comment-form').on('submit', function (e) {
-=======
-
-                $('.comment-form').on('submit', function(e) {
->>>>>>> c6d46051200d062442e0e1b33211ab488d80b241
                     e.preventDefault();
                     if (!isLoggedIn) {
                         window.location.href = "{{ route('user.login') }}";
@@ -562,11 +542,7 @@
                     });
                 });
 
-<<<<<<< HEAD
                 $(document).on('click', '.send-stars-btn', function () {
-=======
-                $('.send-stars-btn').on('click', function() {
->>>>>>> c6d46051200d062442e0e1b33211ab488d80b241
                     var receiverId = $(this).data('receiver-id');
                     var shortId = $(this).data('short-id');
 
@@ -774,7 +750,6 @@
                                         $('.referralURL').val(shortUrl).removeClass('d-none').select();
 
                                         if (navigator.clipboard) {
-<<<<<<< HEAD
                                             navigator.clipboard.writeText(shortUrl).then(function () {
                                                 notify('success', 'Link copied to clipboard!');
                                                 $('#shareModal').modal('hide');
@@ -782,22 +757,6 @@
                                             }, function (err) {
                                                 notify('error', 'Failed to copy link: ' + err);
                                             });
-=======
-                                            navigator.clipboard.writeText(shortUrl).then(
-                                                function() {
-                                                    notify('success',
-                                                        'Link copied to clipboard!');
-                                                    $('#shareModal').modal('hide');
-                                                    $('.referralURL').addClass(
-                                                        'd-none');
-                                                },
-                                                function(err) {
-                                                    notify('error',
-                                                        'Failed to copy link: ' +
-                                                        err);
-                                                }
-                                            );
->>>>>>> c6d46051200d062442e0e1b33211ab488d80b241
                                         } else {
                                             $('.referralURL').select();
                                             document.execCommand('copy');
@@ -813,63 +772,6 @@
                         }
                     });
                 });
-<<<<<<< HEAD
-=======
-
-
-                $('.video-player').each(function() {
-                    var $video = $(this);
-                    var shortId = $video.data('short-id');
-                    var $viewCountSpan = $video.closest('.video-item').find('.view-count');
-                    var playTime = 0;
-                    var lastSentTime = 0;
-
-                    $video.on('timeupdate', function() {
-                        playTime = $video[0].currentTime;
-
-                        if (Math.floor(playTime) % 5 === 0 && playTime > lastSentTime) {
-                            $.ajax({
-                                url: '{{ route('short.track.analytics', ':id') }}'
-                                    .replace(':id', shortId),
-                                type: 'POST',
-                                data: {
-                                    play_time: Math.floor(playTime - lastSentTime),
-                                    _token: '{{ csrf_token() }}'
-                                },
-                                success: function(response) {
-                                    if (response.success) {
-                                        lastSentTime = Math.floor(playTime);
-                                        console.log(
-                                            'Playtime recorded for short ID: ' +
-                                            shortId);
-                                    }
-                                }
-                            });
-                        }
-                    });
-
-                    $video.on('ended', function() {
-                        $.ajax({
-                            url: '{{ route('short.record.view') }}',
-                            type: 'POST',
-                            data: {
-                                shorts_id: shortId,
-                                _token: '{{ csrf_token() }}'
-                            },
-                            success: function(response) {
-                                if (response.success) {
-                                    $viewCountSpan.text(response.views_count);
-                                }
-                            }
-                        });
-                    });
-
-                    $video.on('pause', function() {
-                        playTime = 0;
-                        lastSentTime = 0;
-                    });
-                });
->>>>>>> c6d46051200d062442e0e1b33211ab488d80b241
             });
         })(jQuery);
     </script>
