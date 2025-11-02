@@ -1,14 +1,14 @@
 @extends($activeTemplate . 'layouts.dashboard_frontend')
 @section('content')
     <div class="dashboard-body">
-        <div class="dashboard-body__bar d-lg-none d-block">
+        <div class="dashboard-body__bar d-lg-none d-block mb-3">
             <span class="dashboard-body__bar-icon"><i class="fas fa-bars"></i></span>
         </div>
 
         <div class="post-react mb-4">
             <div class="post-react__left">
                 <div class="post-react__thumb">
-                    <img src="{{ getImage(getFilePath('coverImage') . '/' . $short->cover_image, getFileSize('coverImage')) }}" alt="img">
+                    <img class="fit-image" src="{{ getImage(getFilePath('coverImage') . '/' . $short->cover_image, getFileSize('coverImage')) }}" alt="img">
                 </div>
                 <div class="post-react__content">
                     <h6 class="title">{{ __(strLimit($short->description, 20)) }}</h6>

@@ -145,17 +145,12 @@ if ($image) {
         }
 
         .image-upload__thumb {
-            max-width: 80%;
-            max-height: 80%;
             text-align: center
         }
 
 
         @media screen and (max-width: 575px) {
-            .image-upload__thumb {
-                max-width: 70%;
-                max-height: 70%;
-            }
+           
 
             .image-upload__content .uploade-message {
                 font-size: 0.8125rem;

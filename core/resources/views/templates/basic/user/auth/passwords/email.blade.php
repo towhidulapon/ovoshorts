@@ -10,7 +10,7 @@
             <div class="container">
                 <div class="row gy-4 align-items-center justify-content-center">
                     <div class="account-form__wrapper d-flex justify-content-center pb-4">
-                        <div class="account-form col-6">
+                        <div class="account-form">
                             <h3 class="mt-4 text-center">@lang('Recover Account')</h3>
                             <div class="login-form__wrapper">
                                 <form method="POST" action="{{ route('user.password.email') }}" class="verify-gcaptcha">
