@@ -1,7 +1,8 @@
 <div class="video__wrapper">
     <div class="video__wrapper-slider">
-        <div class="shorts-video_sliders">
+        <div class="shorts-video_sliders video-slider">
             @forelse ($shorts as $short)
+<<<<<<< HEAD
                 <div class="video-item">
                     <div class="video-item-wrapper">
                         <video class="video-player" playsinline preload="metadata"
@@ -125,12 +126,26 @@
                         </div>
                     </div>
                 </div>
+=======
+                @include('Template::user.short.view.video_item', ['short' => $short])
+>>>>>>> main
             @empty
                 <x-empty-message message="No short found" />
             @endforelse
         </div>
     </div>
+
+    <div class="shorts-loading text-center py-4 d-none">
+        <div class="spinner-border text-light" role="status">
+            <span class="visually-hidden">@lang('Loading...')</span>
+        </div>
+    </div>
+
     <div class="shorts-video_arrows"></div>
+
+    <input type="hidden" id="next-page" value="2">
+    <input type="hidden" id="has-more" value="{{ $hasMorePages ? '1' : '0' }}">
+
 </div>
 <div class="video-comment">
     <div class="right-sidebar">
@@ -262,6 +277,7 @@
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
+<<<<<<< HEAD
             <form id="sendStarsForm" class="no-submit-loader" method="POST"
                 action="{{ route('user.star.transaction.send') }}>
                 @csrf
@@ -269,24 +285,31 @@
                 modal-header">
                 <h5 class="modal-title">@lang('Send Stars')</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+=======
+            <form id="sendStarsForm" class="no-submit-loader" method="POST" action="{{ route('user.star.transaction.send') }}">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title">@lang('Send Stars')</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="receiver_id" id="receiverId">
+                    <input type="hidden" name="shorts_id" id="shortId">
+                    <div class="mb-3">
+                        <label>@lang('Number of Stars')</label>
+                        <input type="number" class="form-control form--control" name="stars" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="available-stars">@lang('Stars Available:') {{ auth()?->user()?->stars }}</h6>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn--primary">@lang('Send')</button>
+                </div>
+            </form>
+>>>>>>> main
         </div>
-        <div class="modal-body">
-            <input type="hidden" name="receiver_id" id="receiverId">
-            <input type="hidden" name="shorts_id" id="shortId">
-            <div class="mb-3">
-                <label>@lang('Number of Stars')</label>
-                <input type="number" class="form-control form--control" name="stars" min="1" required>
-            </div>
-            <div class="mb-3">
-                <h6 class="available-stars">@lang('Stars Available:') {{ auth()?->user()?->stars }}</h6>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button type="submit" class="btn btn--primary">@lang('Send')</button>
-        </div>
-        </form>
     </div>
-</div>
 </div>
 
 @push('script')
@@ -294,14 +317,97 @@
         (function($) {
             "use strict";
             const isLoggedIn = {{ auth()->check() ? 'true' : 'false' }};
+            const loadMoreUrl = "{{ route('load.more.shorts') }}";
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             })
+<<<<<<< HEAD
             $(document).ready(function() {
                 let currentPage = 1;
+=======
+
+            $(document).ready(function () {
+
+
+>>>>>>> main
                 let isLoading = false;
+
+                const $slider = $('.shorts-video_sliders');
+                const $arrows = $('.shorts-video_arrows');
+                const nextPageInput = $('#next-page');
+                const hasMoreInput = $('#has-more');
+
+                if (!$slider.length) return;
+
+                $slider.slick({
+                    infinite: false,
+                    dots: false,
+                    arrows: true,
+                    vertical: true,
+                    verticalSwiping: true,
+                    prevArrow: '<button type="button" class="slick-prev"><i class="las la-angle-up"></i></button>',
+                    nextArrow: '<button type="button" class="slick-next"><i class="las la-angle-down"></i></button>',
+                    appendArrows: $arrows
+                });
+
+                $slider.on('wheel', function (e) {
+                    e.preventDefault();
+                    if (e.originalEvent.deltaY < 0) $(this).slick('slickPrev');
+                    else $(this).slick('slickNext');
+                });
+
+                function initPlyr() {
+                    $('.video-player').each(function () {
+                        if (!$(this).data('plyr-initialized')) {
+                            const player = new Plyr(this);
+                            $(this).data('plyr-initialized', true);
+                        }
+                    });
+                }
+
+                initPlyr();
+
+                $slider.on('afterChange', function (event, slick, currentSlide) {
+                    const totalSlides = slick.slideCount;
+                    if (currentSlide === totalSlides - 1) loadMoreShorts();
+                });
+
+                function loadMoreShorts() {
+                    const hasMore = hasMoreInput.val() === '1';
+                    const nextPage = parseInt(nextPageInput.val());
+                    if (!hasMore || isLoading) return;
+                    isLoading = true;
+
+                    $.ajax({
+                        url: loadMoreUrl,
+                        type: 'GET',
+                        data: { page: nextPage },
+                        success: function (response) {
+                            console.log('success');
+                            if (response.status === 'success') {
+
+                                $slider.slick('slickAdd', response.data.html);
+                                $slider.slick('setPosition');
+
+                                initPlyr();
+
+
+                                nextPageInput.val(nextPage + 1);
+                                hasMoreInput.val(response.data.hasMore ? '1' : '0');
+                            }
+                        },
+                        complete: function () {
+                            isLoading = false;
+                        }
+                    });
+                }
+
+
+
+                let currentPage = 1;
+                // let isLoading = false;
                 let hasMoreComments = true;
                 let currentShortId = null;
 
@@ -449,11 +555,16 @@
                         success: function(response) {
                             if (response.success) {
                                 var shortId = $('.short-id').val();
+<<<<<<< HEAD
                                 var $videoItem = $('.video-item').find(
                                     `[data-short-id="${shortId}"]`).closest(
                                     '.video-item');
                                 var $commentCountElement = $videoItem.find(
                                     '.button-comment .comment-count');
+=======
+                                var $videoItem = $('.video-item').find(`[data-short-id="${shortId}"]`).closest('.video-item');
+                                var $commentCountElement = $videoItem.find('.button-comment .comment-count');
+>>>>>>> main
                                 $commentCountElement.text(response.comment_count);
                                 $('.comment-form').trigger('reset');
                                 $('.comments-container').prepend(response.html);
@@ -601,6 +712,8 @@
                                     $btn.data("action", "follow");
                                 }
                                 notify('success', response.message);
+
+                                $(".sidebar-following-container").load("{{ route('user.friend.sidebar.following') }}");
                             }
                         }
                     });
@@ -686,8 +799,6 @@
                     var platform = $option.data('platform');
                     var shortsId = $('#shareModal').data('shorts-id');
 
-                    console.log("Sharing shorts ID:", shortsId);
-
                     var $countElement = $('.video-item').find(`[data-shorts-id="${shortsId}"]`).closest(
                         '.video-item').find('.share-count');
 
@@ -699,9 +810,13 @@
                             shorts_id: shortsId,
                             platform: platform
                         },
+<<<<<<< HEAD
                         success: function(response) {
                             console.log("Server response:", response);
 
+=======
+                        success: function (response) {
+>>>>>>> main
                             if (response.data.success) {
                                 var shortUrl = response.data.share_url;
                                 var shareText = 'Check out this video! ' + shortUrl;

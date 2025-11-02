@@ -20,8 +20,6 @@ Route::controller('TicketController')->prefix('ticket')->name('ticket.')->group(
 });
 
 Route::controller('SiteController')->group(function () {
-    Route::get('/contact', 'contact')->name('contact');
-    Route::post('/contact', 'contactSubmit');
     Route::get('/change/{lang?}', 'changeLanguage')->name('lang');
 
     Route::get('cookie-policy', 'cookiePolicy')->name('cookie.policy');
@@ -46,6 +44,8 @@ Route::controller('SiteController')->group(function () {
 
     Route::get('/{slug}', 'pages')->name('pages');
     Route::get('/', 'index')->name('home');
+
+    Route::get('/load-more-shorts',  'loadMoreShorts')->name('load.more.shorts');
 
     Route::get('user/shorts/get',  'getShorts')->name('user.shorts.get');
     Route::get('/get/stars', 'getStars')->name('get.stars');

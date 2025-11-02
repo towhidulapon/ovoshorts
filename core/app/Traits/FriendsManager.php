@@ -16,9 +16,9 @@ trait FriendsManager
 
         $query = User::active()->with([
             'shorts' => function ($q) {
-                $q->where('is_approved', Status::SHORT_APPROVE)
-                    ->where('status', Status::PUBLISHED)
-                    ->where('is_visible', Status::EVERYONE)
+                $q->approved()
+                    ->published()
+                    ->publicShort()
                     ->where(function ($query) {
                         $query->where('storage_driver', 'local')
                             ->orWhereIn('storage_driver', function ($subQuery) {
@@ -104,9 +104,9 @@ trait FriendsManager
         $pageTitle = 'Following';
 
         $query = auth()->user()->followings()->with(['shorts' => function ($q) {
-            $q->where('is_approved', Status::SHORT_APPROVE)
-                ->where('status', Status::PUBLISHED)
-                ->where('is_visible', Status::EVERYONE)
+            $q->approved()
+                ->published()
+                ->publicShort()
                 ->where(function ($query) {
                     $query->where('storage_driver', 'local')
                         ->orWhereIn('storage_driver', function ($subQuery) {
@@ -140,9 +140,9 @@ trait FriendsManager
     public function followingList()
     {
         $query = auth()->user()->followings()->with(['shorts' => function ($q) {
-            $q->where('is_approved', Status::SHORT_APPROVE)
-                ->where('status', Status::PUBLISHED)
-                ->where('is_visible', Status::EVERYONE)
+            $q->approved()
+                ->published()
+                ->publicShort()
                 ->latest();
         }]);
 
@@ -163,9 +163,9 @@ trait FriendsManager
 
         $shorts = Short::with('user')
             ->whereIn('user_id', $followingIds)
-            ->where('is_approved', Status::SHORT_APPROVE)
-            ->where('status', Status::PUBLISHED)
-            ->where('is_visible', Status::EVERYONE)
+            ->approved()
+            ->published()
+            ->publicShort()
             ->where(function ($query) {
                 $query->where('storage_driver', 'local')
                     ->orWhereIn('storage_driver', function ($subQuery) {

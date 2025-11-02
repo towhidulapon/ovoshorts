@@ -30,7 +30,7 @@ trait InteractsWithSockets
      *
      * @return $this
      */
-    public function broadcastToEveryone()
+    public function broadcastTopublicShort()
     {
         $this->socket = null;
 

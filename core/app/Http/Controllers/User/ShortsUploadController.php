@@ -11,10 +11,6 @@ use App\Traits\ShortsManager;
 class ShortsUploadController extends Controller
 {
     use ShortsManager;
-    public function __construct(StorageConfig $storageConfig)
-    {
-        $this->storageConfig = $storageConfig;
-    }
 
     public function index($id = 0)
     {

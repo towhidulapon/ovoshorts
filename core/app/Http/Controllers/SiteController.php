@@ -4,19 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Constants\Status;
 use App\Lib\StorageConfig;
-use App\Models\AdminNotification;
 use App\Models\Category;
 use App\Models\Comment;
 use App\Models\Frontend;
 use App\Models\Language;
-use App\Models\Message;
 use App\Models\Page;
 use App\Models\Short;
 use App\Models\ShortShare;
 use App\Models\ShortView;
-use App\Models\SupportMessage;
-use App\Models\SupportTicket;
 use App\Models\User;
+use App\Models\UserReaction;
 use App\Traits\StarManager;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -48,10 +45,39 @@ class SiteController extends Controller
         $users     = User::active()->where('id', '!=', auth()->id())->searchable(['username'])->get();
         $following = auth()->check() ? auth()->user()->followings->pluck('id')->toArray() : [];
 
-        $shorts = Short::with('user', 'storage', 'comments.user', 'comments.replies.user', 'savedShorts')
-            ->where('is_approved', Status::SHORT_APPROVE)
-            ->where('status', Status::PUBLISHED)
-            ->where('is_visible', Status::EVERYONE)
+        $shortsQuery = Short::with('user', 'storage', 'comments.user', 'comments.replies.user', 'savedShorts')
+            ->approved()
+            ->published()
+            ->publicShort()
+            ->where(function ($query) {
+                $query->where('storage_driver', 'local')
+                    ->orWhereIn('storage_driver', function ($subQuery) {
+                        $subQuery->select('alias')
+                            ->from('storage_settings')
+                            ->where('status', Status::ENABLE);
+                    });
+            })
+            ->withCount('likes')
+            ->withSum('stars', 'stars')
+            ->orderBy('id', 'desc');
+
+        $shorts = $shortsQuery->paginate(getPaginate(5));
+
+        $hasMorePages = $shorts->hasMorePages();
+
+        $shorts->getCollection()->transform(function ($short) {
+            return prepareShortData($short);
+        });
+
+        return view('Template::home', compact('pageTitle', 'sections', 'following', 'shorts', 'seoContents', 'seoImage', 'hasMorePages'));
+    }
+
+    public function loadMoreShorts(Request $request)
+    {
+        $shorts = Short::with('user', 'comments.user', 'comments.replies.user')
+            ->approved()
+            ->published()
+            ->publicShort()
             ->where(function ($query) {
                 $query->where('storage_driver', 'local')
                     ->orWhereIn('storage_driver', function ($subQuery) {
@@ -63,12 +89,20 @@ class SiteController extends Controller
             ->withCount('likes')
             ->withSum('stars', 'stars')
             ->orderBy('id', 'desc')
-            ->get()
-            ->map(function ($short) {
-                return prepareShortData($short);
-            });
+            ->paginate(getPaginate(5), ['*'], 'page', $request->page);
 
-        return view('Template::home', compact('pageTitle', 'sections', 'following', 'shorts', 'seoContents', 'seoImage'));
+        $html = '';
+        foreach ($shorts as $short) {
+            $html .= view('Template::user.short.view.video_item', ['short' => $short])->render();
+        }
+
+        return response()->json([
+            'success' => true,
+            'data'    => [
+                'html'    => $html,
+                'hasMore' => $shorts->hasMorePages(),
+            ],
+        ]);
     }
 
     public function recordView(Request $request)
@@ -119,7 +153,7 @@ class SiteController extends Controller
             'play_time' => 'nullable|integer|min:0',
         ]);
 
-        $short = Short::where('id', $id)->where('is_approved', Status::SHORT_APPROVE)->firstOrFail();
+        $short = Short::where('id', $id)->approved()->firstOrFail();
 
         if ($request->has('play_time')) {
             $short->increment('total_play_time', $request->input('play_time'));
@@ -130,7 +164,7 @@ class SiteController extends Controller
 
     public function getAnalytics($id)
     {
-        $short = Short::where('id', $id)->where('is_approved', Status::SHORT_APPROVE)->firstOrFail();
+        $short = Short::where('id', $id)->approved()->firstOrFail();
         return response()->json([
             'total_play_time' => $short->total_play_time,
             'views_count'     => $short->views_count,
@@ -146,9 +180,9 @@ class SiteController extends Controller
 
         $shorts = Short::with('user', 'storage', 'comments.user', 'comments.replies.user', 'savedShorts')
             ->searchable(['user:username', 'description'])
-            ->where('is_approved', Status::SHORT_APPROVE)
-            ->where('status', Status::PUBLISHED)
-            ->where('is_visible', Status::EVERYONE)
+            ->approved()
+            ->published()
+            ->publicShort()
             ->where(function ($query) {
                 $query->where('storage_driver', 'local')
                     ->orWhereIn('storage_driver', function ($subQuery) {
@@ -176,10 +210,11 @@ class SiteController extends Controller
     public function hashtag($hashtag)
     {
         $pageTitle = 'Search';
-        $shorts    = Short::with('user', 'storage', 'comments.user', 'comments.replies.user', 'savedShorts')
-            ->where('is_approved', Status::SHORT_APPROVE)
-            ->where('status', Status::PUBLISHED)
-            ->where('is_visible', Status::EVERYONE)
+
+        $shorts = Short::with('user', 'storage', 'comments.user', 'comments.replies.user', 'savedShorts')
+            ->approved()
+            ->published()
+            ->publicShort()
             ->where('description', 'like', '%' . '#' . $hashtag . '%')
             ->where(function ($query) {
                 $query->where('storage_driver', 'local')
@@ -190,10 +225,23 @@ class SiteController extends Controller
                     });
             })
             ->orderBy('id', 'desc')
-            ->get()
-            ->map(function ($short) {
-                return prepareShortData($short);
-            });
+            ->get();
+
+        $userReactions = [];
+
+        if (auth()->check()) {
+            $userId   = auth()->id();
+            $shortIds = $shorts->pluck('id');
+
+            $userReactions = UserReaction::whereIn('shorts_id', $shortIds)
+                ->where('user_id', $userId)
+                ->pluck('shorts_id')
+                ->toArray();
+        }
+
+        $shorts = $shorts->map(function ($short) use ($userReactions) {
+            return prepareShortData($short, $userReactions);
+        });
 
         $view = 'Template::user.short.hashtag';
 
@@ -213,62 +261,6 @@ class SiteController extends Controller
         $seoContents = $page->seo_content;
         $seoImage    = @$seoContents->image ? getImage(getFilePath('seo') . '/' . @$seoContents->image, getFileSize('seo')) : null;
         return view('Template::pages', compact('pageTitle', 'sections', 'seoContents', 'seoImage'));
-    }
-
-    public function contact()
-    {
-        $pageTitle   = "Contact Us";
-        $user        = auth()->user();
-        $sections    = Page::where('tempname', activeTemplate())->where('slug', 'contact')->first();
-        $seoContents = $sections->seo_content;
-        $seoImage    = @$seoContents->image ? getImage(getFilePath('seo') . '/' . @$seoContents->image, getFileSize('seo')) : null;
-        return view('Template::contact', compact('pageTitle', 'user', 'sections', 'seoContents', 'seoImage'));
-    }
-
-    public function contactSubmit(Request $request)
-    {
-        $request->validate([
-            'name'    => 'required',
-            'email'   => 'required',
-            'subject' => 'required|string|max:255',
-            'message' => 'required',
-        ]);
-
-        $request->session()->regenerateToken();
-
-        if (!verifyCaptcha()) {
-            $notify[] = ['error', 'Invalid captcha provided'];
-            return back()->withNotify($notify);
-        }
-
-        $random = getNumber();
-
-        $ticket           = new SupportTicket();
-        $ticket->user_id  = auth()->id() ?? 0;
-        $ticket->name     = $request->name;
-        $ticket->email    = $request->email;
-        $ticket->priority = Status::PRIORITY_MEDIUM;
-
-        $ticket->ticket     = $random;
-        $ticket->subject    = $request->subject;
-        $ticket->last_reply = Carbon::now();
-        $ticket->status     = Status::TICKET_OPEN;
-        $ticket->save();
-
-        $adminNotification            = new AdminNotification();
-        $adminNotification->user_id   = auth()->user() ? auth()->user()->id : 0;
-        $adminNotification->title     = 'A new contact message has been submitted';
-        $adminNotification->click_url = urlPath('admin.ticket.view', $ticket->id);
-        $adminNotification->save();
-
-        $message                    = new SupportMessage();
-        $message->support_ticket_id = $ticket->id;
-        $message->message           = $request->message;
-        $message->save();
-
-        $notify[] = ['success', 'Ticket created successfully'];
-
-        return to_route('ticket.view', [$ticket->ticket])->withNotify($notify);
     }
 
     public function policyPages($slug)
@@ -417,8 +409,8 @@ class SiteController extends Controller
         $pageTitle = 'View Short';
         $short     = Short::with('user', 'comments.user', 'comments.replies.user', 'savedShorts')
             ->where('id', $id)
-            ->where('is_approved', Status::SHORT_APPROVE)
-            ->where('status', Status::PUBLISHED)
+            ->approved()
+            ->published()
             ->where(function ($query) {
                 $query->where('storage_driver', 'local')
                     ->orWhereIn('storage_driver', function ($subQuery) {
@@ -459,8 +451,8 @@ class SiteController extends Controller
 
         $userShorts = Short::where('user_id', $request->user_id)
             ->where('id', '!=', $request->exclude_short_id)
-            ->where('is_approved', Status::SHORT_APPROVE)
-            ->where('status', Status::PUBLISHED)
+            ->approved()
+            ->published()
             ->where(function ($query) {
                 $query->where('storage_driver', 'local')
                     ->orWhereIn('storage_driver', function ($subQuery) {
@@ -528,8 +520,9 @@ class SiteController extends Controller
         $pageTitle = 'Explore Shorts';
 
         $query = Short::query()
-            ->where('status', Status::PUBLISHED)
-            ->where('is_visible', Status::EVERYONE)
+            ->with('user', 'likes')
+            ->published()
+            ->publicShort()
             ->where(function ($query) {
                 $query->where('storage_driver', 'local')
                     ->orWhereIn('storage_driver', function ($subQuery) {
@@ -581,8 +574,8 @@ class SiteController extends Controller
     public function exploreShorts($id = 0)
     {
         $query = Short::query()
-            ->where('status', Status::PUBLISHED)
-            ->where('is_visible', Status::EVERYONE)
+            ->published()
+            ->publicShort()
             ->where(function ($query) {
                 $query->where('storage_driver', 'local')
                     ->orWhereIn('storage_driver', function ($subQuery) {
@@ -602,7 +595,7 @@ class SiteController extends Controller
         return view('Template::user.short.explore_shorts', compact('shorts'))->render();
     }
 
-    public function userProfile($username = null, Request $request)
+    public function userProfile($username = null)
     {
         $pageTitle = 'User Details';
         $follower  = User::where('username', $username)->first();
@@ -614,10 +607,10 @@ class SiteController extends Controller
         }
         $following = auth()->check() ? auth()->user()->followings->pluck('id')->toArray() : [];
 
-        $shortsQuery = Short::with('likes')
+        $shortsQuery = Short::with('likes', 'user')
             ->where('user_id', $follower->id)
-            ->where('status', Status::PUBLISHED)
-            ->where('is_visible', Status::EVERYONE)
+            ->published()
+            ->publicShort()
             ->where(function ($query) {
                 $query->where('storage_driver', 'local')
                     ->orWhereIn('storage_driver', function ($subQuery) {
@@ -647,7 +640,7 @@ class SiteController extends Controller
         ]);
     }
 
-    public function userProfileShorts($username = null, Request $request)
+    public function userProfileShorts(Request $request, $username = null)
     {
         $follower = User::where('username', $username)->first();
         if (!$follower) {
@@ -658,8 +651,8 @@ class SiteController extends Controller
         $page        = $request->input('page', 2);
         $shortsQuery = Short::with('likes')
             ->where('user_id', $follower->id)
-            ->where('status', Status::PUBLISHED)
-            ->where('is_visible', Status::EVERYONE)
+            ->published()
+            ->publicShort()
             ->where(function ($query) {
                 $query->where('storage_driver', 'local')
                     ->orWhereIn('storage_driver', function ($subQuery) {

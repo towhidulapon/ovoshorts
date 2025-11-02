@@ -17,7 +17,7 @@
         <div class="user-info">
             <button class="user-info__button flex-align" tabindex="-1">
                 <span class="user-info__thumb">
-                    <img src="{{ getImage(getFilePath('userProfile') . '/' . auth()?->user()?->image, getFileSize('profileImage')) }}" class="user-img fit-image">
+                    <img src="{{ auth()->user()->image ? getImage(getFilePath('userProfile') . '/' . auth()->user()->image, getFileSize('userProfile')) : asset('assets/images/avatar.jpg') }}" class="user-img" alt="img">
                 </span>
             </button>
             <ul class="user-info-dropdown">

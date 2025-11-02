@@ -31,6 +31,11 @@
                         </li>
 
                         <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap ps-0">
+                            <span class="fs-14 text-muted">@lang('Category')</span>
+                            <span class="fs-14 text--primary">{{ ($short->category->name) }}</span>
+                        </li>
+
+                        <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap ps-0">
                             <span class="fs-14 text-muted">@lang('Storage')</span>
                             <span class="fs-14 text--warning">{{ ($short->storage_driver) }}</span>
                         </li>
