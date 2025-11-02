@@ -20,6 +20,9 @@
                             </form>
 
 
+                            <div class="text-center my-4">
+                                <span class="text-muted">@lang('OR')</span>
+
                                 <form action="{{ route('user.verification.purchase') }}" class="no-submit-loader" method="POST">
                                     @csrf
                                     <input type="hidden" name="amount" value="{{ gs('verification_price') }}">
@@ -27,9 +30,10 @@
                                         @lang('Get Verified Now for') {{ showAmount(gs('verification_price')) }}
                                     </button>
                                 </form>
-=========
+
                             <div class="text-center my-4">
                                 <span class="text-muted">@lang('OR')</span>
+
 
                             </div>
 
