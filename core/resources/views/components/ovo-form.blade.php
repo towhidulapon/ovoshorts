@@ -89,7 +89,7 @@
                 @elseif($data->type == 'radio')
                     <div class="d-flex gap-3 flex-wrap">
                         @foreach($data->options as $option)
-                            <div class="form-check">
+                            <div class="form--radio">
                                 <input
                                 class="form-check-input"
                                 name="{{ $data->label }}"

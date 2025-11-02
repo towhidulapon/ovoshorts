@@ -1,121 +1,127 @@
 @extends($activeTemplate . 'layouts.dashboard_frontend')
 @section('content')
-    <div class="py-5">
+    <div class="dashboard-body">
         <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-md-12">
-                    <div class="d-flex justify-content-between">
+            <div class="card custom--card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between flex-wrap gap-2 align-items-center">
                         <form>
-                            <div class="mb-3 d-flex justify-content-end">
-                                <div class="input-group">
-                                    <input type="search" name="search" class="form-control" value="{{ request()->search }}" placeholder="@lang('Search by transactions')">
-                                    <button class="input-group-text bg--base text-white">
+                            <div class="d-flex justify-content-end">
+                                <div class="input-group custom--search">
+                                    <input type="search" name="search" class="form-control form--control"
+                                        value="{{ request()->search }}" placeholder="@lang('Search by transactions')">
+                                    <button class="input-group-text">
                                         <i class="las la-search"></i>
                                     </button>
                                 </div>
                             </div>
                         </form>
-                        <a href="{{ route('user.deposit.index') }}" class="btn  btn--base btn--sm mb-2">@lang('New Deposit')</a>
-                    </div>
-                    <div class="card custom--card">
-                        <div class="card-body p-0">
-                            <div class="dashboard-table">
-                                <table class="table table--responsive--xl">
-                                    <thead>
-                                        <tr>
-                                            <th>@lang('Gateway | Transaction')</th>
-                                            <th class="text-center">@lang('Initiated')</th>
-                                            <th class="text-center">@lang('Amount')</th>
-                                            <th class="text-center">@lang('Conversion')</th>
-                                            <th class="text-center">@lang('Status')</th>
-                                            <th>@lang('Details')</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse($deposits as $deposit)
-                                            <tr>
-                                                <td>
-                                                    <span class="fw-bold">
-                                                        <span class="text-primary">
-                                                            @if ($deposit->method_code < 5000)
-                                                                {{ __(@$deposit->gateway->name) }}
-                                                            @else
-                                                                @lang('Google Pay')
-                                                            @endif
-                                                        </span>
-                                                    </span>
-                                                    <br>
-                                                    <small> {{ $deposit->trx }} </small>
-                                                </td>
-                                                <td class="text-center">
-                                                    {{ showDateTime($deposit->created_at) }}<br>{{ diffForHumans($deposit->created_at) }}
-                                                </td>
-                                                <td class="text-center">
-                                                    {{ showAmount($deposit->amount) }} + <span class="text--danger" data-bs-toggle="tooltip" title="@lang('Processing Charge')">{{ showAmount($deposit->charge) }}
-                                                    </span>
-                                                    <br>
-                                                    <strong data-bs-toggle="tooltip" title="@lang('Amount with charge')">
-                                                        {{ showAmount($deposit->amount + $deposit->charge) }}
-                                                    </strong>
-                                                </td>
-                                                <td class="text-center">
-                                                    {{ showAmount(1) }} =
-                                                    {{ showAmount($deposit->rate, currencyFormat: false) }}
-                                                    {{ __($deposit->method_currency) }}
-                                                    <br>
-                                                    <strong>{{ showAmount($deposit->final_amount, currencyFormat: false) }}
-                                                        {{ __($deposit->method_currency) }}</strong>
-                                                </td>
-                                                <td class="text-center">
-                                                    @php echo $deposit->statusBadge @endphp
-                                                </td>
-                                                @php
-    $details = [];
-    if (
-        $deposit->method_code >= 1000 &&
-        $deposit->method_code <= 5000
-    ) {
-        foreach (@$deposit->detail ?? [] as $key => $info) {
-            $details[] = $info;
-            if ($info->type == 'file') {
-                $details[$key]->value = route(
-                    'user.download.attachment',
-                    encrypt(getFilePath('verify') . '/' . $info->value),
-                );
-            }
-        }
-    }
-                                                @endphp
-                                                <td>
-                                                    @if ($deposit->method_code >= 1000 && $deposit->method_code <= 5000)
-                                                        <a href="javascript:void(0)" class="btn btn--base btn--sm detailBtn" data-info="{{ json_encode($details) }}" @if ($deposit->status == Status::PAYMENT_REJECT) data-admin_feedback="{{ $deposit->admin_feedback }}" @endif>
-                                                            <i class="fas fa-desktop"></i>
-                                                        </a>
-                                                    @else
-                                                        <button type="button" class="btn btn--sm btn--success " data-bs-toggle="tooltip" title="@lang('Automatically processed')">
-                                                            <i class="fas fa-check"></i>
-                                                        </button>
-                                                    @endif
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td class="text-muted text-center" colspan="100%">
-                                                    <x-empty-message message="{{ __($emptyMessage) }}" />
-                                                </td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        @if ($deposits->hasPages())
-                            <div class="card-footer">
-                                {{ paginateLinks($deposits) }}
-                            </div>
-                        @endif
+                        <a href="{{ route('user.deposit.index') }}" class="btn btn--base btn--sm">@lang('New Withdraw')</a>
                     </div>
                 </div>
+    
+                <div class="card-body card-body p-3 pt-0">
+                    <table class="table table--responsive--xl">
+                        <thead>
+                            <tr>
+                                <th>@lang('Gateway | Transaction')</th>
+                                <th class="text-center">@lang('Initiated')</th>
+                                <th class="text-center">@lang('Amount')</th>
+                                <th class="text-center">@lang('Conversion')</th>
+                                <th class="text-center">@lang('Status')</th>
+                                <th>@lang('Details')</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($deposits as $deposit)
+                                <tr>
+                                    <td>
+                                        <span>
+                                            <span class="fw-bold">
+                                                <span class="text-primary">
+                                                    @if ($deposit->method_code < 5000)
+                                                        {{ __(@$deposit->gateway->name) }}
+                                                    @else
+                                                        @lang('Google Pay')
+                                                    @endif
+                                                </span>
+                                            </span>
+                                            <br>
+                                            <small> {{ $deposit->trx }} </small>
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        {{ showDateTime($deposit->created_at) }}<br>{{ diffForHumans($deposit->created_at) }}
+                                    </td>
+                                    <td class="text-center">
+                                        <span>
+                                            {{ showAmount($deposit->amount) }} + <span class="text--danger"
+                                                data-bs-toggle="tooltip"
+                                                title="@lang('Processing Charge')">{{ showAmount($deposit->charge) }}
+                                            </span>
+                                            <br>
+                                            <strong data-bs-toggle="tooltip" title="@lang('Amount with charge')">
+                                                {{ showAmount($deposit->amount + $deposit->charge) }}
+                                            </strong>
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span>
+                                            {{ showAmount(1) }} =
+                                            {{ showAmount($deposit->rate, currencyFormat: false) }}
+                                            {{ __($deposit->method_currency) }}
+                                            <br>
+                                            <strong>{{ showAmount($deposit->final_amount, currencyFormat: false) }}
+                                                {{ __($deposit->method_currency) }}</strong>
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        @php echo $deposit->statusBadge @endphp
+                                    </td>
+                                    @php
+                                        $details = [];
+                                        if ($deposit->method_code >= 1000 && $deposit->method_code <= 5000) {
+                                            foreach (@$deposit->detail ?? [] as $key => $info) {
+                                                $details[] = $info;
+                                                if ($info->type == 'file') {
+                                                    $details[$key]->value = route(
+                                                        'user.download.attachment',
+                                                        encrypt(getFilePath('verify') . '/' . $info->value),
+                                                    );
+                                                }
+                                            }
+                                        }
+                                    @endphp
+                                    <td>
+                                        @if ($deposit->method_code >= 1000 && $deposit->method_code <= 5000)
+                                            <a href="javascript:void(0)" class="btn btn--base btn--sm detailBtn"
+                                                data-info="{{ json_encode($details) }}"
+                                                @if ($deposit->status == Status::PAYMENT_REJECT) data-admin_feedback="{{ $deposit->admin_feedback }}" @endif>
+                                                <i class="fas fa-desktop"></i>
+                                            </a>
+                                        @else
+                                            <button type="button" class="btn btn--sm btn--success " data-bs-toggle="tooltip"
+                                                title="@lang('Automatically processed')">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td class="text-muted text-center" colspan="100%">
+                                        <x-empty-message message="{{ __($emptyMessage) }}" />
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                @if ($deposits->hasPages())
+                    <div class="card-footer">
+                        {{ paginateLinks($deposits) }}
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -144,9 +150,9 @@
 
 @push('script')
     <script>
-        (function ($) {
+        (function($) {
             "use strict";
-            $('.detailBtn').on('click', function () {
+            $('.detailBtn').on('click', function() {
                 var modal = $('#detailModal');
                 var userData = $(this).data('info');
                 var html = '';
@@ -183,7 +189,7 @@
                 modal.modal('show');
             });
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title], [data-title], [data-bs-title]'))
-            tooltipTriggerList.map(function (tooltipTriggerEl) {
+            tooltipTriggerList.map(function(tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl)
             });
         })(jQuery);
