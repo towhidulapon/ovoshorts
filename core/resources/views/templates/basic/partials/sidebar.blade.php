@@ -6,12 +6,8 @@
         <div class="sidebar-menu__inner">
             <span class="sidebar-menu__close d-md-none d-flex"><i class="fas fa-times"></i></span>
             <div class="sidebar-logo">
-                @if (request()->routeIs('user.message.index'))
-                    <a href="{{ route('home') }}" class="side-sm-logo"><img src="{{ siteFavicon() }}" alt="logo"></a>
-                    <a href="{{ route('home') }}" class="sidebar-logo__link"><img src="{{ siteLogo() }}" alt="logo"></a>
-                @else
-                    <a href="{{ route('home') }}"> <img src="{{ siteLogo() }}" alt="img"> </a>
-                @endif
+                <a href="{{ route('home') }}" class="side-sm-logo"><img src="{{ siteFavicon() }}" alt="logo"></a>
+                <a href="{{ route('home') }}" class="sidebar-logo__link"><img src="{{ siteLogo() }}" alt="logo"></a>
             </div>
             <form action="{{ route('short.search', 'index') }}" method="GET">
                 <div class="sidebar-search">
@@ -22,7 +18,7 @@
                                 <path d="M22 22L20 20" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                         </span>
-                        <input class="input-group-custom__input form-control form--control" type="search" name="search" value="{{ request()->search }}" placeholder="@lang('Search')">
+                        <input class="input-group-custom__input form-control form--control" type="search" readonly name="search" value="{{ request()->search }}" placeholder="@lang('Search')">
                     </div>
                 </div>
             </form>
@@ -128,7 +124,7 @@
                     </ul>
 
                     @php
-                        $followings = auth()->user()->followings()->take(5)->get();
+    $followings = auth()->user()->followings()->take(5)->get();
                     @endphp
 
                     <div class="sidebar-menu__following sidebar-following-container">
@@ -277,12 +273,13 @@
                 @endif
 
                 @if (
-                        $groupedNotifications['today']->isEmpty() &&
-                        $groupedNotifications['yesterday']->isEmpty() &&
-                        $groupedNotifications['this_month']->isEmpty()
-                    )
-                        <p>@lang('No notifications found')</p>
+    $groupedNotifications['today']->isEmpty() &&
+    $groupedNotifications['yesterday']->isEmpty() &&
+    $groupedNotifications['this_month']->isEmpty()
+)
+                    <p>@lang('No notifications found')</p>
                 @endif
             </div>
         </div>
     </div>
+
