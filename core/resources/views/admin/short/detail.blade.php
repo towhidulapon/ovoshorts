@@ -86,7 +86,7 @@
                                 </div>
                             </div>
                         @endif
-                        @if ($short->status == Status::SHORT_PENDING)
+                        @if ($short->is_approved == Status::SHORT_PENDING)
                             <div class="mt-3 d-flex gap-2 flex-wrap">
                                 <button class="btn btn-outline--success" data-bs-toggle="modal" data-bs-target="#approveModal">
                                     <i class="las la-check-double"></i> @lang('Approve')

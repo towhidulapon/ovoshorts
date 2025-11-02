@@ -1,6 +1,12 @@
+@php
+    if (request()->ajax()) {
+        info($short);
+    }
+
+@endphp
 <div class="video-item">
     <div class="video-item-wrapper">
-        <video class="video-player" playsinline preload="metadata" data-video_id="{{ encrypt($short->id) }}" data-short-id="{{ $short->id }}" controls poster="{{ getImage(getFilePath('coverImage') . '/' . $short->cover_image) }}">
+        <video class="video-player" playsinline muted preload="metadata" data-video_id="{{ encrypt($short->id) }}" data-short-id="{{ $short->id }}" controls poster="{{ getImage(getFilePath('coverImage') . '/' . $short->cover_image) }}">
             <source src="{{ $short->fileUrl }}" type="video/{{ $short->extension }}">
         </video>
         <div class="video-item-content">
@@ -31,7 +37,7 @@
 
                 </a>
                 @if ($short->user->id !== auth()->id())
-                    <button class="follower-btn follow-toggle-btn follow-btn" data-following="{{ in_array($short->user->id, $following) ? '1' : '0' }}" data-id="{{ $short->user->id }}" data-action="follow">
+                    <button class="follower-btn follow-toggle-btn follow-btn" data-following="{{ in_array($short->user->id, $following) ? '1' : '0' }}" data-id="{{ $short->user->id }}" data-action="{{ in_array($short->user->id, $following) ? 'unfollow' : 'follow' }}">
                         <i class="las {{ in_array($short->user->id, $following) ? 'la-check' : 'la-plus' }}"></i>
                     </button>
                 @endif
@@ -59,7 +65,7 @@
             </div>
             @if ($short->allow_comments === Status::YES)
                 <div class="cmn-button-item button-comment">
-                    <button class="like-button  button-item">
+                    <button class="like-button  button-item comment-btn" data-short-id="{{ $short->id }}">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" fill="none">
                             <path d="M18.6666 2.33333H9.33325C4.66659 2.33333 2.33325 4.66667 2.33325 9.33333V24.5C2.33325 25.1417 2.85825 25.6667 3.49992 25.6667H18.6666C23.3333 25.6667 25.6666 23.3333 25.6666 18.6667V9.33333C25.6666 4.66667 23.3333 2.33333 18.6666 2.33333ZM16.3333 17.7917H8.16659C7.68825 17.7917 7.29159 17.395 7.29159 16.9167C7.29159 16.4383 7.68825 16.0417 8.16659 16.0417H16.3333C16.8116 16.0417 17.2083 16.4383 17.2083 16.9167C17.2083 17.395 16.8116 17.7917 16.3333 17.7917ZM19.8333 11.9583H8.16659C7.68825 11.9583 7.29159 11.5617 7.29159 11.0833C7.29159 10.605 7.68825 10.2083 8.16659 10.2083H19.8333C20.3116 10.2083 20.7083 10.605 20.7083 11.0833C20.7083 11.5617 20.3116 11.9583 19.8333 11.9583Z" fill="CurrentColor" />
                         </svg>

@@ -191,36 +191,6 @@ trait ShortsManager
 
         $request->validate($rules, $messages);
 
-        // $rules = $isUpdate ? [
-        //     'description' => 'nullable|string|max:4000',
-        //     'cover_image' => ['nullable', 'image', new FileTypeValidate(['jpg', 'jpeg', 'png'])],
-        //     'visibility'  => 'required|in:1,2',
-        //     'comment'     => 'nullable',
-        //     'category_id' => 'required|exists:categories,id',
-        // ] : [
-        //     'short_id'         => 'required|exists:shorts,id',
-        //     'description'      => 'nullable|string|max:4000',
-        //     'cover_image'      => ['nullable', 'image', new FileTypeValidate(['jpg', 'jpeg', 'png'])],
-        //     'cover_image_data' => ['nullable', 'string'],
-        //     'visibility'       => 'required|in:1,2',
-        //     'comment'          => 'nullable',
-        //     'category_id'      => 'required|exists:categories,id',
-        //     'post_at'          => 'required|in:1,2',
-        //     'schedule_time'    => 'nullable|required_if:post_at,2|after:now',
-        // ];
-
-        // $messages = [
-        //     'description.max'           => 'Description cannot exceed 4000 characters.',
-        //     'cover_image.image'         => 'Cover image must be a valid image file.',
-        //     'cover_image.mimes'         => 'Cover image must be a file of type: jpg, jpeg, png.',
-        //     'category_id.required'      => 'Please select a category.',
-        //     'category_id.exists'        => 'Selected category does not exist.',
-        //     'schedule_time.required_if' => 'Schedule time is required when post type is scheduled.',
-        //     'schedule_time.after'       => 'Schedule time must be a future date and time.',
-        // ];
-
-        // $request->validate($rules, $messages);
-
         $category = Category::active()->find($request->category_id);
 
         if (!$category) {
@@ -249,7 +219,7 @@ trait ShortsManager
             $short->allow_comments = $request->comment ?? 0;
             $short->category_id    = $request->category_id;
 
-            if ($request->post_at == Status::LATER) {
+            if ($request->post_at >= now()) {
                 $short->post_at = $request->schedule_time;
                 $short->status  = Status::SCHEDULE;
             } else {
@@ -285,6 +255,7 @@ trait ShortsManager
         $short->is_visible     = $request->visibility;
         $short->allow_comments = $request->comment ?? 0;
         $short->category_id    = $request->category_id;
+        $short->post_at        = $request->schedule_time ?? now();
 
         if ($request->hasFile('cover_image')) {
             try {
@@ -309,18 +280,23 @@ trait ShortsManager
 
         $uploadMode = gs('short_approval');
 
-        if ($uploadMode == Status::SHORT_PENDING) {
+        if ($uploadMode == Status::MANUAL) {
             $short->is_approved = Status::SHORT_PENDING;
-            $short->post_at     = $request->schedule_time;
-            $short->status      = Status::UNPUBLISHED;
+            if ($short->post_at >= now()) {
+                // $short->post_at = $request->schedule_time;
+                $short->status = Status::SCHEDULE;
+            } else {
+                // $short->post_at = now();
+                $short->status = Status::UNPUBLISHED;
+            }
         } else {
             $short->is_approved = Status::SHORT_APPROVE;
-            if ($request->post_at == Status::LATER) {
-                $short->post_at = $request->schedule_time;
-                $short->status  = Status::SCHEDULE;
+            if ($short->post_at >= now()) {
+                // $short->post_at = $request->schedule_time;
+                $short->status = Status::SCHEDULE;
             } else {
-                $short->post_at = now();
-                $short->status  = Status::PUBLISHED;
+                // $short->post_at = now();
+                $short->status = Status::PUBLISHED;
             }
         }
 
@@ -350,7 +326,7 @@ trait ShortsManager
             }
         }
 
-        $message = $short->is_approved == Status::PUBLISHED ? 'Short uploaded successfully' : 'Short uploaded successfully and waiting for approval';
+        $message = $short->is_approved == Status::SHORT_APPROVE ? 'Short uploaded successfully' : 'Short uploaded successfully and waiting for approval';
 
         return responseManager("short_upload", $message, "success");
     }

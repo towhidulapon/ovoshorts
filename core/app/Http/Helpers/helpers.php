@@ -13,7 +13,6 @@ use App\Models\GeneralSetting;
 use App\Models\StorageSetting;
 use App\Models\Transaction;
 use App\Models\User;
-use App\Models\UserReaction;
 use App\Notify\Notify;
 use Aws\Credentials\Credentials;
 use Aws\S3\S3Client;
@@ -715,52 +714,6 @@ function getS3FileUri($fileName)
     }
 }
 
-// function getS3FileUri($fileName)
-// {
-//     $wasabi = StorageSetting::where('alias', 'wasabi')->first();
-
-//     if (!$wasabi || !isset($wasabi->parameters)) {
-//         return null;
-//     }
-
-//     $config = $wasabi->parameters;
-
-//     $accessKey  = $config->key->value ?? null;
-//     $secretKey  = $config->secret->value ?? null;
-//     $bucketName = $config->bucket->value ?? null;
-//     $region     = $config->region->value;
-//     $endpoint   = $config->endpoint->value;
-
-//     if (!$accessKey || !$secretKey || !$bucketName || !$endpoint) {
-//         return null;
-//     }
-
-//     $credentials = new Credentials($accessKey, $secretKey);
-
-//     $s3Client = new S3Client([
-//         'version'                 => 'latest',
-//         'region'                  => $region,
-//         'endpoint'                => $endpoint,
-//         'credentials'             => $credentials,
-//         'use_path_style_endpoint' => true,
-//     ]);
-
-//     $objectKey = 'shorts/' . $fileName;
-
-//     try {
-//         $command = $s3Client->getCommand('GetObject', [
-//             'Bucket' => $bucketName,
-//             'Key'    => $objectKey,
-//         ]);
-
-//         $request = $s3Client->createPresignedRequest($command, '+1 hour');
-//         return (string) $request->getUri();
-//     } catch (Exception $ex) {
-//         return null;
-//     }
-
-// }
-
 if (!function_exists('s3Client')) {
     function s3Client($storage)
     {
@@ -780,35 +733,6 @@ if (!function_exists('s3Client')) {
         }
     }
 }
-
-if (!function_exists('getFileUrl')) {
-    function getFileUrl($file, $storage, $folder = 'shorts')
-    {
-        if ($storage) {
-            if (in_array(@$storage->alias, ['wasabi'])) {
-                $key     = "{$folder}/{$file}";
-                $command = s3Client($storage)->getCommand('GetObject', [
-                    'Bucket' => @$storage->parameters->bucket->value,
-                    'Key'    => $key,
-                ]);
-                $expiry           = '+5 hours';
-                $presignedRequest = s3Client($storage)->createPresignedRequest($command, $expiry);
-                return (string) $presignedRequest->getUri();
-            } elseif ($storage->alias == 'ftp') {
-                return @$storage->parameters->host->value . "/" . $file;
-            }
-        }
-        return asset('storage/shorts/' . $file);
-    }
-}
-
-// if (!function_exists('getShortVideoUrl')) {
-//     function getShortVideoUrl($file, $storageId)
-//     {
-//         $storage = StorageSetting::find($storageId);
-//         return getFileUrl($file, $storage, 'shorts');
-//     }
-// }
 
 function showFormatCount($num)
 {
@@ -830,31 +754,6 @@ function formatPlayTime($seconds)
     return sprintf('%dh:%02dm:%02ds', $hours, $minutes, $seconds);
 }
 
-// function prepareShortData($short)
-// {
-//     if ($short->storage_driver === 'wasabi') {
-//         $short->fileUrl = getS3FileUri($short->name);
-//     } elseif ($short->storage_driver === 'local') {
-//         $short->fileUrl = asset(getFilePath('shorts') . '/' . $short->name);
-//     } else {
-//         $short->fileUrl = route('short.file', $short->name);
-//     }
-
-//     $short->extension = pathinfo($short->name, PATHINFO_EXTENSION);
-
-//     $short->is_liked = auth()->check() && UserReaction::where('shorts_id', $short->id)
-//         ->where('user_id', auth()->id())
-//         ->exists();
-
-//     $escapedDescription = e($short->description);
-//     $short->description = preg_replace(
-//         '/#(\w+)/',
-//         '<a href="' . url('/$1') . '" class="hashtag"><strong>#$1</strong></a>',
-//         $escapedDescription
-//     );
-
-//     return $short;
-// }
 
 function prepareShortData($short, $userReactions = [])
 {
@@ -879,7 +778,6 @@ function prepareShortData($short, $userReactions = [])
 
     return $short;
 }
-
 
 function userReferralCommission($user, $amount)
 {

@@ -145,16 +145,34 @@
             })
 
             $(document).ready(function () {
-
-
                 let isLoading = false;
-
                 const $slider = $('.shorts-video_sliders');
                 const $arrows = $('.shorts-video_arrows');
                 const nextPageInput = $('#next-page');
                 const hasMoreInput = $('#has-more');
 
                 if (!$slider.length) return;
+
+                function playVisibleVideo() {
+                    const $currentSlide = $slider.find('.slick-slide.slick-current');
+                    const $currentVideo = $currentSlide.find('.video-player')[0];
+
+                    $('.video-player').each(function () {
+                        if (this !== $currentVideo) {
+                            this.pause();
+                        }
+                    });
+
+                    if ($currentVideo) {
+                        $currentVideo.play().catch(() => { });
+                    }
+                }
+
+                $slider.on('afterChange', function (event, slick, currentSlide) {
+                    playVisibleVideo();
+                });
+
+                playVisibleVideo();
 
                 $slider.slick({
                     infinite: false,
@@ -173,8 +191,8 @@
                     else $(this).slick('slickNext');
                 });
 
-                function initPlyr() {
-                    $('.video-player').each(function () {
+                function initPlyr($container = $(document)) {
+                    $container.find('.video-player').each(function () {
                         if (!$(this).data('plyr-initialized')) {
                             const player = new Plyr(this);
                             $(this).data('plyr-initialized', true);
@@ -182,7 +200,63 @@
                     });
                 }
 
+                function attachVideoEvents($container = $(document)) {
+                    $container.find('.video-player').each(function () {
+                        if (!$(this).data('events-attached')) {
+                            var $video = $(this);
+                            var shortId = $video.data('short-id');
+                            var $viewCountSpan = $video.closest('.video-item').find('.view-count');
+                            var playTime = 0;
+                            var lastSentTime = 0;
+
+                            $video.on('timeupdate', function () {
+                                playTime = $video[0].currentTime;
+                                if (Math.floor(playTime) % 5 === 0 && playTime > lastSentTime) {
+                                    $.ajax({
+                                        url: '{{ route('short.track.analytics', ':id') }}'.replace(':id', shortId),
+                                        type: 'POST',
+                                        data: {
+                                            play_time: Math.floor(playTime - lastSentTime),
+                                            _token: '{{ csrf_token() }}'
+                                        },
+                                        success: function (response) {
+                                            if (response.success) {
+                                                lastSentTime = Math.floor(playTime);
+                                                console.log('Playtime recorded for short ID: ' + shortId);
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+
+                            $video.on('ended', function () {
+                                $.ajax({
+                                    url: '{{ route('short.record.view') }}',
+                                    type: 'POST',
+                                    data: {
+                                        shorts_id: shortId,
+                                        _token: '{{ csrf_token() }}'
+                                    },
+                                    success: function (response) {
+                                        if (response.success) {
+                                            $viewCountSpan.text(response.views_count);
+                                        }
+                                    }
+                                });
+                            });
+
+                            $video.on('pause', function () {
+                                playTime = 0;
+                                lastSentTime = 0;
+                            });
+
+                            $(this).data('events-attached', true);
+                        }
+                    });
+                }
+
                 initPlyr();
+                attachVideoEvents();
 
                 $slider.on('afterChange', function (event, slick, currentSlide) {
                     const totalSlides = slick.slideCount;
@@ -200,17 +274,23 @@
                         type: 'GET',
                         data: { page: nextPage },
                         success: function (response) {
-                            console.log('success');
-                            if (response.status === 'success') {
+                            if (response.success === true) {
+                                const $newSlides = $(response.data.html);
+                                const $validSlides = $newSlides.find('.video-item').addBack('.video-item');
 
-                                $slider.slick('slickAdd', response.data.html);
-                                $slider.slick('setPosition');
+                                if ($validSlides.length > 0) {
+                                    $validSlides.each(function () {
+                                        $slider.slick('slickAdd', $(this));
+                                    });
+                                }
 
-                                initPlyr();
-
+                                initPlyr($newSlides);
+                                attachVideoEvents($newSlides);
 
                                 nextPageInput.val(nextPage + 1);
                                 hasMoreInput.val(response.data.hasMore ? '1' : '0');
+                            } else {
+                                console.warn('Unexpected response:', response);
                             }
                         },
                         complete: function () {
@@ -219,10 +299,7 @@
                     });
                 }
 
-
-
                 let currentPage = 1;
-                // let isLoading = false;
                 let hasMoreComments = true;
                 let currentShortId = null;
 
@@ -244,7 +321,6 @@
                 function hideLoadingIndicator() {
                     $('.comments-loading').addClass('d-none');
                 }
-
 
                 $(document).on('click', ".like-btn", function (e) {
                     e.preventDefault();
@@ -276,7 +352,6 @@
                         }
                     });
                 });
-
 
                 function loadComments(shortId, page = 1, append = false) {
                     if (isLoading || !hasMoreComments) return;
@@ -315,24 +390,29 @@
                     });
                 }
 
-                $('.button-comment').on('click', function () {
+
+                $(document).on('click', '.comment-btn', function (e) {
+                    e.preventDefault();
                     var $button = $(this);
-                    var $videoItem = $button.closest('.video-item');
-                    var shortId = $videoItem.find('.video-player').data('short-id');
+                    var shortId = $button.data('short-id')
+
+                    if (!shortId) {
+                        shortId = $button.closest('.video-item').find('.video-player').data('short-id');
+                    }
+
                     $('.short-id').val(shortId);
                     currentShortId = shortId;
                     currentPage = 1;
                     hasMoreComments = true;
 
-                    $('.video-comment').addClass('active');
-                    $('.right-sidebar').addClass('active');
+                    $('.video-comment, .right-sidebar').toggleClass('show');
 
                     loadComments(shortId);
                 });
 
                 $('.common-action-close').on('click', function () {
-                    $('.video-comment').removeClass('active');
-                    $('.right-sidebar').removeClass('active');
+                    $('.video-comment').removeClass('show');
+                    $('.right-sidebar').removeClass('show');
                     $('.comments-container').empty();
                     currentShortId = null;
                     currentPage = 1;
@@ -350,7 +430,6 @@
                         loadComments(currentShortId, currentPage, true);
                     }
                 });
-
 
                 $('.comment-form').on('submit', function (e) {
                     e.preventDefault();
@@ -400,33 +479,26 @@
                                 $form[0].reset();
                                 $form.closest('.reply-form-container').addClass('d-none');
 
-                                var $repliesContainer = $form.closest('.comment-item').find(
-                                    '.replies-container');
+                                var $repliesContainer = $form.closest('.comment-item').find('.replies-container');
                                 $repliesContainer.prepend(response.html);
                                 $repliesContainer.show();
 
-                                var $viewRepliesBtn = $form.closest('.comment-item').find(
-                                    '.view-replies');
+                                var $viewRepliesBtn = $form.closest('.comment-item').find('.view-replies');
                                 if ($viewRepliesBtn.length) {
-                                    var currentCount = parseInt($viewRepliesBtn.find(
-                                        '.count-text').text().match(/\d+/)[0]);
-                                    $viewRepliesBtn.find('.count-text').text('― View ' + (
-                                        currentCount + 1) + ' replies');
+                                    var currentCount = parseInt($viewRepliesBtn.find('.count-text').text().match(/\d+/)[0]);
+                                    $viewRepliesBtn.find('.count-text').text('― View ' + (currentCount + 1) + ' replies');
                                 } else {
-                                    var newBtnHtml =
-                                        '<button class="common-action-btn view-replies" data-comment-id="' +
-                                        $form.data('comment-id') + '">' +
+                                    var newBtnHtml = '<button class="common-action-btn view-replies" data-comment-id="' + $form.data('comment-id') + '">' +
                                         '<span class="count-text">― View 1 reply </span> <i class="las la-angle-down"></i>' +
                                         '</button>';
-                                    $form.closest('.comment-item').find(
-                                        '.comment-item__action').append(newBtnHtml);
+                                    $form.closest('.comment-item').find('.comment-item__action').append(newBtnHtml);
                                 }
                             }
                         }
                     });
                 });
 
-                $('.send-stars-btn').on('click', function () {
+                $(document).on('click', '.send-stars-btn', function () {
                     var receiverId = $(this).data('receiver-id');
                     var shortId = $(this).data('short-id');
 
@@ -456,8 +528,7 @@
                         success: function (response) {
                             if (response.status == 'success') {
                                 var $btn = $($form.data('clickedButton'));
-                                $btn.siblings('.star-count').text(response.data
-                                    .stars_count);
+                                $btn.siblings('.star-count').text(response.data.stars_count);
                                 notify('success', response.message);
                                 $('.available-stars').text(response.data.stars_available);
                                 $form.trigger('reset');
@@ -501,9 +572,7 @@
                     let action = $btn.data("action");
 
                     $.ajax({
-                        url: action === "follow" ?
-                            "{{ url('user/friend/follow') }}/" + userId :
-                            "{{ url('user/friend/unfollow') }}/" + userId,
+                        url: action === "follow" ? "{{ url('user/friend/follow') }}/" + userId : "{{ url('user/friend/unfollow') }}/" + userId,
                         type: "POST",
                         data: {
                             _token: "{{ csrf_token() }}",
@@ -606,8 +675,7 @@
                     var platform = $option.data('platform');
                     var shortsId = $('#shareModal').data('shorts-id');
 
-                    var $countElement = $('.video-item').find(`[data-shorts-id="${shortsId}"]`).closest(
-                        '.video-item').find('.share-count');
+                    var $countElement = $('.video-item').find(`[data-shorts-id="${shortsId}"]`).closest('.video-item').find('.share-count');
 
                     $.ajax({
                         url: "{{ route('short.share') }}",
@@ -626,38 +694,25 @@
 
                                 switch (platform) {
                                     case 'whatsapp':
-                                        window.open('https://wa.me/?text=' +
-                                            encodeURIComponent(shareText), '_blank');
+                                        window.open('https://wa.me/?text=' + encodeURIComponent(shareText), '_blank');
                                         break;
                                     case 'facebook':
-                                        window.open(
-                                            'https://www.facebook.com/sharer/sharer.php?u=' +
-                                            encodeURIComponent(shortUrl), '_blank');
+                                        window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(shortUrl), '_blank');
                                         break;
                                     case 'telegram':
-                                        window.open('https://telegram.me/share/url?url=' +
-                                            encodeURIComponent(shortUrl) + '&text=' +
-                                            encodeURIComponent(shareText), '_blank');
+                                        window.open('https://telegram.me/share/url?url=' + encodeURIComponent(shortUrl) + '&text=' + encodeURIComponent(shareText), '_blank');
                                         break;
                                     case 'link':
-                                        $('.referralURL').val(shortUrl).removeClass(
-                                            'd-none').select();
+                                        $('.referralURL').val(shortUrl).removeClass('d-none').select();
 
                                         if (navigator.clipboard) {
-                                            navigator.clipboard.writeText(shortUrl).then(
-                                                function () {
-                                                    notify('success',
-                                                        'Link copied to clipboard!');
-                                                    $('#shareModal').modal('hide');
-                                                    $('.referralURL').addClass(
-                                                        'd-none');
-                                                },
-                                                function (err) {
-                                                    notify('error',
-                                                        'Failed to copy link: ' +
-                                                        err);
-                                                }
-                                            );
+                                            navigator.clipboard.writeText(shortUrl).then(function () {
+                                                notify('success', 'Link copied to clipboard!');
+                                                $('#shareModal').modal('hide');
+                                                $('.referralURL').addClass('d-none');
+                                            }, function (err) {
+                                                notify('error', 'Failed to copy link: ' + err);
+                                            });
                                         } else {
                                             $('.referralURL').select();
                                             document.execCommand('copy');
@@ -671,60 +726,6 @@
                                 notify('error', (response.data.message));
                             }
                         }
-                    });
-                });
-
-
-                $('.video-player').each(function () {
-                    var $video = $(this);
-                    var shortId = $video.data('short-id');
-                    var $viewCountSpan = $video.closest('.video-item').find('.view-count');
-                    var playTime = 0;
-                    var lastSentTime = 0;
-
-                    $video.on('timeupdate', function () {
-                        playTime = $video[0].currentTime;
-
-                        if (Math.floor(playTime) % 5 === 0 && playTime > lastSentTime) {
-                            $.ajax({
-                                url: '{{ route('short.track.analytics', ':id') }}'
-                                    .replace(':id', shortId),
-                                type: 'POST',
-                                data: {
-                                    play_time: Math.floor(playTime - lastSentTime),
-                                    _token: '{{ csrf_token() }}'
-                                },
-                                success: function (response) {
-                                    if (response.success) {
-                                        lastSentTime = Math.floor(playTime);
-                                        console.log(
-                                            'Playtime recorded for short ID: ' +
-                                            shortId);
-                                    }
-                                }
-                            });
-                        }
-                    });
-
-                    $video.on('ended', function () {
-                        $.ajax({
-                            url: '{{ route('short.record.view') }}',
-                            type: 'POST',
-                            data: {
-                                shorts_id: shortId,
-                                _token: '{{ csrf_token() }}'
-                            },
-                            success: function (response) {
-                                if (response.success) {
-                                    $viewCountSpan.text(response.views_count);
-                                }
-                            }
-                        });
-                    });
-
-                    $video.on('pause', function () {
-                        playTime = 0;
-                        lastSentTime = 0;
                     });
                 });
             });

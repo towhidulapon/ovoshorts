@@ -167,15 +167,7 @@
         // progress bar  js
 
         // ========================= Small Device Search And Little Bit Header Item Js Start =====================
-        $(".button-comment").on("click", (e) => {
-            $(".video-comment").toggleClass("show")
-            $(".body-overlay").toggleClass("show");
-        });
-        $(".common-action-close, .body-overlay").on("click", e => {
-            e.stopPropagation();
-            $(".video-comment").removeClass("show");
-            $(".body-overlay").removeClass("show");
-        });
+
 
         $(".has-sidebar").on("click", function () {
             $(".sidebar-menu").toggleClass("show-sm").removeClass('show');
@@ -375,17 +367,17 @@
         new WOW().init();
         // ========================= Wow Js End=====================
         /* ==================== Slick Slider Initialization JS Start ==================== */
-        const sliderConfig = {
-            slidesToScroll: 1,
-            autoplay: false,
-            autoplaySpeed: 2000,
-            speed: 1500,
-            dots: true,
-            pauseOnHover: true,
-            arrows: false,
-            prevArrow: '<button type="button" class="slick-prev"><i class="las la-arrow-left"></i></button>',
-            nextArrow: '<button type="button" class="slick-next"><i class="las la-arrow-right"></i></button>',
-        };
+        // const sliderConfig = {
+        //     slidesToScroll: 1,
+        //     autoplay: false,
+        //     autoplaySpeed: 2000,
+        //     speed: 1500,
+        //     dots: true,
+        //     pauseOnHover: true,
+        //     arrows: false,
+        //     prevArrow: '<button type="button" class="slick-prev"><i class="las la-arrow-left"></i></button>',
+        //     nextArrow: '<button type="button" class="slick-next"><i class="las la-arrow-right"></i></button>',
+        // };
 
         /* ==================== Slick Slider Initialization JS End ====================== */
 
