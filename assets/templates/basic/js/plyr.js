@@ -2281,7 +2281,7 @@
         playsinline: !0,
         seekTime: 10,
         volume: 1,
-        muted: !1,
+        muted: false,
         duration: null,
         displayDuration: !0,
         invertTime: !0,
