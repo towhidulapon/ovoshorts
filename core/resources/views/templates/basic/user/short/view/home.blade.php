@@ -158,7 +158,6 @@
                     <button type="submit" class="btn btn--primary">@lang('Send')</button>
                 </div>
             </form>
-
         </div>
     </div>
 </div>
@@ -176,7 +175,6 @@
             })
 
             $(document).ready(function () {
-
                 let isLoading = false;
                 const $slider = $('.shorts-video_sliders');
                 const $arrows = $('.shorts-video_arrows');
@@ -223,8 +221,8 @@
                     else $(this).slick('slickNext');
                 });
 
-                function initPlyr($container = $(document)) {
-                    $container.find('.video-player').each(function () {
+                function initPlyr() {
+                    $('.video-player').each(function () {
                         if (!$(this).data('plyr-initialized')) {
                             const player = new Plyr(this);
                             $(this).data('plyr-initialized', true);
@@ -483,7 +481,6 @@
                                 var shortId = $('.short-id').val();
                                 var $videoItem = $('.video-item').find(`[data-short-id="${shortId}"]`).closest('.video-item');
                                 var $commentCountElement = $videoItem.find('.button-comment .comment-count');
-
                                 $commentCountElement.text(response.comment_count);
                                 $('.comment-form').trigger('reset');
                                 $('.comments-container').prepend(response.html);
