@@ -9,8 +9,10 @@ use App\Models\CronJobLog;
 use App\Models\Short;
 use Carbon\Carbon;
 
-class CronController extends Controller {
-    public function cron() {
+class CronController extends Controller
+{
+    public function cron()
+    {
         $general            = gs();
         $general->last_cron = now();
         $general->save();
@@ -64,15 +66,24 @@ class CronController extends Controller {
         }
     }
 
-    public function fetchSchedule() {
+    public function fetchSchedule()
+    {
         $shorts = Short::where('status', Status::SCHEDULE)
-            ->approved()
             ->where('post_at', '<=', now())
             ->get();
 
+        $uploadMode = gs('short_approval');
+
         foreach ($shorts as $short) {
-            $short->status = Status::PUBLISHED;
-            $short->save();
+            if ($uploadMode == Status::AUTOMATIC) {
+                $short->is_approved = Status::SHORT_APPROVE;
+                $short->status      = Status::PUBLISHED;
+                $short->save();
+            } else {
+                $short->status      = Status::PUBLISHED;
+                $short->is_approved = Status::SHORT_PENDING;
+                $short->save();
+            }
         }
     }
 }

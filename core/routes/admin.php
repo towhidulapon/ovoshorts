@@ -336,12 +336,14 @@ Route::middleware('admin')->group(function () {
 
     Route::controller('ShortsController')->name('short.')->prefix('short')->group(function () {
         Route::get('unpublished', 'unpublished')->name('unpublished');
+        Route::get('pending', 'pendingShorts')->name('pending');
         Route::get('index', 'index')->name('index');
         Route::get('details/{id}', 'details')->name('details');
         Route::post('approve/{id}', 'approve')->name('approve');
         Route::post('reject/{id}', 'reject')->name('reject');
         Route::get('approved', 'approved')->name('approved');
         Route::get('rejected', 'rejected')->name('rejected');
+        Route::get('scheduled', 'scheduledShorts')->name('scheduled');
         Route::get('public', 'publicShorts')->name('public');
         Route::get('private', 'privateShorts')->name('private');
         Route::get('draft', 'draftShorts')->name('draft');

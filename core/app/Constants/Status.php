@@ -65,7 +65,7 @@ class Status
     const VERIFICATION_REJECTED   = 3;
 
     const MANUAL = 0;
-    const AUTO   = 1;
+    const AUTOMATIC   = 1;
 
     const NOW    = 1;
     const LATER  = 2;

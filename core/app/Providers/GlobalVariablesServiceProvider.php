@@ -66,7 +66,8 @@ class GlobalVariablesServiceProvider extends ServiceProvider
                 'kycUnverifiedUsersCount'       => User::kycUnverified()->count(),
                 'kycPendingUsersCount'          => User::kycPending()->count(),
                 'verificationPendingUsersCount' => User::verificationPending()->count(),
-                'unpublishedShortsCount'        => Short::where('is_approved', Status::SHORT_PENDING)->orWhere('status', Status::UNPUBLISHED)->count(),
+                'unpublishedShortsCount'        => Short::where('status', Status::UNPUBLISHED)->count(),
+                'pendingShortsCount'            => Short::where('is_approved', Status::SHORT_PENDING)->count(),
                 'draftShortsCount'              => Short::where('status', Status::DRAFT)->count(),
             ]);
         });
@@ -78,7 +79,7 @@ class GlobalVariablesServiceProvider extends ServiceProvider
             ]);
         });
 
-         View()->composer([
+        View()->composer([
             'Template::home',
             'Template::user.short.explore',
             'Template::user.friend.*',
@@ -179,7 +180,6 @@ class GlobalVariablesServiceProvider extends ServiceProvider
             $view->with('groupedNotifications', $cached['groupedNotifications'])
                 ->with('unreadNotifications', $cached['unreadNotifications']);
         });
-
 
         // View()->composer(['Template::home', 'Template::user.short.explore', 'Template::user.friend.*', 'Template::user.message.index', 'Template::user.profile_details'], function ($view) {
         //     if (auth()->check()) {

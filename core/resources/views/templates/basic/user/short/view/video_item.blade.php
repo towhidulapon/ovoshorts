@@ -83,7 +83,7 @@
             </div>
 
             <div class="cmn-button-item star-button">
-                <button class="like-button button-item send-stars-btn " data-receiver-id="{{ $short->user_id }}" data-short-id="{{ $short->id }}" @if ($short->user_id == auth()->id()) disabled @endif>
+                <button class="like-button button-item send-stars-btn" data-receiver-id="{{ $short->user_id }}" data-short-id="{{ $short->id }}" @if ($short->user_id == auth()->id()) disabled @endif>
                     ⭐
                 </button>
                 <span class="button-text likeCount star-count">{{ $short->stars_sum_stars ?? 0 }}</span>

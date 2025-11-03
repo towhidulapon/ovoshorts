@@ -185,7 +185,7 @@ class AppController extends Controller {
             'play_time' => 'nullable|integer|min:0',
         ]);
 
-        $short = Short::where('id', $id)->approved()->publicShort()
+        $short = Short::where('id', $id)->approved()->publicShort();
         if (!$short) {
             return apiResponse("short", "error", ['Short not found']);
         }
@@ -200,7 +200,7 @@ class AppController extends Controller {
     }
 
     public function getAnalytics($id) {
-        $short = Short::where('id', $id)->approved()->publicShort()
+        $short = Short::where('id', $id)->approved()->publicShort();
         if (!$short) {
             return apiResponse("short", "error", ['Short not found']);
         }

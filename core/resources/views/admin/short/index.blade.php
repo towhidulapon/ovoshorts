@@ -45,7 +45,7 @@
                                                     <button type="button" class="btn btn-outline--danger table-action-btn confirmationBtn" data-action="{{ route('admin.short.status', $short->id) }}" data-question="@lang('Are you sure to unpublish this short?')">
                                                         <i class="la la-eye-slash"></i> @lang('Unpublish')
                                                     </button>
-                                                @elseif ($short->status != Status::DRAFT && $short->is_approved != Status::SHORT_PENDING)
+                                                @elseif ($short->status == Status::UNPUBLISHED)
                                                     <button type="button" class="btn btn-outline--success table-action-btn confirmationBtn" data-action="{{ route('admin.short.status', $short->id) }}" data-question="@lang('Are you sure to publish this short?')">
                                                         <i class="la la-eye"></i> @lang('Publish')
                                                     </button>

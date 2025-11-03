@@ -27,6 +27,21 @@ class ShortsController extends Controller
         return $this->getShorts('Unpublished Shorts', Status::UNPUBLISHED);
     }
 
+    public function scheduledShorts()
+    {
+        $pageTitle = 'Scheduled Shorts';
+        $shorts = Short::with('user')
+            ->where('status', Status::SCHEDULE)
+            ->searchable(['name'])
+            ->filter(['id'])
+            ->dateFilter()
+            ->orderBy('id', getOrderBy())
+            ->paginate(getPaginate());
+
+        return view('admin.short.index', compact('pageTitle', 'shorts'));
+
+    }
+
     public function approved()
     {
         return $this->getShorts('Published Shorts', Status::PUBLISHED);
@@ -42,6 +57,7 @@ class ShortsController extends Controller
         $shorts = Short::with('user')
             ->when($status !== null, fn($q) => $q->where('status', $status))
             ->where('status', '!=', Status::DRAFT)
+            ->approved()
             ->searchable(['name'])
             ->filter(['id'])
             ->dateFilter()
@@ -54,6 +70,7 @@ class ShortsController extends Controller
     private function shortsQuery($status = null, $visibility = null)
     {
         $query = Short::with('user')
+            ->approved()
             ->searchable(['name'])
             ->filter(['id'])
             ->dateFilter()
@@ -68,6 +85,14 @@ class ShortsController extends Controller
         }
 
         return $query->paginate(getPaginate());
+    }
+
+    public function pendingShorts()
+    {
+        $pageTitle = 'Pending Shorts';
+        $shorts    = Short::where('is_approved', Status::SHORT_PENDING)->where('status', Status::PUBLISHED)->orderBy('id', 'desc')->paginate(getPaginate());
+
+        return view('admin.short.index', compact('pageTitle', 'shorts'));
     }
 
     public function publicShorts()
@@ -89,8 +114,13 @@ class ShortsController extends Controller
     public function draftShorts()
     {
         $pageTitle = 'Draft Shorts';
-        $shorts    = $this->shortsQuery(Status::DRAFT);
-
+        $shorts = Short::with('user')
+            ->where('status', Status::DRAFT)
+            ->searchable(['name'])
+            ->filter(['id'])
+            ->dateFilter()
+            ->orderBy('id', getOrderBy())
+            ->paginate(getPaginate());
         return view('admin.short.index', compact('pageTitle', 'shorts'));
     }
 
@@ -118,7 +148,7 @@ class ShortsController extends Controller
         ]);
 
         $notify[] = ['success', 'Short has been approved successfully'];
-        return to_route('admin.short.unpublished')->withNotify($notify);
+        return back()->withNotify($notify);
     }
 
     public function reject(Request $request, $id)
@@ -164,8 +194,8 @@ class ShortsController extends Controller
 
         $url = match ($short->storage_driver) {
             'wasabi' => getS3FileUri($filename),
-            'local' => asset(getFilePath('shorts') . '/' . $filename),
-            default => route('short.file', $filename),
+            'local'  => asset(getFilePath('shorts') . '/' . $filename),
+            default  => route('short.file', $filename),
         };
 
         return view('admin.short.detail', compact('short', 'pageTitle', 'url'));

@@ -219,13 +219,6 @@ trait ShortsManager
             $short->allow_comments = $request->comment ?? 0;
             $short->category_id    = $request->category_id;
 
-            if ($request->post_at >= now()) {
-                $short->post_at = $request->schedule_time;
-                $short->status  = Status::SCHEDULE;
-            } else {
-                $short->post_at = now();
-                $short->status  = Status::PUBLISHED;
-            }
 
             if ($request->hasFile('cover_image')) {
                 try {
@@ -326,7 +319,8 @@ trait ShortsManager
             }
         }
 
-        $message = $short->is_approved == Status::SHORT_APPROVE ? 'Short uploaded successfully' : 'Short uploaded successfully and waiting for approval';
+        // $message = $short->is_approved == Status::SHORT_APPROVE ? 'Short uploaded successfully' : 'Short uploaded successfully and waiting for approval';
+        $message = $uploadMode == Status::AUTOMATIC ? 'Short uploaded successfully' : 'Short uploaded successfully and waiting for approval';
 
         return responseManager("short_upload", $message, "success");
     }

@@ -124,4 +124,4 @@
     });
     // =============== Password Show Hide Js End =================
 </script>
-@endpush;
+@endpush

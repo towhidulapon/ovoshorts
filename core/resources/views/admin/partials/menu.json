@@ -39,80 +39,62 @@
         {
             "title": "Manage Shorts",
             "icon": "las la-video",
-            "counters": [
-                "unpublishedShortsCount",
-                "draftShortsCount"
-            ],
+            "counters": ["unpublishedShortsCount", "draftShortsCount", "pendingShortsCount"],
             "menu_active": "admin.short*",
             "submenu": [
                 {
-                    "keyword": [
-                        "shorts",
-                        "Manage Shorts",
-                        "Short management"
-                    ],
+                    "keyword": ["shorts", "Manage Shorts", "Short management"],
                     "title": "Draft Shorts",
                     "route_name": "admin.short.draft",
                     "menu_active": "admin.short.draft",
                     "counter": "draftShortsCount"
                 },
                 {
-                    "keyword": [
-                        "shorts",
-                        "Manage Shorts",
-                        "Short management"
-                    ],
+                    "keyword": ["shorts", "Manage Shorts", "Short management"],
                     "title": "Private Shorts",
                     "route_name": "admin.short.private",
                     "menu_active": "admin.short.private"
                 },
                 {
-                    "keyword": [
-                        "shorts",
-                        "Manage Shorts",
-                        "Short management"
-                    ],
+                    "keyword": ["shorts", "Manage Shorts", "Short management"],
                     "title": "Public Shorts",
                     "route_name": "admin.short.public",
                     "menu_active": "admin.short.public"
                 },
                 {
-                    "keyword": [
-                        "shorts",
-                        "Manage Shorts",
-                        "Short management"
-                    ],
+                    "keyword": ["shorts", "Manage Shorts", "Short management"],
+                    "title": "Scheduled Shorts",
+                    "route_name": "admin.short.scheduled",
+                    "menu_active": "admin.short.scheduled"
+                },
+                {
+                    "keyword": ["shorts", "Manage Shorts", "Short management"],
                     "title": "Unpublished Shorts",
                     "route_name": "admin.short.unpublished",
                     "menu_active": "admin.short.unpublished",
                     "counter": "unpublishedShortsCount"
                 },
                 {
-                    "keyword": [
-                        "shorts",
-                        "Manage Shorts",
-                        "Short management"
-                    ],
+                    "keyword": ["shorts", "Manage Shorts", "Short management"],
+                    "title": "Pending Shorts",
+                    "route_name": "admin.short.pending",
+                    "menu_active": "admin.short.pending",
+                    "counter": "pendingShortsCount"
+                },
+                {
+                    "keyword": ["shorts", "Manage Shorts", "Short management"],
                     "title": "Approved Shorts",
                     "route_name": "admin.short.approved",
                     "menu_active": "admin.short.approved"
                 },
                 {
-                    "keyword": [
-                        "shorts",
-                        "Manage Shorts",
-                        "Short management"
-                    ],
+                    "keyword": ["shorts", "Manage Shorts", "Short management"],
                     "title": "Rejected Shorts",
                     "route_name": "admin.short.rejected",
                     "menu_active": "admin.short.rejected"
                 },
                 {
-                    "keyword": [
-                        "shorts",
-                        "Manage Shorts",
-                        "Short management"
-                    ],
+                    "keyword": ["shorts", "Manage Shorts", "Short management"],
                     "title": "All Shorts",
                     "route_name": "admin.short.index",
                     "menu_active": "admin.short.index"
@@ -120,11 +102,7 @@
             ]
         },
         {
-            "keyword": [
-                "Stars",
-                "Manage stars",
-                "star management"
-            ],
+            "keyword": ["Stars", "Manage stars", "star management"],
             "title": "Star Packages",
             "icon": "lar la-star",
             "route_name": "admin.star.index"
@@ -292,7 +270,8 @@
             "icon": "las la-coins",
             "counters": ["pendingStarRechargeCount"],
             "menu_active": "admin.star.recharge*",
-            "submenu": [{
+            "submenu": [
+                {
                     "keyword": [
                         "Pending Star Recharge",
                         "Star Recharges",
