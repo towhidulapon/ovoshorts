@@ -170,10 +170,10 @@
 
 
         $(".has-sidebar").on("click", function () {
-            $(".sidebar-menu").toggleClass("show-sm").removeClass('show-sm');
+          $(".sidebar-menu").toggleClass("show-sm").removeClass("show");
         });
         $(".sidebar_left-close").on("click", function () {
-            $(".sidebar-menu").removeClass("show-sm").addClass('show-sm');
+          $(".sidebar-menu").removeClass("show-sm").addClass("show");
         });
         // Body click to close sidebar if open
 
