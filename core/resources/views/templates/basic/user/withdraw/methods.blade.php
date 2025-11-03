@@ -1,125 +1,128 @@
-@extends($activeTemplate . 'layouts.app')
-@section('app-content')
-    <section class="account position-relative bg-img" data-background-image="{{ asset($activeTemplateTrue . 'images/account-bg.png') }}">
+@extends($activeTemplate . 'layouts.dashboard_frontend')
+@section('content')
 
-        <div class="account__header">
-            <a href="{{ route('home') }}"> <img src="{{ siteLogo() }}" alt="img"> </a>
-        </div>
-
+<div class="dashboard-body">
+    <section class="account position-relative">
         <div class="account-inner">
             <div class="container ">
                 <div class="row justify-content-center">
-                    <div class="col-lg-9">
-                        <form action="{{ route('user.withdraw.money') }}" method="post" class="withdraw-form">
-                            @csrf
-                            <div class="gateway-card">
-                                <div class="row justify-content-center gy-sm-4 gy-3">
-                                    <div class="col-12">
-                                        <h5 class="payment-card-title">@lang('Withdraw')</h5>
-                                    </div>
-                                    <div class="col-lg-6">
-                                        <div class="payment-system-list is-scrollable gateway-option-list">
-                                            @foreach ($withdrawMethod as $data)
-                                                <label for="{{ titleToKey($data->name) }}" class="payment-item @if ($loop->index > 4) d-none @endif gateway-option">
-                                                    <div class="payment-item__info">
-                                                        <span class="payment-item__check"></span>
-                                                        <span class="payment-item__name">{{ __($data->name) }}</span>
+                    <div class="col-lg-10">
+                        <div class="custom--card">
+                            <div class="card-body">
+                                <form action="{{ route('user.withdraw.money') }}" method="post" class="withdraw-form">
+                                    @csrf
+                                    <div class="gateway-card">
+                                        <div class="row justify-content-center gy-sm-4 gy-3">
+                                            <div class="col-12">
+                                                <h5 class="payment-card-title">@lang('Withdraw')</h5>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="payment-system-list is-scrollable gateway-option-list">
+                                                    @foreach ($withdrawMethod as $data)
+                                                        <label for="{{ titleToKey($data->name) }}" class="payment-item @if ($loop->index > 4) d-none @endif gateway-option">
+                                                            <div class="payment-item__info">
+                                                                <span class="payment-item__check"></span>
+                                                                <span class="payment-item__name">{{ __($data->name) }}</span>
+                                                            </div>
+                                                            <div class="payment-item__thumb">
+                                                                <img class="payment-item__thumb-img" src="{{ getImage(getFilePath('withdrawMethod') . '/' . $data->image) }}" alt="@lang('payment-thumb')">
+                                                            </div>
+                                                            <input class="payment-item__radio gateway-input" id="{{ titleToKey($data->name) }}" hidden data-gateway='@json($data)' type="radio" name="method_code" value="{{ $data->id }}" @checked(old('method_code', $loop->first) == $data->id) data-min-amount="{{ showAmount($data->min_limit) }}" data-max-amount="{{ showAmount($data->max_limit) }}">
+                                                        </label>
+                                                    @endforeach
+                                                    @if ($withdrawMethod->count() > 4)
+                                                        <button type="button" class="payment-item__btn more-gateway-option">
+                                                            <p class="payment-item__btn-text">@lang('Show All Payment Options')</p>
+                                                            <span class="payment-item__btn__icon"><i class="fas fa-chevron-down"></i></i></span>
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="payment-system-list p-3">
+                                                    <div class="deposit-info">
+                                                        <div class="deposit-info__title">
+                                                            <p class="text mb-0">@lang('Amount')</p>
+                                                        </div>
+                                                        <div class="deposit-info__input">
+                                                            <div class="deposit-info__input-group input-group">
+                                                                <span class="deposit-info__input-group-text">{{ gs('cur_sym') }}</span>
+                                                                <input type="text" class="form-control form--control amount" name="amount" placeholder="@lang('00.00')" value="{{ old('amount') }}" autocomplete="off">
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <div class="payment-item__thumb">
-                                                        <img class="payment-item__thumb-img" src="{{ getImage(getFilePath('withdrawMethod') . '/' . $data->image) }}" alt="@lang('payment-thumb')">
+                                                    <div class="deposit-info">
+                                                        <div class="deposit-info__title">
+                                                            <p class="text has-icon"> @lang('Limit')</p>
+                                                        </div>
+                                                        <div class="deposit-info__input">
+                                                            <p class="text"><span class="gateway-limit">@lang('0.00')</span> </p>
+                                                        </div>
                                                     </div>
-                                                    <input class="payment-item__radio gateway-input" id="{{ titleToKey($data->name) }}" hidden data-gateway='@json($data)' type="radio" name="method_code" value="{{ $data->id }}" @checked(old('method_code', $loop->first) == $data->id) data-min-amount="{{ showAmount($data->min_limit) }}" data-max-amount="{{ showAmount($data->max_limit) }}">
-                                                </label>
-                                            @endforeach
-                                            @if ($withdrawMethod->count() > 4)
-                                                <button type="button" class="payment-item__btn more-gateway-option">
-                                                    <p class="payment-item__btn-text">@lang('Show All Payment Options')</p>
-                                                    <span class="payment-item__btn__icon"><i class="fas fa-chevron-down"></i></i></span>
-                                                </button>
-                                            @endif
+                                                    <div class="deposit-info">
+                                                        <div class="deposit-info__title">
+                                                            <p class="text has-icon">@lang('Processing Charge')
+                                                                <span data-bs-toggle="tooltip" title="@lang('Processing charge for withdraw method')" class="proccessing-fee-info"><i class="las la-info-circle"></i> </span>
+                                                            </p>
+                                                        </div>
+                                                        <div class="deposit-info__input">
+                                                            <p class="text">{{ gs('cur_sym') }}<span class="processing-fee">@lang('0.00')</span>
+                                                                {{ __(gs('cur_text')) }}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+            
+                                                    <div class="deposit-info total-amount pt-3">
+                                                        <div class="deposit-info__title">
+                                                            <p class="text">@lang('Receivable')</p>
+                                                        </div>
+                                                        <div class="deposit-info__input">
+                                                            <p class="text">{{ gs('cur_sym') }}<span class="final-amount">@lang('0.00')</span>
+                                                                {{ __(gs('cur_text')) }}</p>
+                                                        </div>
+                                                    </div>
+            
+                                                    <div class="deposit-info gateway-conversion d-none total-amount pt-2">
+                                                        <div class="deposit-info__title">
+                                                            <p class="text">@lang('Conversion')
+                                                            </p>
+                                                        </div>
+                                                        <div class="deposit-info__input">
+                                                            <p class="text"></p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="deposit-info conversion-currency d-none total-amount pt-2">
+                                                        <div class="deposit-info__title">
+                                                            <p class="text">
+                                                                @lang('In') <span class="gateway-currency"></span>
+                                                            </p>
+                                                        </div>
+                                                        <div class="deposit-info__input">
+                                                            <p class="text">
+                                                                <span class="in-currency"></span>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <button type="submit" class="btn btn--base w-100" disabled>
+                                                        @lang('Confirm Withdraw')
+                                                    </button>
+                                                    <div class="info-text pt-3">
+                                                        <p class="text">@lang('Safely withdraw your funds using our highly secure process and various withdrawal method')</p>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="col-lg-6">
-                                        <div class="payment-system-list p-3">
-                                            <div class="deposit-info">
-                                                <div class="deposit-info__title">
-                                                    <p class="text mb-0">@lang('Amount')</p>
-                                                </div>
-                                                <div class="deposit-info__input">
-                                                    <div class="deposit-info__input-group input-group">
-                                                        <span class="deposit-info__input-group-text">{{ gs('cur_sym') }}</span>
-                                                        <input type="text" class="form-control form--control amount" name="amount" placeholder="@lang('00.00')" value="{{ old('amount') }}" autocomplete="off">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="deposit-info">
-                                                <div class="deposit-info__title">
-                                                    <p class="text has-icon"> @lang('Limit')</p>
-                                                </div>
-                                                <div class="deposit-info__input">
-                                                    <p class="text"><span class="gateway-limit">@lang('0.00')</span> </p>
-                                                </div>
-                                            </div>
-                                            <div class="deposit-info">
-                                                <div class="deposit-info__title">
-                                                    <p class="text has-icon">@lang('Processing Charge')
-                                                        <span data-bs-toggle="tooltip" title="@lang('Processing charge for withdraw method')" class="proccessing-fee-info"><i class="las la-info-circle"></i> </span>
-                                                    </p>
-                                                </div>
-                                                <div class="deposit-info__input">
-                                                    <p class="text">{{ gs('cur_sym') }}<span class="processing-fee">@lang('0.00')</span>
-                                                        {{ __(gs('cur_text')) }}
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <div class="deposit-info total-amount pt-3">
-                                                <div class="deposit-info__title">
-                                                    <p class="text">@lang('Receivable')</p>
-                                                </div>
-                                                <div class="deposit-info__input">
-                                                    <p class="text">{{ gs('cur_sym') }}<span class="final-amount">@lang('0.00')</span>
-                                                        {{ __(gs('cur_text')) }}</p>
-                                                </div>
-                                            </div>
-
-                                            <div class="deposit-info gateway-conversion d-none total-amount pt-2">
-                                                <div class="deposit-info__title">
-                                                    <p class="text">@lang('Conversion')
-                                                    </p>
-                                                </div>
-                                                <div class="deposit-info__input">
-                                                    <p class="text"></p>
-                                                </div>
-                                            </div>
-                                            <div class="deposit-info conversion-currency d-none total-amount pt-2">
-                                                <div class="deposit-info__title">
-                                                    <p class="text">
-                                                        @lang('In') <span class="gateway-currency"></span>
-                                                    </p>
-                                                </div>
-                                                <div class="deposit-info__input">
-                                                    <p class="text">
-                                                        <span class="in-currency"></span>
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <button type="submit" class="btn btn--base w-100" disabled>
-                                                @lang('Confirm Withdraw')
-                                            </button>
-                                            <div class="info-text pt-3">
-                                                <p class="text">@lang('Safely withdraw your funds using our highly secure process and various withdrawal method')</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                </form>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+</div>
+
 @endsection
 
 
