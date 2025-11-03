@@ -1967,6 +1967,10 @@ ol {
   background-color: rgba(14, 14, 14, 0.5);
 }
 
+.social-login-link svg{
+  padding-right: 3px;
+}
+
 @media screen and (max-width: 575px) {
   .social-login-link {
     font-size: 1rem;
@@ -3042,6 +3046,26 @@ textarea.form--control {
   border-radius: 30px;
   border: 1px solid transparent;
 }
+
+@media screen  and (max-width: 991px) {
+  
+   .input-group-custom{
+      border: transparent;
+      background: rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      padding: 0px !important;
+      height: 45px;
+      width: 45px;
+      border-radius: 30px;
+      border: 1px solid transparent;
+      justify-content: center;
+  } 
+  .input-group-custom__icon{
+      padding-left: 10px;
+  }
+}
+
 
 .input-group-custom .input-group-text.mobile-code {
   background-color: hsl(var(--common-bg));
@@ -5187,7 +5211,7 @@ body:has(.mobile-bottom-menu) {
   height: 28px;
 }
 
-@media screen and (max-width: 767px) {
+@media screen and (max-width: 991px) {
   .cmn-button-item .button-item svg {
     width: 20px;
     height: 20px;
@@ -5902,7 +5926,7 @@ body:has(.mobile-bottom-menu) {
   right: 24px;
 }
 
-@media screen and (max-width: 767px) {
+@media screen and (max-width: 991px) {
   .home-fluid .search-form .form-group .form--control {
     padding: 14px 35px 14px 45px;
     background: hsl(var(--body-bg));
@@ -12170,4 +12194,17 @@ body:has(.mobile-bottom-menu) {
   -ms-flex-align: center;
   align-items: center;
   gap: 12px;
+}
+
+/* login modal design start here */
+.login-modal__footer__text, .login-have-account{
+  padding: 16px;
+  background-color: hsl(var(--body-bg));
+  text-align: center;
+}
+
+.login-have-account{
+ border-top: 1px solid hsl(var(--border-color));
+ border-radius: 0px 0px 6px 6px;
+
 }

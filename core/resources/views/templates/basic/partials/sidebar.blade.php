@@ -18,7 +18,7 @@
                                 <path d="M22 22L20 20" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                         </span>
-                        <input class="input-group-custom__input form-control form--control" type="search" readonly name="search" value="{{ request()->search }}" placeholder="@lang('Search')">
+                        <input class="input-group-custom__input form-control form--control" type="search" name="search" value="{{ request()->search }}" placeholder="@lang('Search')">
                     </div>
                 </div>
             </form>
