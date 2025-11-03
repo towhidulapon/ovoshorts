@@ -387,11 +387,15 @@ class SiteController extends Controller
     {
         $request->validate([
             'shorts_id' => 'required|exists:shorts,id',
-            'platform'  => 'required|in:telegram,whatsapp,facebook,modal,link',
+            'platform'  => 'required|in:telegram,whatsapp,facebook,modal,link,messenger,pinterest,linkedin',
         ]);
 
-        $short = Short::findOrFail($request->shorts_id);
+        $short = Short::find($request->shorts_id);
         $token = getTrx();
+
+        if(!$short) {
+            return apiResponse("short", "error", ['Short not found']);
+        }
 
         $shortShare              = new ShortShare();
         $shortShare->shorts_id   = $request->shorts_id;

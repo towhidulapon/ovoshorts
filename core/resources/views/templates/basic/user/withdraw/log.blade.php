@@ -39,16 +39,16 @@
 
                                     @forelse($withdraws as $withdraw)
                                         @php
-                                            $details = [];
-                                            foreach ($withdraw->withdraw_information ?? [] as $key => $info) {
-                                                $details[] = $info;
-                                                if ($info->type == 'file') {
-                                                    $details[$key]->value = route(
-                                                        'user.download.attachment',
-                                                        encrypt(getFilePath('verify') . '/' . $info->value),
-                                                    );
-                                                }
-                                            }
+    $details = [];
+    foreach ($withdraw->withdraw_information ?? [] as $key => $info) {
+        $details[] = $info;
+        if ($info->type == 'file') {
+            $details[$key]->value = route(
+                'user.download.attachment',
+                encrypt(getFilePath('verify') . '/' . $info->value),
+            );
+        }
+    }
                                         @endphp
                                         <tr>
                                             <td>
@@ -123,7 +123,7 @@
 
 
     {{-- APPROVE MODAL --}}
-    <div id="detailModal" class="modal custom--modal fade" tabindex="-1" role="dialog">
+    <div id="detailModal" class="modal custom--modal fade-in-scale fade" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">

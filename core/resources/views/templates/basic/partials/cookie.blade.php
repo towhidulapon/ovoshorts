@@ -10,8 +10,8 @@
             {{ __($cookie->data_values->short_desc) }}
         </p>
         <div class="cookies-card__footer">
-            <a href="{{ route('cookie.policy') }}" class="cookies-card__btn-outline">@lang('View More')</a>
-            <button type="button"  class="cookies-card__btn policy">@lang('Accept All')</button>
+            <a href="{{ route('cookie.policy') }}" class="btn btn--base-two btn--sm">@lang('View More')</a>
+            <button type="button"  class="btn btn--base policy btn--sm">@lang('Accept All')</button>
         </div>
     </div>
 @endif

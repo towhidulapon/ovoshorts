@@ -2,7 +2,7 @@
     <div class="social-login">
         @if (@gs('socialite_credentials')->google->status == Status::ENABLE)
             <div class="social-login-btn">
-                <a href="{{ route('user.social.login', 'google') }}" class="btn social-login-link fs-18 w-100">
+                <a href="{{ route('user.social.login', 'google') }}" class="btn social-login-link google-link fs-18 w-100">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <g clip-path="url(#clip0_2185_1326)">
                             <path d="M5.31891 14.5034L4.4835 17.6221L1.43011 17.6867C0.517594 15.9942 0 14.0577 0 11.9999C0 10.01 0.483938 8.1335 1.34175 6.4812H1.34241L4.06078 6.97958L5.25159 9.68164C5.00236 10.4082 4.86652 11.1882 4.86652 11.9999C4.86661 12.8808 5.02617 13.7247 5.31891 14.5034Z" fill="#FBBB00" />
@@ -23,7 +23,7 @@
 
         @if (@gs('socialite_credentials')->facebook->status == Status::ENABLE)
             <div class="social-login-btn">
-                <a href="{{ route('user.social.login', 'facebook') }}" class="btn social-login-link fs-18 w-100">
+                <a href="{{ route('user.social.login', 'facebook') }}" class="btn social-login-link facebook-link fs-18 w-100">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <g clip-path="url(#clip0_2185_1311)">
                             <path d="M24 12C24 17.9897 19.6116 22.9542 13.875 23.8542V15.4688H16.6711L17.2031 12H13.875V9.74906C13.875 8.79984 14.34 7.875 15.8306 7.875H17.3438V4.92188C17.3438 4.92188 15.9703 4.6875 14.6573 4.6875C11.9166 4.6875 10.125 6.34875 10.125 9.35625V12H7.07812V15.4688H10.125V23.8542C4.38844 22.9542 0 17.9897 0 12C0 5.37281 5.37281 0 12 0C18.6272 0 24 5.37281 24 12Z" fill="#1877F2" />
@@ -41,7 +41,7 @@
         @endif
         @if (@gs('socialite_credentials')->linkedin->status == Status::ENABLE)
             <div class="social-login-btn">
-                <a href="{{ route('user.social.login', 'linkedin') }}" class="btn social-login-link fs-18 w-100">
+                <a href="{{ route('user.social.login', 'linkedin') }}" class="btn social-login-link linkedin-link fs-18 w-100">
                     <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" x="0" y="0" viewBox="0 0 152 152" style="enable-background:new 0 0 512 512" xml:space="preserve" class="">
                         <g>
                             <g data-name="Layer 2">

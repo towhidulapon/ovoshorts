@@ -64,7 +64,7 @@
 
 
 <!-- Share Modal -->
-<div class="modal custom--modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+<div class="modal custom--modal fade-in-scale fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content text-center">
             <div class="modal-header">
@@ -105,10 +105,9 @@
                         <i class="fab fa-facebook-f"></i> <span>@lang('Facebook')</span>
                     </a>
 
-                    <a href="#" target="_blank" class="sheer_icon twitter-i">
-                        <i class="fab fa-twitter"></i> <span>@lang('Twitter')</span>
+                    <a href="#" class="sheer_icon link-i">
+                        <i class="fas fa-link"></i> <span>@lang('Link')</span>
                     </a>
-
                     <a href="#" target="_blank" class="sheer_icon linkedin-i">
                         <i class="fab fa-linkedin-in"></i> <span>@lang('Linkedin')</span>
                     </a>
@@ -125,8 +124,8 @@
                         <i class="fa-brands fa-facebook-messenger"></i> <span>@lang('Messenger')</span>
                     </a>
                 </div>
-                <div class="sheer_link">
-                    <input type="text" class="form--control" id="copyText" readonly="">
+                <div class="sheer_link d-none">
+                    <input type="text" class="form--control" id="copyText" readonly>
                     <button class="btn btn--base copyBtn">@lang('Copy')</button>
                 </div>
             </div>
@@ -134,7 +133,7 @@
     </div>
 </div>
 
-<div class="modal custom--modal fade" id="sendStarsModal" tabindex="-1" aria-labelledby="shareProfileModalLabel" aria-hidden="true">
+<div class="modal custom--modal fade-in-scale fade" id="sendStarsModal" tabindex="-1" aria-labelledby="shareProfileModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <form id="sendStarsForm" class="no-submit-loader" method="POST" action="{{ route('user.star.transaction.send') }}">
@@ -161,6 +160,58 @@
         </div>
     </div>
 </div>
+
+<div class="modal custom--modal fade  fade-in-scale login-modal" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header justify-content-end p-3 p-lg-4">
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><i class="las la-times"></i></button>
+            </div>
+            <div class="modal-body p-4 p-lg-5 ">
+                <h3 class="title text-center mb-4">@lang('Log in to') {{ gs('site_name') }}</h3>
+                <form action="#" method="POST">
+                    <div class="social-login-btn">
+                        <a href="{{ route('user.login') }}" class="btn social-login-link fs-18 w-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve" class="">
+                                <g>
+                                    <path d="M260.52 329.539a24 24 0 0 0 33.941 33.941l90.51-90.51a24 24 0 0 0 0-33.941l-90.51-90.509a24 24 0 0 0-33.941 0 24 24 0 0 0 0 33.941L310.059 232H48a24 24 0 0 0-24 24 24 24 0 0 0 24 24h262.059z" fill="CurrentColor" opacity="1" data-original="CurrentColor" class=""></path>
+                                    <path d="M448 24H224a40 40 0 0 0-40 40v32a24 24 0 0 0 48 0V72h208v368H232v-24a24 24 0 0 0-48 0v32a40 40 0 0 0 40 40h224a40 40 0 0 0 40-40V64a40 40 0 0 0-40-40z" fill="CurrentColor" opacity="1" data-original="CurrentColor" class=""></path>
+                                </g>
+                            </svg>
+                            @lang('Go to Login Page')
+                        </a>
+                    </div>
+                    <div class="d-flex align-items-center my-2">
+                        <hr class="flex-grow-1">
+                        <span class="mx-2 text-muted fw-semibold">@lang('OR')</span>
+                        <hr class="flex-grow-1">
+                    </div>
+                    <div class="social-login-btn">
+                        @include($activeTemplate . 'partials.social_login')
+                    </div>
+                </form>
+            </div>
+
+            <div class="login-modal__footer">
+                <div class="login-modal__footer__text">
+                    <p class="fs-14">
+                        By continuing with an account located in <a href="#" class="link fw-700">Bangladesh</a>,
+                        you
+                        agree to our <a href="#" class="link fw-700">Terms of Services</a> and acknowledge that
+                        you
+                        have read our <a href="#" class="link fw-700">Privacy Policy</a>.
+                    </p>
+                </div>
+                <div class="login-have-account">
+                    <p class="login-have-account__text">@lang('Don’t have an Account?') <a href="{{ route('user.register') }}" class="login-have-account__link text--base fw-700">@lang('Sign Up')</a>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 
 @push('script')
     <script>
@@ -355,7 +406,7 @@
                 $(document).on('click', ".like-btn", function (e) {
                     e.preventDefault();
                     if (!isLoggedIn) {
-                        window.location.href = "{{ route('user.login') }}";
+                        $('.login-modal').modal('show');
                         return;
                     }
                     var $button = $(this);
@@ -464,7 +515,7 @@
                 $('.comment-form').on('submit', function (e) {
                     e.preventDefault();
                     if (!isLoggedIn) {
-                        window.location.href = "{{ route('user.login') }}";
+                        $('.login-modal').modal('show');
                         return;
                     }
                     var $btn = $(this);
@@ -492,7 +543,7 @@
                 $(document).on('submit', '.reply-form', function (e) {
                     e.preventDefault();
                     if (!isLoggedIn) {
-                        window.location.href = "{{ route('user.login') }}";
+                        $('.login-modal').modal('show');
                         return;
                     }
                     var $form = $(this);
@@ -535,7 +586,7 @@
                     $('#sendStarsForm').data('clickedButton', this);
 
                     if (!isLoggedIn) {
-                        window.location.href = "{{ route('user.login') }}";
+                        $('.login-modal').modal('show');
                         return;
                     }
 
@@ -628,7 +679,7 @@
                 $(document).on('click', '.comment-reaction-btn', function (e) {
                     e.preventDefault();
                     if (!isLoggedIn) {
-                        window.location.href = "{{ route('user.login') }}";
+                        $('.login-modal').modal('show');
                         return;
                     }
                     var $btn = $(this);
@@ -658,7 +709,7 @@
                 $(document).on('click', '.save-btn', function (e) {
                     e.preventDefault();
                     if (!isLoggedIn) {
-                        window.location.href = "{{ route('user.login') }}";
+                        $('.login-modal').modal('show');
                         return;
                     }
                     var $btn = $(this);
@@ -705,7 +756,7 @@
 
                     var platform = '';
                     if ($(this).hasClass('facebook-i')) platform = 'facebook';
-                    else if ($(this).hasClass('twitter-i')) platform = 'twitter';
+                    else if ($(this).hasClass('link-i')) platform = 'link';
                     else if ($(this).hasClass('linkedin-i')) platform = 'linkedin';
                     else if ($(this).hasClass('pinterest-i')) platform = 'pinterest';
                     else if ($(this).hasClass('whatsapp-i')) platform = 'whatsapp';
@@ -725,18 +776,17 @@
                         success: function (response) {
                             if (response.data.success) {
                                 var shortUrl = response.data.share_url;
+                                console.log(shortUrl);
                                 var shareText = encodeURIComponent("Check out this video! " + shortUrl);
                                 var shareUrl = '';
 
                                 $countElement.text(response.data.shares_count);
-                                $('#copyText').val(shortUrl);
+
+                                $('#shareModal').data('short-url', shortUrl);
 
                                 switch (platform) {
                                     case 'facebook':
                                         shareUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(shortUrl);
-                                        break;
-                                    case 'twitter':
-                                        shareUrl = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(shortUrl) + '&text=' + shareText;
                                         break;
                                     case 'linkedin':
                                         shareUrl = 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(shortUrl);
@@ -750,6 +800,27 @@
                                     case 'messenger':
                                         shareUrl = 'fb-messenger://share/?link=' + encodeURIComponent(shortUrl);
                                         break;
+                                    case 'link':
+                                        $('.referralURL').val(shortUrl).select();
+                                        if (navigator.clipboard) {
+                                            navigator.clipboard.writeText(shortUrl).then(
+                                                function () {
+                                                    notify('success', 'Link copied to clipboard!');
+                                                    $('#shareModal').modal('hide');
+                                                    $('.referralURL').addClass('d-none');
+                                                },
+                                                function (err) {
+                                                    notify('error', 'Failed to copy link: ' + err);
+                                                }
+                                            );
+                                        } else {
+                                            $('.referralURL').select();
+                                            document.execCommand('copy');
+                                            notify('success', 'Link copied to clipboard!');
+                                            $('#shareModal').modal('hide');
+                                            $('.referralURL').addClass('d-none');
+                                        }
+                                        break;
                                 }
 
                                 if (shareUrl) {
@@ -759,31 +830,9 @@
                             } else {
                                 notify('error', response.data.message);
                             }
-                        },
-                        error: function () {
-                            notify('error', 'Something went wrong while sharing.');
                         }
                     });
                 });
-
-                $(document).on('click', '.copyBtn', function () {
-                    var shortUrl = $('#copyText').val();
-
-                    if (navigator.clipboard) {
-                        navigator.clipboard.writeText(shortUrl).then(function () {
-                            notify('success', 'Link copied to clipboard!');
-                            $('#shareModal').modal('hide');
-                        }, function (err) {
-                            notify('error', 'Failed to copy link: ' + err);
-                        });
-                    } else {
-                        $('#copyText').select();
-                        document.execCommand('copy');
-                        notify('success', 'Link copied to clipboard!');
-                        $('#shareModal').modal('hide');
-                    }
-                });
-
             });
         })(jQuery);
     </script>

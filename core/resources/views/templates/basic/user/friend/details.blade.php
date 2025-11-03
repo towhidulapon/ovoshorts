@@ -80,7 +80,7 @@
 
 @endsection
 
-<div class="modal custom--modal fade" id="shareProfileModal" tabindex="-1" aria-labelledby="shareProfileModalLabel" aria-hidden="true">
+<div class="modal custom--modal fade-in-scale fade" id="shareProfileModal" tabindex="-1" aria-labelledby="shareProfileModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
@@ -109,7 +109,7 @@
     </div>
 </div>
 
-<div class="modal custom--modal fade" id="followingModal" tabindex="-1" aria-labelledby="followingModalLabel" aria-hidden="true">
+<div class="modal custom--modal fade-in-scale fade" id="followingModal" tabindex="-1" aria-labelledby="followingModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">

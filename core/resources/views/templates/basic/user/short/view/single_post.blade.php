@@ -227,7 +227,7 @@ $isSaved =
     <x-confirmation-modal isFrontend="true" />
 @endsection
 
-<div class="modal custom--modal fade" id="sendStarsModal" tabindex="-1" aria-labelledby="shareProfileModalLabel" aria-hidden="true">
+<div class="modal custom--modal fade-in-scale fade" id="sendStarsModal" tabindex="-1" aria-labelledby="shareProfileModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <form id="sendStarsForm" class="no-submit-loader" method="POST" action="{{ route('user.star.transaction.send') }}">

@@ -1,6 +1,6 @@
 @props(['isFrontend' => false])
 
-<div id="confirmationModal" class="modal custom--modal @if($isFrontend)  @endif fade" tabindex="-1" role="dialog" data-bs-backdrop="static" data-bs-keyboard="false">
+<div id="confirmationModal" class="modal fade-in-scale custom--modal @if($isFrontend)  @endif fade" tabindex="-1" role="dialog" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <form method="POST">

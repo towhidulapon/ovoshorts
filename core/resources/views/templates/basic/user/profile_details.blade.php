@@ -86,10 +86,10 @@
 
                 <div class="tab-content" id="pills-tabContent">
                     @foreach ([
-                                'home' => $shorts,
-                                'profile' => $favShorts,
-                                'contact' => $likedShorts,
-                            ] as $tab => $collection)
+    'home' => $shorts,
+    'profile' => $favShorts,
+    'contact' => $likedShorts,
+] as $tab => $collection)
                         <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="pills-{{ $tab }}"
                             role="tabpanel">
                             @include('Template::user.tab_content', compact('collection', 'tab'))
@@ -102,7 +102,7 @@
     </div>
 @endsection
 
-<div class="modal custom--modal fade" id="shareProfileModal" tabindex="-1" aria-labelledby="shareProfileModalLabel"
+<div class="modal custom--modal fade-in-scale fade" id="shareProfileModal" tabindex="-1" aria-labelledby="shareProfileModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content text-center">
@@ -119,7 +119,7 @@
     </div>
 </div>
 
-<div class="modal custom--modal fade" id="followersModal" tabindex="-1" aria-labelledby="followersModalLabel"
+<div class="modal custom--modal fade-in-scale fade" id="followersModal" tabindex="-1" aria-labelledby="followersModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
@@ -135,7 +135,7 @@
     </div>
 </div>
 
-<div class="modal custom--modal fade" id="followingModal" tabindex="-1" aria-labelledby="followingModalLabel"
+<div class="modal custom--modal fade-in-scale fade" id="followingModal" tabindex="-1" aria-labelledby="followingModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">

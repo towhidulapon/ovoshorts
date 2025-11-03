@@ -154,7 +154,7 @@ $starElements = getContent('stars.element', false, orderById: true);
 
 
     <!-- Modal -->
-    <div class="modal custom--modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal custom--modal fade-in-scale fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header border-0 justify-content-end">
@@ -225,7 +225,7 @@ $starElements = getContent('stars.element', false, orderById: true);
     </div>
 
     <!-- Convert Coins to Balance Modal -->
-    <div class="modal custom--modal fade" id="convertModal" tabindex="-1" aria-hidden="true">
+    <div class="modal custom--modal fade-in-scale fade" id="convertModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content p-4">
                 <div class="modal-header border-0 justify-content-end">
@@ -256,7 +256,7 @@ $starElements = getContent('stars.element', false, orderById: true);
     </div>
 
     <!-- Share Modal -->
-    <div class="modal custom--modal fade" id="shareModal" tabindex="-1" aria-hidden="true">
+    <div class="modal custom--modal fade-in-scale fade" id="shareModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content p-4">
                 <div class="modal-header border-0 justify-content-end">

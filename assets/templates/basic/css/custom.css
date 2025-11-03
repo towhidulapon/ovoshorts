@@ -99,10 +99,11 @@
   left: 30px;
   z-index: 999999;
   transition: all 0.5s;
-  background: #fff;
+  background: hsl(var(--common-bg));
   border-radius: 5px;
   box-shadow: 0 0 18px rgb(0 0 0 / 20%);
   border-radius: 20px;
+  border: 1px solid hsl(var(--border-color));
 }
 
 .cookies-card__header {

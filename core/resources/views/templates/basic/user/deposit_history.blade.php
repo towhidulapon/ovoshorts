@@ -19,7 +19,7 @@
                         <a href="{{ route('user.deposit.index') }}" class="btn btn--base btn--sm">@lang('New Withdraw')</a>
                     </div>
                 </div>
-    
+
                 <div class="card-body card-body p-3 pt-0">
                     <table class="table table--responsive--xl">
                         <thead>
@@ -79,18 +79,18 @@
                                         @php echo $deposit->statusBadge @endphp
                                     </td>
                                     @php
-                                        $details = [];
-                                        if ($deposit->method_code >= 1000 && $deposit->method_code <= 5000) {
-                                            foreach (@$deposit->detail ?? [] as $key => $info) {
-                                                $details[] = $info;
-                                                if ($info->type == 'file') {
-                                                    $details[$key]->value = route(
-                                                        'user.download.attachment',
-                                                        encrypt(getFilePath('verify') . '/' . $info->value),
-                                                    );
-                                                }
-                                            }
-                                        }
+    $details = [];
+    if ($deposit->method_code >= 1000 && $deposit->method_code <= 5000) {
+        foreach (@$deposit->detail ?? [] as $key => $info) {
+            $details[] = $info;
+            if ($info->type == 'file') {
+                $details[$key]->value = route(
+                    'user.download.attachment',
+                    encrypt(getFilePath('verify') . '/' . $info->value),
+                );
+            }
+        }
+    }
                                     @endphp
                                     <td>
                                         @if ($deposit->method_code >= 1000 && $deposit->method_code <= 5000)
@@ -126,7 +126,7 @@
         </div>
     </div>
     {{-- APPROVE MODAL --}}
-    <div id="detailModal" class="modal custom--modal fade" tabindex="-1" role="dialog">
+    <div id="detailModal" class="modal custom--modal fade-in-scale fade" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
