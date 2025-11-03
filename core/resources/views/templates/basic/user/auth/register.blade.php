@@ -176,7 +176,7 @@
                                                             );
                                                         @endphp
                                                         <div class="form-group">
-                                                            <div class="form--check">
+                                                            <div class="form--check flex-wrap">
                                                                 <input type="checkbox" id="agree" class="form-check-input"
                                                                     @checked(old('agree')) name="agree" required>
                                                                 <label for="agree">@lang('I agree with')</label> <span>
