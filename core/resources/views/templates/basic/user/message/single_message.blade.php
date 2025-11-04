@@ -6,7 +6,7 @@
     <div class="message-content-outer">
         <div class="message-content-author">
             <div class="thumb">
-                <img src="{{ getImage(getFilePath('userProfile') . '/' . $message?->sender?->image) }}" class="fit-image" alt="img">
+                <img src="{{ $message?->sender?->image ? getImage(getFilePath('userProfile') . '/' . $message?->sender?->image, getFileSize('userProfile')) : asset('assets/images/avatar.jpg') }}" class="user-img fit-image" alt="img">
             </div>
             <div class="message-content {{ $message->images->isNotEmpty() ? 'has-image' : '' }}">
                 @if($message->message)

@@ -50,7 +50,7 @@
                             <div class="video-profile__auhtor">
                                 <div class="video-profile__auhtor-left">
                                     <div class="video-profile__auhtor__thumb">
-                                        <img class="fit-image" src="{{ getImage(getFilePath('userProfile') . '/' . $short?->user?->image, getFileSize('userProfile')) }}" alt="image">
+                                        <img class="fit-image" src="{{ $short?->user?->image ? getImage(getFilePath('userProfile') . '/' . $short?->user?->image, getFileSize('userProfile')) : asset('assets/images/avatar.jpg') }}" alt="image">
                                     </div>
                                     <div class="video-profile__auhtor__content">
                                         <h6 class="video-profile__auhtor__name">{{ $short?->user?->firstname }}
@@ -77,16 +77,16 @@
                             </div>
                         </div>
                         @php
-$isLiked =
-    auth()->check() &&
-    App\Models\UserReaction::where('shorts_id', $short->id)
-        ->where('user_id', auth()->id())
-        ->exists();
-$isSaved =
-    auth()->check() &&
-    App\Models\SavedShort::where('shorts_id', $short->id)
-        ->where('user_id', auth()->id())
-        ->exists();
+                            $isLiked =
+                                auth()->check() &&
+                                App\Models\UserReaction::where('shorts_id', $short->id)
+                                    ->where('user_id', auth()->id())
+                                    ->exists();
+                            $isSaved =
+                                auth()->check() &&
+                                App\Models\SavedShort::where('shorts_id', $short->id)
+                                    ->where('user_id', auth()->id())
+                                    ->exists();
                         @endphp
                         <div class="video-action-wrapper">
                             <div class="video-item__action video-action-button-group">
@@ -134,7 +134,7 @@ $isSaved =
                         </div>
                         <div class="input-group video-action__copybtn copy-board d-none">
                             <input type="text" name="key" value="" class="form-control form--control referralURL" readonly="" id="key">
-                            <button type="button" class="btn text-white copybtn" id="copyBoard">
+                            <button type="button" class="btn text-white btn--base copybtn" id="copyBoard">
                                 @lang('Copy link')
                             </button>
                         </div>

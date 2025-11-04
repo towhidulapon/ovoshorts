@@ -341,7 +341,7 @@ Route::middleware('admin')->group(function () {
         Route::get('details/{id}', 'details')->name('details');
         Route::post('approve/{id}', 'approve')->name('approve');
         Route::post('reject/{id}', 'reject')->name('reject');
-        Route::get('approved', 'approved')->name('approved');
+        Route::get('published', 'published')->name('published');
         Route::get('rejected', 'rejected')->name('rejected');
         Route::get('scheduled', 'scheduledShorts')->name('scheduled');
         Route::get('public', 'publicShorts')->name('public');
@@ -351,8 +351,8 @@ Route::middleware('admin')->group(function () {
 
     });
 
-    Route::controller('StarRechargeController')->prefix('star/recharge')->name('star.recharge.')->group(function () {
-        Route::get('/', 'allRecharges')->name('list');
+    Route::controller('PaymentController')->prefix('payment')->name('payment.')->group(function () {
+        Route::get('/', 'allPayments')->name('list');
         Route::get('pending', 'pending')->name('pending');
         Route::get('approved', 'approved')->name('approved');
         Route::get('successful', 'successful')->name('successful');

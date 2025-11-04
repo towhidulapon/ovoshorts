@@ -153,7 +153,7 @@
                             @endif
                             <div class="notification-item__left">
                                 <div class="notification-item__thumb">
-                                    <img class="fit-image" src="{{ getImage(getFilePath('userProfile') . '/' . $notification['user']->image, getFileSize('userProfile')) }}" alt="author">
+                                    <img class="fit-image" src="{{ $notification['user']->image ? getImage(getFilePath('userProfile') . '/' . $notification['user']->image, getFileSize('userProfile')) : asset('assets/images/avatar.jpg') }}" alt="author">
                                 </div>
                                 <div class="notification-item__content">
                                     <a href="{{ route('user.profile', $notification['user']->username) }}">

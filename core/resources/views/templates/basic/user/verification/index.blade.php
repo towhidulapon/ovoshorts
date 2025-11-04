@@ -9,8 +9,7 @@
                             <h4 class="card-title">@lang('Verification Form')</h4>
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('user.verification.apply') }}" method="post"
-                                enctype="multipart/form-data">
+                            <form action="{{ route('user.verification.apply') }}" method="post" enctype="multipart/form-data">
                                 @csrf
                                 <x-ovo-form identifier="act" identifierValue="verification" />
 
@@ -19,36 +18,23 @@
                                 </div>
                             </form>
 
-
                             <div class="text-center my-4">
                                 <span class="text-muted">@lang('OR')</span>
+                            </div>
 
-                                <form action="{{ route('user.verification.purchase') }}" class="no-submit-loader" method="POST">
+                            <div class="text-center my-4">
+                                <form action="{{ route('user.verification.purchase') }}" method="POST">
                                     @csrf
                                     <input type="hidden" name="amount" value="{{ gs('verification_price') }}">
                                     <button type="submit" class="btn btn-success w-100">
                                         @lang('Get Verified Now for') {{ showAmount(gs('verification_price')) }}
                                     </button>
                                 </form>
-
-                            <div class="text-center my-4">
-                                <span class="text-muted">@lang('OR')</span>
-
-
                             </div>
-
-                            <form action="{{ route('user.verification.purchase') }}" method="POST">
-                                @csrf
-                                <input type="hidden" name="amount" value="{{ gs('verification_price') }}">
-                                <button type="submit" class="btn btn-success w-100">
-                                    @lang('Get Verified Now for') {{ showAmount(gs('verification_price')) }}
-                                </button>
-                            </form>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
 @endsection

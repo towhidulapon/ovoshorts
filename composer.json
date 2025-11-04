@@ -1,5 +1,8 @@
 {
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.16"
+    },
+    "require": {
+        "php-ffmpeg/php-ffmpeg": "^1.3"
     }
 }

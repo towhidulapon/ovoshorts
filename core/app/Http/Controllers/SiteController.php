@@ -61,7 +61,7 @@ class SiteController extends Controller
             ->withSum('stars', 'stars')
             ->orderBy('id', 'desc');
 
-        $shorts = $shortsQuery->paginate(getPaginate(5));
+        $shorts = $shortsQuery->paginate(getPaginate());
 
         $hasMorePages = $shorts->hasMorePages();
 
@@ -90,7 +90,7 @@ class SiteController extends Controller
             ->withCount('likes')
             ->withSum('stars', 'stars')
             ->orderBy('id', 'desc')
-            ->paginate(getPaginate(5), ['*'], 'page', $request->page);
+            ->paginate(getPaginate(20), ['*'], 'page', $request->page);
 
         $html = '';
 

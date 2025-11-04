@@ -1,6 +1,6 @@
 <div class="comment-item reply-item" data-comment-id="{{ $reply->id }}">
     <div class="comment-item__thumb">
-        <img class="fit-image" src="{{ getImage(getFilePath('userProfile') . '/' . $reply?->user?->image) }}" alt="image">
+        <img class="fit-image" src="{{ $reply?->user?->image ? getImage( getFilePath('userProfile') . '/' . $reply?->user?->image, getFileSize('userProfile')) : asset('assets/images/avatar.jpg') }}" alt="image">
     </div>
     <div class="comment-item__content">
         <div class="comment-item__author">

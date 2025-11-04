@@ -42,11 +42,16 @@ class GlobalVariablesServiceProvider extends ServiceProvider
 
         view()->composer(['admin.partials.sidenav', 'admin.partials.topnav'], function ($view) {
             $view->with([
-                'menus'                    => json_decode(file_get_contents(resource_path('views/admin/partials/menu.json'))),
-                'pendingTicketCount'       => SupportTicket::whereIn('status', [Status::TICKET_OPEN, Status::TICKET_REPLY])->count(),
-                'pendingDepositsCount'     => Deposit::where('star_purchase_id', null)->pending()->count(),
-                'pendingStarRechargeCount' => Deposit::where('star_purchase_id', '!=', null)->pending()->count(),
-                'pendingWithdrawCount'     => Withdrawal::pending()->count(),
+                'menus'                => json_decode(file_get_contents(resource_path('views/admin/partials/menu.json'))),
+                'pendingTicketCount'   => SupportTicket::whereIn('status', [Status::TICKET_OPEN, Status::TICKET_REPLY])->count(),
+                'pendingDepositsCount' => Deposit::where('star_purchase_id', null)->pending()->count(),
+                'pendingPaymentCount'  => Deposit::where(function ($query) {
+                    $query->whereNotNull('star_purchase_id')
+                        ->orWhere('is_verification', 1);
+                })
+                    ->pending()
+                    ->count(),
+                'pendingWithdrawCount' => Withdrawal::pending()->count(),
             ]);
         });
 
@@ -66,8 +71,8 @@ class GlobalVariablesServiceProvider extends ServiceProvider
                 'kycUnverifiedUsersCount'       => User::kycUnverified()->count(),
                 'kycPendingUsersCount'          => User::kycPending()->count(),
                 'verificationPendingUsersCount' => User::verificationPending()->count(),
-                'unpublishedShortsCount'        => Short::where('status', Status::UNPUBLISHED)->count(),
-                'pendingShortsCount'            => Short::where('is_approved', Status::SHORT_PENDING)->count(),
+                'unpublishedShortsCount'        => Short::approved()->unpublished()->count(),
+                'pendingShortsCount'            => Short::where('is_approved', Status::SHORT_PENDING)->where('status', Status::PUBLISHED)->count(),
                 'draftShortsCount'              => Short::where('status', Status::DRAFT)->count(),
             ]);
         });

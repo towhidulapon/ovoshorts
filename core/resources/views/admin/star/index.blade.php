@@ -52,7 +52,7 @@
 
     <x-admin.ui.modal id="starModal">
         <x-admin.ui.modal.header>
-            <h1 class="modal-title">@lang('Add New Star')</h1>
+            <h1 class="modal-title">@lang('Add New Star Package')</h1>
             <button type="button" class="btn-close close" data-bs-dismiss="modal" aria-label="Close">
                 <i class="las la-times"></i>
             </button>

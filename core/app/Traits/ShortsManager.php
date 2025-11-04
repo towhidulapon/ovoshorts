@@ -11,6 +11,7 @@ use App\Rules\FileTypeValidate;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
+use FFMpeg\FFProbe;
 
 trait ShortsManager
 {
@@ -219,7 +220,6 @@ trait ShortsManager
             $short->allow_comments = $request->comment ?? 0;
             $short->category_id    = $request->category_id;
 
-
             if ($request->hasFile('cover_image')) {
                 try {
                     if ($short->cover_image && file_exists(getFilePath('coverImage') . '/' . $short->cover_image)) {
@@ -339,7 +339,7 @@ trait ShortsManager
     public function uploadShort(Request $request)
     {
         $request->validate([
-            'short'       => ['required', 'file', new FileTypeValidate(['mp4', 'mov', 'webm'])],
+            'short'       => 'required|mimetypes:video/mp4,video/quicktime,video/x-msvideo,video/webm,video/x-matroska|max:204800',
             'description' => 'nullable|string|max:4000',
             'cover_image' => ['nullable', 'image', new FileTypeValidate(['jpg', 'jpeg', 'png'])],
             'visibility'  => 'required|in:1,2',
@@ -357,6 +357,11 @@ trait ShortsManager
         $user = auth()->user();
 
         $shortFile = $request->file('short');
+
+        if (!$this->isValidVideoDuration($shortFile, 120)) {
+            return apiResponse("upload", 'error', ["Video length exceeds the maximum allowed duration of 2 minutes"]);
+        }
+
         $extension = strtolower($shortFile->getClientOriginalExtension());
         $filename  = strtolower($user->username) . '_' . time() . '.' . $extension;
 
@@ -509,14 +514,11 @@ trait ShortsManager
             }
         }
 
-        try {
+        if ($short->cover_image) {
             $coverImagePath = getFilePath('coverImage') . '/' . $short->cover_image;
             if (file_exists($coverImagePath)) {
-                unlink($coverImagePath);
+                @unlink($coverImagePath);
             }
-        } catch (\Exception $e) {
-            $notify[] = ['error', 'Storage configuration not found'];
-            return back()->withNotify($notify);
         }
 
         $short->delete();
@@ -530,4 +532,23 @@ trait ShortsManager
             'status'   => 'success',
         ]);
     }
+
+    private function isValidVideoDuration(UploadedFile $file, $maxSeconds = 120)
+    {
+        if (!$file->isValid()) {
+            return false;
+        }
+
+        try {
+            $ffprobe  = FFProbe::create();
+            $duration = $ffprobe
+                ->format($file->getRealPath())
+                ->get('duration');
+
+            return round($duration) <= $maxSeconds;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
 }

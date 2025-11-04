@@ -39,7 +39,11 @@
         {
             "title": "Manage Shorts",
             "icon": "las la-video",
-            "counters": ["unpublishedShortsCount", "draftShortsCount", "pendingShortsCount"],
+            "counters": [
+                "unpublishedShortsCount",
+                "draftShortsCount",
+                "pendingShortsCount"
+            ],
             "menu_active": "admin.short*",
             "submenu": [
                 {
@@ -83,9 +87,9 @@
                 },
                 {
                     "keyword": ["shorts", "Manage Shorts", "Short management"],
-                    "title": "Approved Shorts",
-                    "route_name": "admin.short.approved",
-                    "menu_active": "admin.short.approved"
+                    "title": "Published Shorts",
+                    "route_name": "admin.short.published",
+                    "menu_active": "admin.short.published"
                 },
                 {
                     "keyword": ["shorts", "Manage Shorts", "Short management"],
@@ -266,80 +270,80 @@
     ],
     "finance": [
         {
-            "title": "Star Recharges",
+            "title": "Payments",
             "icon": "las la-coins",
-            "counters": ["pendingStarRechargeCount"],
-            "menu_active": "admin.star.recharge*",
+            "counters": ["pendingPaymentCount"],
+            "menu_active": "admin.payment*",
             "submenu": [
                 {
                     "keyword": [
-                        "Pending Star Recharge",
-                        "Star Recharges",
-                        "Star Recharge management",
-                        "Star Recharge control",
-                        "Star Recharge status",
-                        "Star Recharge activity"
+                        "Pending Payments",
+                        "Payments",
+                        "Payments management",
+                        "Payments control",
+                        "Payments status",
+                        "Payments activity"
                     ],
-                    "title": "Pending Recharges",
-                    "route_name": "admin.star.recharge.pending",
-                    "menu_active": "admin.star.recharge.pending",
-                    "counter": "pendingStarRechargeCount"
+                    "title": "Pending Payments",
+                    "route_name": "admin.payment.pending",
+                    "menu_active": "admin.payment.pending",
+                    "counter": "pendingPaymentCount"
                 },
                 {
                     "keyword": [
-                        "Approved Star Recharge",
-                        "Star Recharges",
-                        "Star Recharge management",
-                        "Star Recharge activity"
+                        "Approved Payments",
+                        "Payments",
+                        "Payments management",
+                        "Payments activity"
                     ],
-                    "title": "Approved Recharges",
-                    "route_name": "admin.star.recharge.approved",
-                    "menu_active": "admin.star.recharge.approved"
+                    "title": "Approved Payments",
+                    "route_name": "admin.payment.approved",
+                    "menu_active": "admin.payment.approved"
                 },
                 {
                     "keyword": [
-                        "Successful Star Recharge",
-                        "Star Recharges",
-                        "Star Recharge management",
-                        "Star Recharge activity"
+                        "Successful Payments",
+                        "Payments",
+                        "Payments management",
+                        "Payments activity"
                     ],
-                    "title": "Successful Recharges",
-                    "route_name": "admin.star.recharge.successful",
-                    "menu_active": "admin.star.recharge.successful"
+                    "title": "Successful Payments",
+                    "route_name": "admin.payment.successful",
+                    "menu_active": "admin.payment.successful"
                 },
                 {
                     "keyword": [
-                        "Rejected Star Recharge",
-                        "Star Recharges",
-                        "Star Recharge management",
-                        "Star Recharge activity"
+                        "Rejected Payments",
+                        "Payments",
+                        "Payments management",
+                        "Payments activity"
                     ],
-                    "title": "Rejected Recharges",
-                    "route_name": "admin.star.recharge.rejected",
-                    "menu_active": "admin.star.recharge.rejected"
+                    "title": "Rejected Payments",
+                    "route_name": "admin.payment.rejected",
+                    "menu_active": "admin.payment.rejected"
                 },
                 {
                     "keyword": [
-                        "Initiated Star Recharge",
-                        "Star Recharges",
-                        "Star Recharge management",
-                        "Star Recharge activity"
+                        "Initiated Payments",
+                        "Payments",
+                        "Payments management",
+                        "Payments activity"
                     ],
-                    "title": "Initiated Recharges",
-                    "route_name": "admin.star.recharge.initiated",
-                    "menu_active": "admin.star.recharge.initiated"
+                    "title": "Initiated Payments",
+                    "route_name": "admin.payment.initiated",
+                    "menu_active": "admin.payment.initiated"
                 },
                 {
                     "keyword": [
-                        "All Star Recharge",
-                        "Star Recharges",
-                        "Star Recharge management",
-                        "Star Recharge control",
-                        "Star Recharge activity"
+                        "All Payments",
+                        "Payments",
+                        "Payments management",
+                        "Payments control",
+                        "Payments activity"
                     ],
-                    "title": "All Recharges",
-                    "route_name": "admin.star.recharge.list",
-                    "menu_active": "admin.star.recharge.list"
+                    "title": "All Payments",
+                    "route_name": "admin.payment.list",
+                    "menu_active": "admin.payment.list"
                 }
             ]
         },

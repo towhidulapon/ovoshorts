@@ -95,6 +95,11 @@ class Short extends Model
     public function scopePublished($query)
     {
         return $query->where('status', Status::PUBLISHED);
+
+    }
+    public function scopeUnpublished($query)
+    {
+        return $query->where('status', Status::UNPUBLISHED);
     }
 
     public function statusBadge(): Attribute

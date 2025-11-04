@@ -42,7 +42,7 @@ class ShortsController extends Controller
 
     }
 
-    public function approved()
+    public function published()
     {
         return $this->getShorts('Published Shorts', Status::PUBLISHED);
     }

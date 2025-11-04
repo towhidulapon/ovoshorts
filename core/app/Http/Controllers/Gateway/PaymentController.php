@@ -255,6 +255,21 @@ class PaymentController extends Controller
 
         }
 
+        if ($data->is_verification == Status::YES) {
+            notify($data->user, 'VERIFICATION_REQUEST', [
+                'method_name'     => $data->gatewayCurrency()->name,
+                'method_currency' => $data->method_currency,
+                'method_amount'   => showAmount($data->final_amount, currencyFormat: false),
+                'amount'          => showAmount($data->amount, currencyFormat: false),
+                'charge'          => showAmount($data->charge, currencyFormat: false),
+                'rate'            => showAmount($data->rate, currencyFormat: false),
+                'trx'             => $data->trx,
+            ]);
+
+            $notify[] = ['success', 'Verification request has been taken'];
+            return to_route('user.transactions')->withNotify($notify);
+        }
+
         notify($data->user, 'DEPOSIT_REQUEST', [
             'method_name'     => $data->gatewayCurrency()->name,
             'method_currency' => $data->method_currency,

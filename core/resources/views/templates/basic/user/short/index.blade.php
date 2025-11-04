@@ -14,7 +14,7 @@
                         <path d="M33.0435 16.6519L26.396 7.85352C25.514 6.68616 24.1357 6 22.6726 6H8.00004C5.42271 6 3.33337 8.08933 3.33337 10.6667V50.6667C3.33337 54.7168 6.61663 58 10.6667 58H30.8347C29.8899 56.6864 29.3334 55.0749 29.3334 53.3333V42.6667C29.3334 38.2483 32.915 34.6667 37.3334 34.6667H48C50.9739 34.6667 53.5691 36.2896 54.9478 38.6979L56.2816 37.8963C57.663 37.2056 59.2611 37.1539 60.6667 37.7224V23.9852C60.6667 19.9351 57.3835 16.6519 53.3334 16.6519H33.0435Z" fill="#6F56FC" />
                     </svg>
                 </div>
-                <div class="video-upload-card__content text-center">
+                <div class="video-upload-card__content text-center video-drop-area">
                     <h5 class="video-upload-card__title">@lang('Select video to upload')</h5>
                     <p class="video-upload-card__desc">@lang('or drag and drop it here')</p>
                     <div class="avatar-edit seller-cover-photo">
@@ -31,7 +31,7 @@
                     </svg>
                     <div class="content">
                         <h4>@lang('Size and duration')</h4>
-                        <p>@lang('Maximum size'): 30 @lang('GB'), @lang('video duration'): 60 @lang('minutes.')</p>
+                        <p>@lang('Maximum size'): 200 @lang('MB'), @lang('video duration'): 2 @lang('minutes.')</p>
                     </div>
                 </div>
                 <div class="video-upload-card__item">
@@ -267,6 +267,75 @@
             let currentChunk = 0;
             let shortId = null;
             let videoPath = null;
+
+            const dropArea = document.getElementsByClassName("video-drop-area")[0];
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropArea.classList.add('dragover');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropArea.classList.remove('dragover');
+                }, false);
+            });
+
+            dropArea.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                if (files.length) {
+                    videoFile = files[0];
+                    handleVideoFile(videoFile);
+                }
+            });
+
+            $('.video-input').on('change', function (e) {
+                videoFile = e.target.files[0];
+                handleVideoFile(videoFile);
+            });
+
+            function handleVideoFile(file) {
+                if (!file) return;
+
+                const validFormats = ['video/mp4', 'video/mov', 'video/avi', 'video/webm', 'video/mkv'];
+                if (!validFormats.includes(file.type)) {
+                    notify('error', 'The selected file format is not supported');
+                    return;
+                }
+
+                if (file.size > 200 * 1024 * 1024) {
+                    notify('error', 'The uploaded file size is too large');
+                    return;
+                }
+
+                const video = document.createElement('video');
+                video.preload = 'metadata';
+                video.src = URL.createObjectURL(file);
+
+                video.onloadedmetadata = function () {
+                    URL.revokeObjectURL(video.src);
+                    const duration = video.duration;
+
+                    if (duration > 120) {
+                        notify('error', 'Video length must not exceed 2 minutes');
+                        return;
+                    } else {
+                        proceedWithUpload();
+                    }
+
+                };
+
+                video.onerror = function () {
+                    notify('error', 'Unable to read video duration');
+                };
+
+            }
+
 
             if ($('.upload-step2').data('latest-short-id')) {
                 const latestShortId = $('.upload-step2').data('latest-short-id');

@@ -98,7 +98,7 @@ trait VerificationManager
 
         $user = auth()->user();
 
-        $user->is_verified = Status::VERIFICATION_SUCCESS;
+        $user->is_verified = Status::PAYMENT_INITIATE;
         $user->save();
 
         if ($request->gateway != 'main-balance') {
