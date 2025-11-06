@@ -40,12 +40,12 @@
                                             @php echo $short->statusBadge @endphp
                                         </td>
                                         <td>
-                                            @if ($short->status !== Status::REJECTED)
+                                            @if ($short->status !== Status::REJECTED && !request()->routeIs('admin.short.pending'))
                                                 @if ($short->status == Status::PUBLISHED)
                                                     <button type="button" class="btn btn-outline--danger table-action-btn confirmationBtn" data-action="{{ route('admin.short.status', $short->id) }}" data-question="@lang('Are you sure to unpublish this short?')">
                                                         <i class="la la-eye-slash"></i> @lang('Unpublish')
                                                     </button>
-                                                @elseif ($short->status == Status::UNPUBLISHED)
+                                                @elseif ($short->status == Status::UNPUBLISHED && $short->is_approved == Status::SHORT_APPROVE)
                                                     <button type="button" class="btn btn-outline--success table-action-btn confirmationBtn" data-action="{{ route('admin.short.status', $short->id) }}" data-question="@lang('Are you sure to publish this short?')">
                                                         <i class="la la-eye"></i> @lang('Publish')
                                                     </button>

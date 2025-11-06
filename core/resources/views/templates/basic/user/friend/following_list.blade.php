@@ -2,7 +2,7 @@
     <div class="d-flex align-items-center justify-content-between mb-3">
         <div class="d-flex align-items-center">
             <span class="user-info__thumb">
-                <img src="{{ getImage(getFilePath('userProfile') . '/' . $user->image, getFileSize('userProfile')) }}" class="user-img fit-image">
+                <img src="{{ $user->image ? getImage(getFilePath('userProfile') . '/' . $user->image, getFileSize('userProfile')) : asset('assets/images/avatar.jpg') }}" class="user-img fit-image">
             </span>
             <span class="ms-2">{{ $user->username }}</span>
         </div>

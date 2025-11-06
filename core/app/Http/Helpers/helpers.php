@@ -772,7 +772,7 @@ function prepareShortData($short, $userReactions = [])
     $escapedDescription = e($short->description);
     $short->description = preg_replace(
         '/#(\w+)/',
-        '<a href="' . url('/$1') . '" class="hashtag"><strong>#$1</strong></a>',
+        '<a href="' . url('short/$1') . '" class="hashtag"><strong>#$1</strong></a>',
         $escapedDescription
     );
 

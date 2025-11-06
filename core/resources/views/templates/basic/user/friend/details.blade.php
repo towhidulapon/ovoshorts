@@ -4,7 +4,7 @@
         <div class="body__wrapper-container">
             <div class="author-profile pt-4">
                 <div class="author-profile__thumb">
-                    <img src="{{ getImage(getFilePath('userProfile') . '/' . $follower->image, getFileSize('userProfile')) }}" class="thumb-img fit-image">
+                    <img src="{{ $follower->image ? getImage(getFilePath('userProfile') . '/' . $follower->image, getFileSize('userProfile')) : asset('assets/images/avatar.jpg') }}" class="thumb-img fit-image">
                 </div>
                 <div class="author-profile__content">
                     <h4 class="author-profile__name">
@@ -83,9 +83,8 @@
 <div class="modal custom--modal fade-in-scale fade" id="shareProfileModal" tabindex="-1" aria-labelledby="shareProfileModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title text--base" id="shareProfileModalLabel">@lang('Share Profile')</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header justify-content-end p-3 p-lg-4">
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><i class="las la-times"></i></button>
             </div>
             <div class="modal-body text-center">
                 <input type="text" class="form-control form--control mb-3 text-center" id="profileShareLink" readonly value="{{ route('user.profile.details', $follower->username ?? $follower->id) }}">
@@ -95,12 +94,11 @@
     </div>
 </div>
 
-<div class="modal custom--modal fade" id="followersModal" tabindex="-1" aria-labelledby="followersModalLabel" aria-hidden="true">
+<div class="modal custom--modal fade-in-scale fade" id="followersModal" tabindex="-1" aria-labelledby="followersModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title text--base">@lang('Followers')</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="@lang('Close')"></button>
+            <div class="modal-header justify-content-end p-3 p-lg-4">
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><i class="las la-times"></i></button>
             </div>
             <div class="modal-body followers-list">
                 <div class="text-center py-3">@lang('Loading...')</div>
@@ -112,9 +110,8 @@
 <div class="modal custom--modal fade-in-scale fade" id="followingModal" tabindex="-1" aria-labelledby="followingModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title text--base">@lang('Following')</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="@lang('Close')"></button>
+            <div class="modal-header justify-content-end p-3 p-lg-4">
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><i class="las la-times"></i></button>
             </div>
             <div class="modal-body following-list">
                 <div class="text-center py-3">@lang('Loading...')</div>

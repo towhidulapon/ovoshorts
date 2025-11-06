@@ -1,9 +1,3 @@
-@php
-    if (request()->ajax()) {
-        info($short);
-    }
-
-@endphp
 <div class="video-item">
     <div class="video-item-wrapper">
         <video class="video-player" playsinline muted preload="metadata" data-video_id="{{ encrypt($short->id) }}" data-short-id="{{ $short->id }}" controls poster="{{ getImage(getFilePath('coverImage') . '/' . $short->cover_image) }}">

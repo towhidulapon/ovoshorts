@@ -19,7 +19,15 @@ class ShortsController extends Controller
 
     public function index()
     {
-        return $this->getShorts('All Shorts');
+        $pageTitle = "All Shorts";
+        $shorts    = Short::with('user')
+            ->searchable(['name'])
+            ->filter(['id'])
+            ->dateFilter()
+            ->orderBy('id', 'desc')
+            ->paginate(getPaginate());
+
+        return view('admin.short.index', compact('pageTitle', 'shorts'));
     }
 
     public function unpublished()
@@ -30,7 +38,7 @@ class ShortsController extends Controller
     public function scheduledShorts()
     {
         $pageTitle = 'Scheduled Shorts';
-        $shorts = Short::with('user')
+        $shorts    = Short::with('user')
             ->where('status', Status::SCHEDULE)
             ->searchable(['name'])
             ->filter(['id'])
@@ -49,14 +57,21 @@ class ShortsController extends Controller
 
     public function rejected()
     {
-        return $this->getShorts('Rejected Shorts', Status::REJECTED);
+        $pageTitle = 'Rejected Shorts';
+        $shorts    = Short::where('status', Status::REJECTED)
+            ->searchable(['name'])
+            ->filter(['id'])
+            ->dateFilter()
+            ->orderBy('id', getOrderBy())
+            ->paginate(getPaginate());
+
+        return view('admin.short.index', compact('pageTitle', 'shorts'));
     }
 
     private function getShorts($pageTitle, $status = null)
     {
         $shorts = Short::with('user')
             ->when($status !== null, fn($q) => $q->where('status', $status))
-            ->where('status', '!=', Status::DRAFT)
             ->approved()
             ->searchable(['name'])
             ->filter(['id'])
@@ -90,7 +105,10 @@ class ShortsController extends Controller
     public function pendingShorts()
     {
         $pageTitle = 'Pending Shorts';
-        $shorts    = Short::where('is_approved', Status::SHORT_PENDING)->where('status', Status::PUBLISHED)->orderBy('id', 'desc')->paginate(getPaginate());
+        $shorts    = Short::where('is_approved', Status::SHORT_PENDING)
+            ->where('status', Status::UNPUBLISHED)
+            ->orderBy('id', 'desc')
+            ->paginate(getPaginate());
 
         return view('admin.short.index', compact('pageTitle', 'shorts'));
     }
@@ -114,7 +132,7 @@ class ShortsController extends Controller
     public function draftShorts()
     {
         $pageTitle = 'Draft Shorts';
-        $shorts = Short::with('user')
+        $shorts    = Short::with('user')
             ->where('status', Status::DRAFT)
             ->searchable(['name'])
             ->filter(['id'])
@@ -129,15 +147,9 @@ class ShortsController extends Controller
         $request->validate([
             'details' => 'required|string|max:255',
         ]);
-        $short              = Short::findOrFail($id);
-        $short->is_approved = Status::SHORT_APPROVE;
-
-        if ($short->post_at >= now()) {
-            $short->status = Status::SCHEDULE;
-        } else {
-            $short->status = Status::PUBLISHED;
-        }
-
+        $short                 = Short::findOrFail($id);
+        $short->is_approved    = Status::SHORT_APPROVE;
+        $short->status         = Status::PUBLISHED;
         $short->admin_feedback = $request->details;
         $short->save();
 

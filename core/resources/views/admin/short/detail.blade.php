@@ -32,7 +32,7 @@
 
                         <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap ps-0">
                             <span class="fs-14 text-muted">@lang('Category')</span>
-                            <span class="fs-14 text--primary">{{ ($short->category->name) }}</span>
+                            <span class="fs-14 text--primary">{{ ($short?->category?->name) }}</span>
                         </li>
 
                         <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap ps-0">
@@ -86,7 +86,7 @@
                                 </div>
                             </div>
                         @endif
-                        @if ($short->is_approved == Status::SHORT_PENDING)
+                        @if ($short->is_approved == Status::SHORT_PENDING && $short->status == Status::UNPUBLISHED)
                             <div class="mt-3 d-flex gap-2 flex-wrap">
                                 <button class="btn btn-outline--success" data-bs-toggle="modal" data-bs-target="#approveModal">
                                     <i class="las la-check-double"></i> @lang('Approve')

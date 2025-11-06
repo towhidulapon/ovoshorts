@@ -1,7 +1,7 @@
 @extends($activeTemplate . 'layouts.dashboard_frontend')
 @section('content')
     <div class="dashboard-body">
-       
+
         <div class="dashboard-action-header flex-wrap gap-2">
 
             <div class="input-group custom--search">
@@ -180,7 +180,7 @@
 
         <div class="card custom--card mt-4">
             <div class="card-body">
-                <table class="table table--responsive--xl">
+                <table class="table table--responsive--xl post-table">
                     <thead>
                         <tr>
                             <th>@lang('Post (Created on)')</th>
@@ -197,6 +197,11 @@
                     </tbody>
                 </table>
             </div>
+            @if($shorts->hasPages())
+                <div class="card-footer">
+                    {{ paginateLinks($shorts) }}
+                </div>
+            @endif
         </div>
     </div>
     <x-confirmation-modal isFrontend="true" />
@@ -231,7 +236,7 @@
                     data: data,
                     success: function(response) {
                         if (response.success) {
-                            $('.dashboard-table tbody').html(response.data);
+                            $('.post-table tbody').html(response.data);
                         }
                     }
                 });
@@ -248,7 +253,7 @@
                     },
                     success: function(response) {
                         if (response.success) {
-                            $('.dashboard-table tbody').html(response.data);
+                            $('.post-table tbody').html(response.data);
                             $('.common-filter__dropdown').removeClass('active');
                         }
                     }
@@ -267,7 +272,7 @@
                     },
                     success: function(response) {
                         if (response.success) {
-                            $('.dashboard-table tbody').html(response.view);
+                            $('.post-table tbody').html(response.view);
                             notify('success', response.message);
                         }
                     }
@@ -286,7 +291,7 @@
                     },
                     success: function(response) {
                         if (response.success) {
-                            $('.dashboard-table tbody').html(response.view);
+                            $('.post-table tbody').html(response.view);
                             notify('success', response.message);
                         }
                     }

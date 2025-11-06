@@ -14,11 +14,10 @@
         <div class="message-item {{ $activeUser && $user->id == $activeUser->id ? 'active' : '' }}"
             data-user-id="{{ $user->id }}" data-username="{{ $user->username }}"
             data-firstname="{{ $user->firstname }}" data-lastname="{{ $user->lastname }}"
-            data-image="{{ getImage(getFilePath('userProfile') . '/' . $user->image) }}">
+            data-image="{{ $user->image ? getImage(getFilePath('userProfile') . '/' . $user->image) : asset('assets/images/avatar.jpg') }}">
             <div class="message-item__left">
                 <div class="message-item__thumb thumb">
-                    <img src="{{ getImage(getFilePath('userProfile') . '/' . $user->image) }}" alt="img"
-                        class="fit-image">
+                    <img src="{{ $user->image ? getImage(getFilePath('userProfile') . '/' . $user->image) : asset('assets/images/avatar.jpg') }}" alt="img" class="fit-image">
                     @if ($user->is_online)
                         <span class="online-indicator"></span>
                     @endif

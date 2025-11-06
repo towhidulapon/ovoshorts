@@ -90,7 +90,7 @@ class SiteController extends Controller
             ->withCount('likes')
             ->withSum('stars', 'stars')
             ->orderBy('id', 'desc')
-            ->paginate(getPaginate(20), ['*'], 'page', $request->page);
+            ->paginate(getPaginate(), ['*'], 'page', $request->page);
 
         $html = '';
 
@@ -182,13 +182,10 @@ class SiteController extends Controller
         $pageTitle = 'Search User';
         $search    = $request->search;
 
-        //TODO:: ***** jodi user er only 1ta video thake only me hishebe & server disable thakle tahole search er moddhe oi user show korena
-
         $shorts = Short::with('user', 'storage', 'comments.user', 'comments.replies.user', 'savedShorts')
             ->searchable(['user:username', 'description'])
             ->approved()
             ->published()
-            ->publicShort()
             ->where(function ($query) {
                 $query->where('storage_driver', 'local')
                     ->orWhereIn('storage_driver', function ($subQuery) {
@@ -200,7 +197,17 @@ class SiteController extends Controller
             ->orderBy('id', 'desc')
             ->get()
             ->map(function ($short) {
-                return prepareShortData($short);
+                $short = prepareShortData($short);
+
+                if ($short->is_visible == Status::ONLY_ME) {
+                    $short->is_placeholder = true;
+                    $short->cover_image    = asset('assets/images/default.png');
+                    $short->fileUrl        = null;
+                } else {
+                    $short->is_placeholder = false;
+                }
+
+                return $short;
             });
 
         $view = 'Template::user.short.search';
@@ -393,7 +400,7 @@ class SiteController extends Controller
         $short = Short::find($request->shorts_id);
         $token = getTrx();
 
-        if(!$short) {
+        if (!$short) {
             return apiResponse("short", "error", ['Short not found']);
         }
 
@@ -544,11 +551,9 @@ class SiteController extends Controller
             })
             ->orderBy('id', 'desc');
 
-        //TODO :: explore e user er nijer videos show korbe?
-
-        // if (auth()->check()) {
-        //     $query->where('user_id', '!=', auth()->user()->id);
-        // }
+        if (auth()->check()) {
+            $query->where('user_id', '!=', auth()->user()->id);
+        }
 
         if ($id) {
             $query->where('category_id', $id);

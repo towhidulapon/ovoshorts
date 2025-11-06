@@ -80,7 +80,7 @@ class CronController extends Controller
                 $short->status      = Status::PUBLISHED;
                 $short->save();
             } else {
-                $short->status      = Status::PUBLISHED;
+                $short->status      = Status::UNPUBLISHED;
                 $short->is_approved = Status::SHORT_PENDING;
                 $short->save();
             }

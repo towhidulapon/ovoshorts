@@ -122,7 +122,7 @@ trait DashboardManager {
         ]);
     }
 
-    public function analyticsViewers(Request $request) {
+    public function analyticsViewers() {
         $pageTitle    = "Viewers";
         $totalViewers = ShortView::whereHas('short', function ($q) {
             $q->where('user_id', auth()->id());
@@ -176,7 +176,7 @@ trait DashboardManager {
             $query->orderBy('is_pinned', 'desc')->orderBy('id', 'desc');
         }
 
-        $shorts = $query->whereNot('status', Status::DRAFT)->get();
+        $shorts = $query->whereNot('status', Status::DRAFT)->paginate(getPaginate());
 
         if ($request->ajax()) {
             return response()->json([

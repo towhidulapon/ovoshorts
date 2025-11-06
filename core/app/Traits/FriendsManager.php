@@ -99,7 +99,7 @@ trait FriendsManager
         return responseManager("unfollow", 'You have unfollowed ' . $user->username, 'success', []);
     }
 
-    public function following(Request $request)
+    public function following()
     {
         $pageTitle = 'Following';
 

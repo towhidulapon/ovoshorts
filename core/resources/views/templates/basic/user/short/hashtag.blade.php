@@ -31,7 +31,7 @@
                             </a>
                             <a href="{{ route('user.profile', $userShort?->user?->username) }}" class="explore-item__author">
                                 <div class="explore-item__author__thumb">
-                                    <img src="{{ getImage(getFilePath('userProfile') . '/' . $userShort?->user?->image, getFileSize('userProfile')) }}" class="fit-image" alt="avatar">
+                                    <img src="{{ $userShort?->user?->image ? getImage(getFilePath('userProfile') . '/' . $userShort?->user?->image, getFileSize('userProfile')) : asset('assets/images/avatar.jpg') }}" class="fit-image" alt="avatar">
                                 </div>
                                 <span class="explore-item__author__name fw-bold">
                                     {{ $userShort?->user?->username }}

@@ -84,7 +84,6 @@
                                     <span class="video-upload__uploaded upload-status">@lang('Uploading...')</span>
                                 </div>
                             </div>
-                            <span class="video-upload__badge"></span>
                         </div>
                         <button data-action="{{ route('user.short.upload.delete.draft', $latestDraft->id ?? null) }}" class="btn btn-sm video-upload__replace video-replace-btn confirmationBtn" data-question="@lang('Are you sure to replace this video?')"> <i class="fas fa-sync-alt"></i>@lang('Replace')
                         </button>
@@ -324,10 +323,9 @@
                     if (duration > 120) {
                         notify('error', 'Video length must not exceed 2 minutes');
                         return;
-                    } else {
-                        proceedWithUpload();
                     }
 
+                    proceedWithUpload();
                 };
 
                 video.onerror = function () {
@@ -356,24 +354,6 @@
                 });
                 setCoverImageFromUrl(videoUrl);
             }
-
-            $('.video-input').on('change', function (e) {
-                videoFile = e.target.files[0];
-                if (!videoFile) return;
-
-                const validFormats = ['video/mp4', 'video/mov', 'video/avi', 'video/webm'];
-                if (!validFormats.includes(videoFile.type)) {
-                    notify('error', 'The selected file format is not supported');
-                    return;
-                }
-
-                if (videoFile.size > 30 * 1024 * 1024 * 1024) {
-                    notify('error', 'The uploaded file size is too large');
-                    return;
-                }
-
-                proceedWithUpload();
-            });
 
             function proceedWithUpload() {
                 $('.upload-step1').addClass('d-none');
@@ -614,7 +594,6 @@
 
                         $('.cover-image').attr('src', dataUrl);
                         $('.cover-image-data').val(dataUrl);
-                        console.log('Cover image set from URL (optimized): ' + dataUrl.substring(0, 50) + '...');
                     });
                 });
             }

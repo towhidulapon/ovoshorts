@@ -2311,6 +2311,8 @@
         controls: [
           "play-large",
           "play",
+          "mute",
+          "volume",
           "progress",
           "current-time",
           "airplay",

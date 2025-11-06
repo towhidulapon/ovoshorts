@@ -24,8 +24,7 @@
             <div class="chat-box__header chat-header {{ $activeUser ? '' : 'd-none' }}">
                 <div class="chat-author">
                     <div class="thumb">
-                        <img src="{{ getImage(getFilePath('userProfile') . '/' . $activeUser?->image) }}" alt="img"
-                            class="fit-image">
+                        <img src="{{ $activeUser?->image ? getImage(getFilePath('userProfile') . '/' . $activeUser?->image) : asset('assets/images/avatar.jpg') }}" alt="img" class="fit-image">
                             @if($activeUser && $activeUser->is_online)
                                 <span class="online-indicator"></span>
                             @endif

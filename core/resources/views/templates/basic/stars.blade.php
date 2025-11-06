@@ -62,14 +62,14 @@ $starElements = getContent('stars.element', false, orderById: true);
                         </div>
 
                         <div class="gets-coin__wrapper">
-                            <form action="{{ route('user.star.recharge') }}" method="GET" class="choose-recharge">
+                            <form action="{{ route('user.star.recharge') }}" method="GET" class="choose-recharge no-submit-loader">
                                 <div class="recharge-method-wrapper mb-4">
                                     <div class="row gy-4">
                                         @forelse ($stars as $star)
                                             <div class="col-xl-3 col-lg-4 col-sm-6 col-xsm-6">
                                                 <div class="form-check form--radio">
                                                     @php
-    $inputId = 'starOption' . $loop->index;
+                                                        $inputId = 'starOption' . $loop->index;
                                                     @endphp
                                                     <label class="form-check-label" for="{{ $inputId }}">
                                                         <input class="form-check-input" type="radio" name="star_id" id="{{ $inputId }}" value="{{ $star->id }}" @if ($loop->first) checked @endif hidden="">

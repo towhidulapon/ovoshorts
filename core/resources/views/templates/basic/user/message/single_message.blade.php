@@ -1,5 +1,5 @@
 @php
-    $isOwnMessage = $message->from_id == $currentUserId;
+$isOwnMessage = $message->from_id == $currentUserId;
 @endphp
 
 <div class="single-message {{ $isOwnMessage ? 'message--right' : 'message--left' }}">
@@ -15,8 +15,8 @@
                 @if($message->images->isNotEmpty())
                     @foreach($message->images as $media)
                         @if ($media->is_video)
-                            <a href="{{ route('user.message.media.download', $media->id) }}">
-                                <video class="message-image" controls muted">
+                            <a href="{{ route('user.message.media.download', $media->id) }}" class="popup-image">
+                                <video class="img-fluid rounded message-image" controls muted>
                                     <source src="{{ getImage(getFilePath('messageImage') . '/' . $media->image) }}" type="video/{{ strtolower(pathinfo($media->image, PATHINFO_EXTENSION)) }}">
                                 </video>
                             </a>

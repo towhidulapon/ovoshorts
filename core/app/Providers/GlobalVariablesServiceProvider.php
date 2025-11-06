@@ -72,7 +72,7 @@ class GlobalVariablesServiceProvider extends ServiceProvider
                 'kycPendingUsersCount'          => User::kycPending()->count(),
                 'verificationPendingUsersCount' => User::verificationPending()->count(),
                 'unpublishedShortsCount'        => Short::approved()->unpublished()->count(),
-                'pendingShortsCount'            => Short::where('is_approved', Status::SHORT_PENDING)->where('status', Status::PUBLISHED)->count(),
+                'pendingShortsCount'            => Short::where('is_approved', Status::SHORT_PENDING)->where('status', Status::UNPUBLISHED)->count(),
                 'draftShortsCount'              => Short::where('status', Status::DRAFT)->count(),
             ]);
         });
@@ -185,118 +185,6 @@ class GlobalVariablesServiceProvider extends ServiceProvider
             $view->with('groupedNotifications', $cached['groupedNotifications'])
                 ->with('unreadNotifications', $cached['unreadNotifications']);
         });
-
-        // View()->composer(['Template::home', 'Template::user.short.explore', 'Template::user.friend.*', 'Template::user.message.index', 'Template::user.profile_details'], function ($view) {
-        //     if (auth()->check()) {
-        //         $user         = auth()->user();
-        //         $userShortIds = Short::where('user_id', $user->id)->pluck('id');
-
-        //         // Existing likes
-        //         $likes = UserReaction::whereIn('shorts_id', $userShortIds)
-        //             ->whereNot('user_id', $user->id)
-        //             ->with(['user' => function ($query) {
-        //                 $query->select('id', 'username', 'image');
-        //             }, 'short' => function ($query) {
-        //                 $query->select('id', 'cover_image');
-        //             }])
-        //             ->select('id', 'user_id', 'shorts_id', 'created_at')
-        //             ->get();
-
-        //         // Existing comments
-        //         $comments = Comment::whereIn('shorts_id', $userShortIds)
-        //             ->whereNot('user_id', $user->id)
-        //             ->whereNull('parent_id')
-        //             ->with(['user' => function ($query) {
-        //                 $query->select('id', 'username', 'image');
-        //             }, 'short' => function ($query) {
-        //                 $query->select('id', 'cover_image');
-        //             }])
-        //             ->select('id', 'user_id', 'shorts_id', 'message', 'created_at')
-        //             ->get();
-
-        //         // New: Stars transactions
-        //         $stars = StarsTransaction::whereIn('short_id', $userShortIds)
-        //             ->whereNot('sender_id', $user->id)
-        //             ->with(['sender' => function ($query) {
-        //                 $query->select('id', 'username', 'image');
-        //             }, 'short' => function ($query) {
-        //                 $query->select('id', 'cover_image');
-        //             }])
-        //             ->select('id', 'sender_id', 'short_id', 'stars', 'created_at')
-        //             ->get();
-
-        //         $followers = $user->followers()
-        //             ->where('follows.created_at', '>=', now()->subDays(7))
-        //             ->withPivot('created_at')
-        //             ->get()
-        //             ->map(function ($follower) {
-        //                 return [
-        //                     'type'       => 'follower',
-        //                     'user'       => $follower,
-        //                     'created_at' => $follower->pivot->created_at,
-        //                 ];
-        //             });
-
-        //         // Map likes
-        //         $likesArray = $likes->map(function ($like) {
-        //             return [
-        //                 'type'       => 'like',
-        //                 'user'       => $like->user,
-        //                 'short'      => $like->short,
-        //                 'created_at' => $like->created_at,
-        //             ];
-        //         });
-
-        //         // Map comments
-        //         $commentsArray = $comments->map(function ($comment) {
-        //             return [
-        //                 'type'       => 'comment',
-        //                 'user'       => $comment->user,
-        //                 'short'      => $comment->short,
-        //                 'comment'    => $comment->message,
-        //                 'created_at' => $comment->created_at,
-        //             ];
-        //         });
-
-        //         // Map stars
-        //         $starsArray = $stars->map(function ($star) {
-        //             return [
-        //                 'type'       => 'star',
-        //                 'user'       => $star->sender,
-        //                 'short'      => $star->short,
-        //                 'stars'      => $star->stars,
-        //                 'created_at' => $star->created_at,
-        //             ];
-        //         });
-
-        //         // Merge all notifications
-        //         $notifications = collect(array_merge(
-        //             $likesArray->toArray(),
-        //             $commentsArray->toArray(),
-        //             $starsArray->toArray(),
-        //             $followers->toArray()
-        //         ))->sortByDesc('created_at')->values();
-
-        //         // Group notifications
-        //         $today          = Carbon::today();
-        //         $yesterday      = Carbon::yesterday();
-        //         $thisMonthStart = Carbon::now()->startOfMonth();
-
-        //         $groupedNotifications = [
-        //             'today'      => $notifications->filter(fn($n) => $n['created_at']->isToday()),
-        //             'yesterday'  => $notifications->filter(fn($n) => $n['created_at']->isYesterday()),
-        //             'this_month' => $notifications->filter(fn($n) => $n['created_at']->gte($thisMonthStart) && !$n['created_at']->isToday() && !$n['created_at']->isYesterday()),
-        //         ];
-
-        //         $unreadNotifications = $notifications->count();
-
-        //         $view->with('groupedNotifications', $groupedNotifications)
-        //             ->with('unreadNotifications', $unreadNotifications);
-        //     } else {
-        //         $view->with('groupedNotifications', ['today' => collect(), 'yesterday' => collect(), 'this_month' => collect()])
-        //             ->with('unreadNotifications', 0);
-        //     }
-        // });
 
         view()->share($viewShare);
     }

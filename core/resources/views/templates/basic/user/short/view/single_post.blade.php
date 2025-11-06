@@ -227,6 +227,8 @@
     <x-confirmation-modal isFrontend="true" />
 @endsection
 
+@include('Template::user.short.login_modal')
+
 <div class="modal custom--modal fade-in-scale fade" id="sendStarsModal" tabindex="-1" aria-labelledby="shareProfileModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -429,7 +431,6 @@
                             page: page
                         },
                         success: function (response) {
-                            console.log('Shorts response:', response);
 
                             // Hide both loaders
                             $('.shorts-skeleton').addClass('d-none');
@@ -507,7 +508,7 @@
                 $('.comment-form').on('submit', function (e) {
                     e.preventDefault();
                     if (!isLoggedIn) {
-                        window.location.href = "{{ route('user.login') }}";
+                        $('.login-modal').modal('show');
                         return;
                     }
                     var $form = $(this);
@@ -538,7 +539,7 @@
                 $(document).on('click', '.like-btn', function (e) {
                     e.preventDefault();
                     if (!isLoggedIn) {
-                        window.location.href = "{{ route('user.login') }}";
+                        $('.login-modal').modal('show');
                         return;
                     }
                     var $button = $(this);
@@ -570,7 +571,7 @@
                 $(document).on('click', '.comment-reaction-btn', function (e) {
                     e.preventDefault();
                     if (!isLoggedIn) {
-                        window.location.href = "{{ route('user.login') }}";
+                        $('.login-modal').modal('show');
                         return;
                     }
                     var $btn = $(this);
@@ -602,7 +603,7 @@
                 $(document).on('submit', '.reply-form', function (e) {
                     e.preventDefault();
                     if (!isLoggedIn) {
-                        window.location.href = "{{ route('user.login') }}";
+                        $('.login-modal').modal('show');
                         return;
                     }
                     var $form = $(this);
@@ -664,7 +665,7 @@
                 $(document).on('click', '.save-btn', function (e) {
                     e.preventDefault();
                     if (!isLoggedIn) {
-                        window.location.href = "{{ route('user.login') }}";
+                        $('.login-modal').modal('show');
                         return;
                     }
                     var $btn = $(this);
@@ -695,6 +696,10 @@
                 });
 
                 $('.send-stars-btn').on('click', function () {
+                    if (!isLoggedIn) {
+                        $('.login-modal').modal('show');
+                        return;
+                    }
                     var receiverId = $(this).data('receiver-id');
                     var shortId = $(this).data('short-id');
                     $('#sendStarsForm').data('clickedButton', this);
@@ -705,10 +710,6 @@
 
                 $('#sendStarsForm').on('submit', function (e) {
                     e.preventDefault();
-                    if (!isLoggedIn) {
-                        window.location.href = "{{ route('user.login') }}";
-                        return;
-                    }
                     var $form = $(this);
                     var formData = new FormData(this);
                     $.ajax({
