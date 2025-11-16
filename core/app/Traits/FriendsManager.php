@@ -30,7 +30,7 @@ trait FriendsManager
                     ->orderBy('id', 'desc');
             },
         ]);
-        $users = $query->paginate(getPaginate());
+        $users = $query->searchable(['username'])->paginate(getPaginate());
 
         $users->getCollection()->transform(function ($user) {
             if ($user->shorts->isNotEmpty()) {
@@ -161,7 +161,7 @@ trait FriendsManager
         $user         = auth()->user();
         $followingIds = $user->followings->pluck('id')->toArray();
 
-        $shorts = Short::with('user')
+        $shorts = Short::with('user:id,username,image')
             ->whereIn('user_id', $followingIds)
             ->approved()
             ->published()
@@ -174,6 +174,7 @@ trait FriendsManager
                             ->where('status', Status::ENABLE);
                     });
             })
+            ->withCount('likes', 'comments')
             ->orderBy('id', 'desc')
             ->paginate();
 
@@ -193,9 +194,15 @@ trait FriendsManager
                 $liked = $short->likes()->where('user_id', $user->id)->exists();
             }
 
+            $saved = false;
+            if ($user) {
+                $saved = $short->savedShorts()->where('user_id', $user->id)->exists();
+            }
+
             $short->file_url  = $fileUrl;
             $short->extension = $extension;
             $short->liked     = $liked;
+            $short->saved     = $saved;
             return $short;
         });
 

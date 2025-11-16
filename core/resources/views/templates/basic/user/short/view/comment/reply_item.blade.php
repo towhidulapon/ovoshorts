@@ -1,6 +1,6 @@
 <div class="comment-item reply-item" data-comment-id="{{ $reply->id }}">
     <div class="comment-item__thumb">
-        <img class="fit-image" src="{{ $reply?->user?->image ? getImage( getFilePath('userProfile') . '/' . $reply?->user?->image, getFileSize('userProfile')) : asset('assets/images/avatar.jpg') }}" alt="image">
+        <img class="fit-image" src="{{ $reply?->user?->image ? getImage(getFilePath('userProfile') . '/' . $reply?->user?->image, getFileSize('userProfile')) : asset('assets/images/avatar.jpg') }}" alt="image">
     </div>
     <div class="comment-item__content">
         <div class="comment-item__author">
@@ -10,7 +10,8 @@
         <div class="comment-item__action">
             <div class="comment-item__action__top">
                 <div class="comment-item__action__left">
-                    <span>{{ diffForHumans($reply->created_at) }}</span>
+                    <span>{{ $reply->created_at }}</span>
+                    <button class="common-action-btn reply-btn" data-comment-id="{{ $reply->id }}">@lang('Reply')</button>
                 </div>
                 <div class="comment-item__action__right">
                     <button type="button" class="common-action-btn comment-reaction-btn {{ $reply->is_liked ? 'liked' : '' }}" data-comment-id="{{ $reply->id }}">
@@ -24,5 +25,32 @@
                 </div>
             </div>
         </div>
+
+        <div class="reply-form-container d-none">
+            <form class="reply-form" data-comment-id="{{ $reply->id }}">
+                <input type="hidden" name="comment_id" value="{{ $reply->id }}">
+                <div class="input-group gap-2">
+                    <div class="chat__box">
+                        <div class="chat__box__inner d-flex w-100 gap-2">
+                            <input data-emojiable="true" type="text" class="form--control form-control message" name="message" placeholder="@lang('Add reply')" required>
+                        </div>
+                        <button type="submit" class="chat__box-icon">@lang('Post')</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        @if($reply->replies && $reply->replies->count() > 0)
+            <button class="common-action-btn view-replies" data-comment-id="{{ $reply->id }}">
+                <span class="count-text">― View {{ $reply->replies->count() }} replies </span> <i class="las la-angle-down"></i>
+            </button>
+
+            <div class="replies-container d-none">
+                @foreach($reply->replies as $childReply)
+                    @include('Template::user.short.view.comment.reply_item', ['reply' => $childReply])
+                @endforeach
+            </div>
+        @endif
+
     </div>
 </div>

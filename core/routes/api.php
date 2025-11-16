@@ -31,7 +31,10 @@ Route::namespace('Api')->name('api.')->group(function () {
 
         Route::get('/get/stars', 'getStars');
 
+        Route::get('/get/comments', 'getComments');
+
         Route::post('shorts/share', 'share');
+        Route::get('/search/{index}', 'search');
         Route::get('/hashtag/{hashtag}', 'hashtag');
     });
 
@@ -78,7 +81,6 @@ Route::namespace('Api')->name('api.')->group(function () {
                     Route::get('profile-details', 'profileDetails');
                     Route::post('profile-setting', 'submitProfile');
                     Route::post('change-password', 'submitPassword');
-
 
                     Route::get('user-info', 'userInfo');
                     //KYC

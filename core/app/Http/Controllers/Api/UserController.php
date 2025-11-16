@@ -17,16 +17,19 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
-class UserController extends Controller {
+class UserController extends Controller
+{
 
-    public function dashboard() {
+    public function dashboard()
+    {
         $notify[] = 'User Dashboard';
         return apiResponse("dashboard", "success", $notify, [
             'user' => auth()->user(),
         ]);
     }
 
-    public function userDataSubmit(Request $request) {
+    public function userDataSubmit(Request $request)
+    {
         $user = auth()->user();
 
         if ($user->profile_complete == Status::YES) {
@@ -77,13 +80,46 @@ class UserController extends Controller {
         ]);
     }
 
-    public function profileDetails() {
+    public function profileDetails()
+    {
         $pageTitle = 'Profile Details';
         $user      = auth()->user();
-        $shorts = Short::with('likes')->where('user_id', $user->id)->published()->orderBy('created_at', 'desc')->paginate();
+
+        $shorts = Short::with('user:id,username,image')
+            ->approved()
+            ->published()
+            ->publicShort()
+            ->where(function ($query) {
+                $query->where('storage_driver', 'local')
+                    ->orWhereIn('storage_driver', function ($subQuery) {
+                        $subQuery->select('alias')
+                            ->from('storage_settings')
+                            ->where('status', Status::ENABLE);
+                    });
+            })
+            ->withCount('likes')
+            ->withSum('stars', 'stars')
+            ->orderBy('id', 'desc')
+            ->paginate();
+
+        $shorts->transform(function ($short) use ($user) {
+            if ($short->storage_driver === 'wasabi') {
+                $fileUrl = getS3FileUri($short->name);
+            } elseif ($short->storage_driver === 'local') {
+                $fileUrl = asset(getFilePath('shorts') . '/' . $short->name);
+            } else {
+                $fileUrl = route('short.file', $short->name);
+            }
+
+            $extension = pathinfo($short->name, PATHINFO_EXTENSION);
+            $short->file_url  = $fileUrl;
+            $short->extension = $extension;
+
+            return $short;
+        });
 
         $userProfile = route('user.profile.details', $user->username);
-        $userQR = cryptoQR($userProfile);
+        $userQR      = cryptoQR($userProfile);
 
         $favShorts   = $user->savedShorts()->with('short')->orderBy('id', 'desc')->paginate();
         $likedShorts = $user->likes()->with('short')->orderBy('id', 'desc')->paginate();
@@ -93,23 +129,24 @@ class UserController extends Controller {
         });
 
         return responseManager("profile_details", $pageTitle, 'success', [
-            'user'       => $user,
-            'userProfile' => $userProfile,
-            'userQr'     => $userQR,
-            'balance'     => $user->balance,
-            'imagePath'  => getFilePath('userProfile'),
-            'coverImagePath'  => getFilePath('coverImage'),
-            'pageTitle'  => $pageTitle,
-            'shorts'     => $shorts,
-            'totalLikes' => $totalLikes,
-            'favShorts'  => $favShorts,
-            'likedShorts' => $likedShorts,
-            'followers'  => $user->followers()->count(),
-            'following'  => $user->followings()->count(),
+            'user'           => $user,
+            'userProfile'    => $userProfile,
+            'userQr'         => $userQR,
+            'balance'        => $user->balance,
+            'imagePath'      => getFilePath('userProfile'),
+            'coverImagePath' => getFilePath('coverImage'),
+            'pageTitle'      => $pageTitle,
+            'shorts'         => $shorts,
+            'totalLikes'     => $totalLikes,
+            'favShorts'      => $favShorts,
+            'likedShorts'    => $likedShorts,
+            'followers'      => $user->followers()->count(),
+            'following'      => $user->followings()->count(),
         ]);
     }
 
-    public function kycForm() {
+    public function kycForm()
+    {
         if (auth()->user()->kv == Status::KYC_PENDING) {
             $notify[] = 'Your KYC is under review';
             return apiResponse("under_review", "error", $notify);
@@ -126,7 +163,8 @@ class UserController extends Controller {
         ]);
     }
 
-    public function kycSubmit(Request $request) {
+    public function kycSubmit(Request $request)
+    {
         $form = Form::where('act', 'kyc')->first();
         if (!$form) {
             $notify[] = 'Invalid KYC request';
@@ -159,7 +197,8 @@ class UserController extends Controller {
         return apiResponse("kyc_submitted", "success", $notify);
     }
 
-    public function depositHistory(Request $request) {
+    public function depositHistory(Request $request)
+    {
         $deposits = auth()->user()->deposits();
         if ($request->search) {
             $deposits = $deposits->where('trx', $request->search);
@@ -172,7 +211,8 @@ class UserController extends Controller {
         ]);
     }
 
-    public function transactions(Request $request) {
+    public function transactions(Request $request)
+    {
         $remarks      = Transaction::distinct('remark')->get('remark');
         $transactions = Transaction::where('user_id', auth()->id());
 
@@ -198,7 +238,8 @@ class UserController extends Controller {
         ]);
     }
 
-    public function submitProfile(Request $request) {
+    public function submitProfile(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'firstname' => 'nullable',
             'lastname'  => 'nullable',
@@ -210,8 +251,6 @@ class UserController extends Controller {
         if ($validator->fails()) {
             return apiResponse("validation_error", "error", $validator->errors()->all());
         }
-
-        // ******** added later *********
 
         $user = auth()->user();
         foreach (['firstname', 'lastname', 'bio', 'address', 'city', 'state', 'zip'] as $field) {
@@ -234,7 +273,8 @@ class UserController extends Controller {
         return apiResponse("profile_updated", "success", $notify);
     }
 
-    public function submitPassword(Request $request) {
+    public function submitPassword(Request $request)
+    {
         $passwordValidation = Password::min(6);
         if (gs('secure_password')) {
             $passwordValidation = $passwordValidation->mixedCase()->numbers()->symbols()->uncompromised();
@@ -262,7 +302,8 @@ class UserController extends Controller {
         }
     }
 
-    public function addDeviceToken(Request $request) {
+    public function addDeviceToken(Request $request)
+    {
 
         $validator = Validator::make($request->all(), [
             'token' => 'required',
@@ -288,7 +329,8 @@ class UserController extends Controller {
         return apiResponse("token_saved", "success", $notify);
     }
 
-    public function show2faForm() {
+    public function show2faForm()
+    {
         $ga        = new GoogleAuthenticator();
         $user      = auth()->user();
         $secret    = $ga->createSecret();
@@ -301,7 +343,8 @@ class UserController extends Controller {
         ]);
     }
 
-    public function create2fa(Request $request) {
+    public function create2fa(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'secret' => 'required',
             'code'   => 'required',
@@ -326,7 +369,8 @@ class UserController extends Controller {
         }
     }
 
-    public function disable2fa(Request $request) {
+    public function disable2fa(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'code' => 'required',
         ]);
@@ -350,7 +394,8 @@ class UserController extends Controller {
         }
     }
 
-    public function pushNotifications() {
+    public function pushNotifications()
+    {
         $notifications = NotificationLog::where('user_id', auth()->id())->where('sender', 'firebase')->orderBy('id', 'desc')->paginate(getPaginate());
         $notify[]      = 'Push notifications';
         return apiResponse("notifications", "success", $notify, [
@@ -358,7 +403,8 @@ class UserController extends Controller {
         ]);
     }
 
-    public function pushNotificationsRead($id) {
+    public function pushNotificationsRead($id)
+    {
         $notification = NotificationLog::where('user_id', auth()->id())->where('sender', 'firebase')->find($id);
         if (!$notification) {
             $notify[] = 'Notification not found';
@@ -371,14 +417,16 @@ class UserController extends Controller {
         return apiResponse("notification_read", "success", $notify);
     }
 
-    public function userInfo() {
+    public function userInfo()
+    {
         $notify[] = 'User information';
         return apiResponse("user_info", "success", $notify, [
             'user' => auth()->user(),
         ]);
     }
 
-    public function deleteAccount() {
+    public function deleteAccount()
+    {
         $user              = auth()->user();
         $user->username    = 'deleted_' . $user->username;
         $user->email       = 'deleted_' . $user->email;

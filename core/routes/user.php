@@ -92,7 +92,6 @@ Route::middleware('auth')->name('user.')->group(function () {
                 Route::post('mark-as-read', 'markAsRead')->name('mark.as.read');
                 Route::get('media/download/{mediaId}', 'downloadMedia')->name('media.download');
                 Route::post('online-status', 'updateOnlineStatus')->name('online.status');
-
             });
 
             Route::controller('ShortsUploadController')->prefix('shorts-upload')->name('short.upload.')->group(function () {

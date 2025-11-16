@@ -35,7 +35,9 @@
                                 <span class="explore-item__author__name fw-bold">{{ $userShort?->user?->username }}</span>
                             </a>
 
-                            <p class="video-item-content__desc">{!! $userShort->description !!}</p>
+                            @if (!$userShort->is_placeholder)
+                                <p class="video-item-content__desc">{!! $userShort->description !!}</p>
+                            @endif
                         </div>
                     @empty
                         <x-empty-message message="No shorts found" />

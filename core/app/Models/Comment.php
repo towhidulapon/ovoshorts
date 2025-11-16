@@ -8,7 +8,7 @@ class Comment extends Model
 {
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function short()
@@ -23,19 +23,23 @@ class Comment extends Model
 
     public function replies()
     {
-        return $this->hasMany(Comment::class, 'parent_id');
+        return $this->hasMany(Comment::class, 'parent_id')->with(['user:id,username,image']);
     }
 
     public function reactions()
     {
-        return $this->hasMany(CommentReaction::class);
+        return $this->hasMany(CommentReaction::class, 'comment_id');
     }
 
-    public function getIsLikedAttribute()
+    public function isLikedBy($userId)
     {
-        if(!auth()->check()){
+        if (!$userId) {
             return false;
         }
-        return $this->reactions()->where('user_id', auth()->user()->id)->exists();
+
+        return $this->reactions()
+            ->where('user_id', $userId)
+            ->exists();
     }
+
 }

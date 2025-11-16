@@ -182,7 +182,7 @@ class SiteController extends Controller
         $pageTitle = 'Search User';
         $search    = $request->search;
 
-        $shorts = Short::with('user', 'storage', 'comments.user', 'comments.replies.user', 'savedShorts')
+        $shorts = Short::with('user', 'comments.user', 'comments.replies.user', 'savedShorts')
             ->searchable(['user:username', 'description'])
             ->approved()
             ->published()

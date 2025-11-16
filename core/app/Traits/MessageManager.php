@@ -117,7 +117,7 @@ trait MessageManager
         $validator = Validator::make($request->all(), [
             'to_id'   => 'required|exists:users,id',
             'message' => 'nullable|string',
-            'media' => 'nullable|array',
+            'media'   => 'nullable|array',
             'media.*' => 'required|mimes:jpeg,png,jpg,mp4,mov,webm',
         ], [
             'to_id.required' => 'Recipient is required',
@@ -186,7 +186,6 @@ trait MessageManager
 
         $message->load('images');
 
-
         if ($request->input(('active_user_id') == $receiver->id)) {
             Message::where('from_id', $receiver->id)
                 ->where('to_id', $sender->id)
@@ -220,10 +219,10 @@ trait MessageManager
         ]));
 
         return responseManager('message_send', 'success', 'success', [
-            'html'    => $htmlForSender,
-            'message' => $message,
+            'html'       => $htmlForSender,
+            'message'    => $message,
             'image_path' => getFilePath('messageImage'),
-            'success' => true,
+            'success'    => true,
         ]);
     }
 
@@ -275,10 +274,9 @@ trait MessageManager
         if (isApiRequest()) {
             $notify[] = 'Users Chat List';
             return apiResponse('message chat list', 'success', $notify, [
-                'chatUsers'    => $chatUsers,
-                'activeUser'   => $sidebar['activeUser'],
-                // 'unreadCounts' => $sidebar['unreadCounts'],
-                'image_path'   => getFilePath('userProfile'),
+                'chatUsers'  => $chatUsers,
+                'activeUser' => $sidebar['activeUser'],
+                'image_path' => getFilePath('userProfile'),
             ]);
         }
 
@@ -343,7 +341,7 @@ trait MessageManager
             ->selectRaw('from_id, count(*) as unread_count')
             ->pluck('unread_count', 'from_id');
 
-        $chatUsers = User::whereIn('id', $conversationPartners)->get();
+        $chatUsers = User::whereIn('id', $conversationPartners)->searchable(['username'])->get();
 
         return [
             'conversationPartners' => $conversationPartners,
@@ -365,11 +363,11 @@ trait MessageManager
     public function onlineUsers()
     {
         $onlineThreshold = now()->subMinutes(5);
-        $users = User::where('last_seen', '>=', $onlineThreshold)->get();
+        $users           = User::where('last_seen', '>=', $onlineThreshold)->get();
 
         $notify[] = 'Online Users';
         return apiResponse('online_users', 'success', $notify, [
-            'users' => $users,
+            'users'      => $users,
             'image_path' => getFilePath('userProfile'),
         ]);
     }
@@ -387,5 +385,4 @@ trait MessageManager
         }
         return response()->download($filePath);
     }
-
 }

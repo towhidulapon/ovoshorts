@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Constants\Status;
 use App\Http\Controllers\Controller;
+use App\Models\Comment;
 use App\Models\Language;
 use App\Models\Short;
 use App\Models\ShortShare;
@@ -14,9 +15,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Laravel\Sanctum\PersonalAccessToken;
 
-class AppController extends Controller {
+class AppController extends Controller
+{
     use StarManager;
-    public function generalSetting() {
+    public function generalSetting()
+    {
         $notify[] = 'General setting data';
         return apiResponse("general_setting", "success", $notify, [
             'general_setting'       => gs(),
@@ -24,7 +27,8 @@ class AppController extends Controller {
         ]);
     }
 
-    public function getCountries() {
+    public function getCountries()
+    {
         $countryData = json_decode(file_get_contents(resource_path('views/partials/country.json')));
         $notify[]    = 'Country List';
 
@@ -40,7 +44,8 @@ class AppController extends Controller {
         ]);
     }
 
-    public function getLanguage($code) {
+    public function getLanguage($code)
+    {
         $languages     = Language::get();
         $languageCodes = $languages->pluck('code')->toArray();
 
@@ -59,7 +64,8 @@ class AppController extends Controller {
         ]);
     }
 
-    public function policies() {
+    public function policies()
+    {
         $policies = getContent('policy_pages.element', orderById: true);
         $notify[] = 'All policies';
 
@@ -68,7 +74,8 @@ class AppController extends Controller {
         ]);
     }
 
-    public function faq() {
+    public function faq()
+    {
         $faq      = getContent('faq.element', orderById: true);
         $notify[] = 'FAQ';
         return apiResponse("faq", "success", $notify, [
@@ -76,7 +83,8 @@ class AppController extends Controller {
         ]);
     }
 
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $token = $request->bearerToken();
 
         $user = null;
@@ -88,7 +96,7 @@ class AppController extends Controller {
             }
         }
 
-        $shorts = Short::with('user', 'comments.user', 'comments.replies.user', 'savedShorts')
+        $shorts = Short::with('user:id,username,image')
             ->approved()
             ->published()
             ->publicShort()
@@ -100,11 +108,10 @@ class AppController extends Controller {
                             ->where('status', Status::ENABLE);
                     });
             })
-            ->withCount('likes')
+            ->withCount('likes', 'comments')
             ->withSum('stars', 'stars')
             ->orderBy('id', 'desc')
             ->paginate();
-
 
         $shorts->transform(function ($short) use ($user) {
             if ($short->storage_driver === 'wasabi') {
@@ -122,22 +129,28 @@ class AppController extends Controller {
                 $liked = $short->likes()->where('user_id', $user->id)->exists();
             }
 
-            $short->file_url    = $fileUrl;
-            $short->extension   = $extension;
-            $short->liked       = $liked;
+            $saved = false;
+            if ($user) {
+                $saved = $short->savedShorts()->where('user_id', $user->id)->exists();
+            }
+
+            $short->file_url  = $fileUrl;
+            $short->extension = $extension;
+            $short->liked     = $liked;
+            $short->saved     = $saved;
             return $short;
         });
 
-
         $notify[] = 'Home Data';
         return apiResponse("home_data", "success", $notify, [
-            'shorts'    => $shorts,
+            'shorts'     => $shorts,
             'coverImage' => getFilePath('coverImage'),
-            'imagePath' => getFilePath('userProfile'),
+            'imagePath'  => getFilePath('userProfile'),
         ]);
     }
 
-    public function recordView(Request $request) {
+    public function recordView(Request $request)
+    {
         $request->validate([
             'shorts_id' => 'required|exists:shorts,id',
         ]);
@@ -180,7 +193,8 @@ class AppController extends Controller {
         ]);
     }
 
-    public function trackAnalytics(Request $request, $id) {
+    public function trackAnalytics(Request $request, $id)
+    {
         $request->validate([
             'play_time' => 'nullable|integer|min:0',
         ]);
@@ -199,7 +213,8 @@ class AppController extends Controller {
         ]);
     }
 
-    public function getAnalytics($id) {
+    public function getAnalytics($id)
+    {
         $short = Short::where('id', $id)->approved()->publicShort();
         if (!$short) {
             return apiResponse("short", "error", ['Short not found']);
@@ -211,7 +226,8 @@ class AppController extends Controller {
         ]);
     }
 
-    public function share(Request $request) {
+    public function share(Request $request)
+    {
         $request->validate([
             'shorts_id' => 'required|exists:shorts,id',
             'platform'  => 'required|in:telegram,whatsapp,facebook,modal,link',
@@ -242,27 +258,80 @@ class AppController extends Controller {
         ]);
     }
 
-    public function hashtag($hashtag) {
+    public function hashtag(Request $request, $hashtag)
+    {
         $pageTitle = '#' . $hashtag;
-        $shorts    = Short::with('user', 'storage', 'comments.user', 'comments.replies.user', 'savedShorts')
+
+        $token = $request->bearerToken();
+
+        $user = null;
+
+        if ($token) {
+            $personalToken = PersonalAccessToken::findToken($token);
+            if ($personalToken && $personalToken->tokenable instanceof User) {
+                $user = $personalToken->tokenable;
+            }
+        }
+
+        $shorts = Short::with('user:id,username,image')
             ->approved()
             ->published()
             ->publicShort()
-            ->get();
+            ->where(function ($query) {
+                $query->where('storage_driver', 'local')
+                    ->orWhereIn('storage_driver', function ($subQuery) {
+                        $subQuery->select('alias')
+                            ->from('storage_settings')
+                            ->where('status', Status::ENABLE);
+                    });
+            })
+            ->withCount('likes')
+            ->withSum('stars', 'stars')
+            ->orderBy('id', 'desc')
+            ->paginate();
 
-        $view = 'Template::user.short.hashtag';
+        $shorts->transform(function ($short) use ($user) {
+            if ($short->storage_driver === 'wasabi') {
+                $fileUrl = getS3FileUri($short->name);
+            } elseif ($short->storage_driver === 'local') {
+                $fileUrl = asset(getFilePath('shorts') . '/' . $short->name);
+            } else {
+                $fileUrl = route('short.file', $short->name);
+            }
+
+            $extension = pathinfo($short->name, PATHINFO_EXTENSION);
+
+            $liked = false;
+            if ($user) {
+                $liked = $short->likes()->where('user_id', $user->id)->exists();
+            }
+
+            $saved = false;
+            if ($user) {
+                $saved = $short->savedShorts()->where('user_id', $user->id)->exists();
+            }
+
+            $short->file_url  = $fileUrl;
+            $short->extension = $extension;
+            $short->liked     = $liked;
+            $short->saved     = $saved;
+
+            return $short;
+        });
 
         return responseManager("hashtag", $pageTitle, 'success', [
-            'view'      => $view,
-            'shorts'    => $shorts,
-            'hashtag'   => $hashtag,
-            'pageTitle' => $pageTitle,
+            'shorts'     => $shorts,
+            'hashtag'    => $hashtag,
+            'pageTitle'  => $pageTitle,
+            'coverImage' => getFilePath('coverImage'),
+            'imagePath'  => getFilePath('userProfile'),
         ]);
     }
 
-    public function userProfile(Request $request, $username = null) {
-        $pageTitle = 'User Details';
-        $user  = User::where('username', $username)->first();
+    public function userProfile(Request $request, $username = null)
+    {
+        $pageTitle   = 'User Details';
+        $user        = User::where('username', $username)->first();
         $userProfile = route('user.profile.details', $user->username);
 
         $token = $request->bearerToken();
@@ -286,7 +355,39 @@ class AppController extends Controller {
             return redirect()->route('user.profile.details');
         }
 
-        $shorts     = Short::with('likes')->where('user_id', $user->id)->published()->orderBy('created_at', 'desc')->paginate();
+        $shorts = Short::with('likes')
+            ->where('user_id', $user->id)
+            ->approved()
+            ->published()
+            ->publicShort()
+            ->where(function ($query) {
+                $query->where('storage_driver', 'local')
+                    ->orWhereIn('storage_driver', function ($subQuery) {
+                        $subQuery->select('alias')
+                            ->from('storage_settings')
+                            ->where('status', Status::ENABLE);
+                    });
+            })
+            ->withCount('likes')
+            ->withSum('stars', 'stars')
+            ->orderBy('id', 'desc')
+            ->paginate();
+
+        $shorts->transform(function ($short) use ($user) {
+            if ($short->storage_driver === 'wasabi') {
+                $fileUrl = getS3FileUri($short->name);
+            } elseif ($short->storage_driver === 'local') {
+                $fileUrl = asset(getFilePath('shorts') . '/' . $short->name);
+            } else {
+                $fileUrl = route('short.file', $short->name);
+            }
+
+            $extension        = pathinfo($short->name, PATHINFO_EXTENSION);
+            $short->file_url  = $fileUrl;
+            $short->extension = $extension;
+
+            return $short;
+        });
 
         $totalLikes = $shorts->sum(function ($short) {
             return $short->likes->count();
@@ -300,17 +401,164 @@ class AppController extends Controller {
         $user->is_following = $isFollowing;
 
         return responseManager("details", $pageTitle, 'success', [
-            'view'       => 'Template::user.friend.details',
-            'pageTitle'  => $pageTitle,
-            'user'       => $user,
-            'userProfile' => $userProfile,
-            'userQr'     => $userQR,
-            'shorts'     => $shorts,
-            'followers'  => $user->followers()->count(),
-            'followings' => $user->followings()->count(),
-            'totalLikes' => $totalLikes,
-            'imagePath'  => getFilePath('userProfile'),
-            'coverImagePath'  => getFilePath('coverImage'),
+            'view'           => 'Template::user.friend.details',
+            'pageTitle'      => $pageTitle,
+            'user'           => $user,
+            'userProfile'    => $userProfile,
+            'userQr'         => $userQR,
+            'shorts'         => $shorts,
+            'followers'      => $user->followers()->count(),
+            'followings'     => $user->followings()->count(),
+            'totalLikes'     => $totalLikes,
+            'imagePath'      => getFilePath('userProfile'),
+            'coverImagePath' => getFilePath('coverImage'),
         ]);
     }
+
+    public function getComments(Request $request)
+    {
+        $request->validate([
+            'shorts_id' => 'required|exists:shorts,id',
+        ]);
+
+        $token = $request->bearerToken();
+        $user  = null;
+
+        if ($token) {
+            $personalToken = PersonalAccessToken::findToken($token);
+            if ($personalToken && $personalToken->tokenable instanceof User) {
+                $user = $personalToken->tokenable;
+            }
+        }
+
+        $short = Short::select('description')->find($request->shorts_id);
+
+        $comments = Comment::with([
+            'user:id,username,image',
+            'short:id,description',
+        ])
+            ->where('shorts_id', $request->shorts_id)
+            ->whereNull('parent_id')
+            ->orderBy('id', 'desc')
+            ->paginate();
+
+        $comments->getCollection()->transform(function ($comment) use ($user) {
+
+            $comment->is_liked  = $comment->isLikedBy($user?->id);
+            $comment->childrens = $this->recursiveComment($comment, $user);
+
+            unset($comment->replies);
+
+            return $comment;
+        });
+
+        return apiResponse('comments', 'success', ['short comments'], [
+            'success'   => true,
+            'short'     => $short,
+            'comments'  => $comments,
+            'imagePath' => getFilePath('userProfile'),
+        ]);
+    }
+
+    public function search(Request $request)
+    {
+        $pageTitle = 'Search User';
+        $search    = $request->search;
+
+        $token = $request->bearerToken();
+
+        $user = null;
+
+        if ($token) {
+            $personalToken = PersonalAccessToken::findToken($token);
+            if ($personalToken && $personalToken->tokenable instanceof User) {
+                $user = $personalToken->tokenable;
+            }
+        }
+
+        $shorts = Short::with('user:id,username,image')
+            ->approved()
+            ->published()
+            ->publicShort()
+            ->where(function ($query) {
+                $query->where('storage_driver', 'local')
+                    ->orWhereIn('storage_driver', function ($subQuery) {
+                        $subQuery->select('alias')
+                            ->from('storage_settings')
+                            ->where('status', Status::ENABLE);
+                    });
+            })
+            ->withCount('likes')
+            ->withSum('stars', 'stars')
+            ->orderBy('id', 'desc')
+            ->paginate();
+
+        $shorts->transform(function ($short) use ($user) {
+            if ($short->storage_driver === 'wasabi') {
+                $fileUrl = getS3FileUri($short->name);
+            } elseif ($short->storage_driver === 'local') {
+                $fileUrl = asset(getFilePath('shorts') . '/' . $short->name);
+            } else {
+                $fileUrl = route('short.file', $short->name);
+            }
+
+            $extension = pathinfo($short->name, PATHINFO_EXTENSION);
+
+            $liked = false;
+            if ($user) {
+                $liked = $short->likes()->where('user_id', $user->id)->exists();
+            }
+
+            $saved = false;
+            if ($user) {
+                $saved = $short->savedShorts()->where('user_id', $user->id)->exists();
+            }
+
+            $short->file_url  = $fileUrl;
+            $short->extension = $extension;
+            $short->liked     = $liked;
+            $short->saved     = $saved;
+
+            return $short;
+        });
+
+        return responseManager("userSearch", $pageTitle, 'success', [
+            'shorts'     => $shorts,
+            'search'     => $search,
+            'coverImage' => getFilePath('coverImage'),
+            'imagePath'  => getFilePath('userProfile'),
+        ]);
+    }
+
+    private function recursiveComment($comment, $user)
+    {
+
+        $commentReplies = @$comment->replies;
+
+        $commentArray = [];
+        while (0 == 0) {
+
+            if ($commentReplies->count() > 0) {
+                foreach ($commentReplies as $commentReply) {
+
+                    $singleCommentArray = $commentReply->toArray();
+
+                     $singleCommentArray['is_liked'] = $commentReply->isLikedBy($user?->id);
+
+                    $singleCommentArray['parent'] = [
+                        'username' => $commentReply->parent->user->username,
+                        'id'       => $commentReply->parent->user->id,
+                    ];
+
+                    array_push($commentArray, $singleCommentArray);
+                    $commentReplies = $commentReply->replies;
+                }
+            } else {
+                break;
+            }
+        }
+
+        return $commentArray;
+    }
+
 }

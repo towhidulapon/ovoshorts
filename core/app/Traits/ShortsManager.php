@@ -34,12 +34,14 @@ trait ShortsManager
     {
 
         $request->validate([
-            'short'       => 'required|mimetypes:video/mp4,video/quicktime,video/x-msvideo,video/webm,video/x-matroska|max:204800',
-            'description' => 'nullable|string|max:4000',
-            'cover_image' => ['nullable', 'image', new FileTypeValidate(['jpg', 'jpeg', 'png'])],
-            'visibility'  => 'required|in:1,2',
-            'comment'     => 'nullable',
-            'category_id' => 'required|exists:categories,id',
+            'short'         => 'required|mimetypes:video/mp4,video/quicktime,video/x-msvideo,video/webm,video/x-matroska|max:204800',
+            'description'   => 'nullable|string|max:4000',
+            'cover_image'   => ['nullable', 'image', new FileTypeValidate(['jpg', 'jpeg', 'png'])],
+            'visibility'    => 'required|in:1,2',
+            'comment'       => 'nullable',
+            'category_id'   => 'required|exists:categories,id',
+            'post_at'       => 'required|in:1,2',
+            'schedule_time' => 'nullable|required_if:post_at,2|after:now',
         ]);
 
         $category = Category::active()->find($request->category_id);
@@ -103,7 +105,7 @@ trait ShortsManager
         $short->is_visible     = $request->visibility;
         $short->allow_comments = $request->comment ?? 0;
         $short->category_id    = $request->category_id;
-        $short->post_at        = now();
+        $short->post_at        = $request->schedule_time ?? now();
         $short->storage_id     = $storageId;
         $short->storage_driver = $storageDriver;
 
