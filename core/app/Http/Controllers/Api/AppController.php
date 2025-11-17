@@ -415,9 +415,8 @@ class AppController extends Controller
         ]);
     }
 
-    public function playShort(Request $request, $shortId)
+    public function playShort($shortId)
     {
-
         $clickedShort = Short::with('user:id,username,image')
             ->approved()
             ->published()

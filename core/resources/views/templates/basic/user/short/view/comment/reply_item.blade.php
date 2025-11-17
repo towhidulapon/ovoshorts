@@ -39,18 +39,5 @@
                 </div>
             </form>
         </div>
-
-        @if($reply->replies && $reply->replies->count() > 0)
-            <button class="common-action-btn view-replies" data-comment-id="{{ $reply->id }}">
-                <span class="count-text">― View {{ $reply->replies->count() }} replies </span> <i class="las la-angle-down"></i>
-            </button>
-
-            <div class="replies-container d-none">
-                @foreach($reply->replies as $childReply)
-                    @include('Template::user.short.view.comment.reply_item', ['reply' => $childReply])
-                @endforeach
-            </div>
-        @endif
-
     </div>
 </div>

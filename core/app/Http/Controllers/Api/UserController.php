@@ -80,32 +80,16 @@ class UserController extends Controller
         ]);
     }
 
-    protected function transformShorts($shorts)
+    public function profileDetails()
     {
-        return $shorts->transform(function ($short) {
-            if (!$short) {
-                return null;
-            }
+        $pageTitle = 'Profile Details';
+        $user      = auth()->user();
 
-            $short->file_url = match ($short->storage_driver) {
-                'wasabi' => getS3FileUri($short->name),
-                'local'  => asset(getFilePath('shorts') . '/' . $short->name),
-                default  => route('short.file', $short->name),
-            };
-
-            $short->extension = pathinfo($short->name, PATHINFO_EXTENSION);
-            return $short;
-        });
-    }
-
-    protected function shortQuery()
-    {
-        return Short::with('user:id,username,image')
+        $shorts = Short::with('user:id,username,image')
             ->approved()
             ->published()
             ->publicShort()
-            ->withCount('likes')
-            ->withSum('stars', 'stars')
+            ->where('user_id', $user->id)
             ->where(function ($query) {
                 $query->where('storage_driver', 'local')
                     ->orWhereIn('storage_driver', function ($subQuery) {
@@ -114,32 +98,44 @@ class UserController extends Controller
                             ->where('status', Status::ENABLE);
                     });
             })
-            ->orderBy('id', 'desc');
-    }
-
-    public function profileDetails()
-    {
-        $user      = auth()->user();
-        $pageTitle = 'Profile Details';
-
-        $shorts = $this->shortQuery()
-            ->where('user_id', $user->id)
+            ->withCount('likes')
+            ->withSum('stars', 'stars')
+            ->orderBy('id', 'desc')
             ->paginate();
 
-        $this->transformShorts($shorts);
+        $shorts->transform(function ($short) use ($user) {
+            if ($short->storage_driver === 'wasabi') {
+                $fileUrl = getS3FileUri($short->name);
+            } elseif ($short->storage_driver === 'local') {
+                $fileUrl = asset(getFilePath('shorts') . '/' . $short->name);
+            } else {
+                $fileUrl = route('short.file', $short->name);
+            }
+
+            $extension        = pathinfo($short->name, PATHINFO_EXTENSION);
+            $short->file_url  = $fileUrl;
+            $short->extension = $extension;
+
+            return $short;
+        });
 
         $userProfile = route('user.profile.details', $user->username);
+        $userQR      = cryptoQR($userProfile);
 
-        return responseManager('profile_details', $pageTitle, 'success', [
+        $totalLikes = $shorts->sum(function ($short) {
+            return $short->likes->count();
+        });
+
+        return responseManager("profile_details", $pageTitle, 'success', [
             'user'           => $user,
             'userProfile'    => $userProfile,
-            'userQr'         => cryptoQR($userProfile),
+            'userQr'         => $userQR,
             'balance'        => $user->balance,
             'imagePath'      => getFilePath('userProfile'),
             'coverImagePath' => getFilePath('coverImage'),
             'pageTitle'      => $pageTitle,
             'shorts'         => $shorts,
-            'totalLikes'     => $shorts->sum(fn($s) => $s->likes->count()),
+            'totalLikes'     => $totalLikes,
             'followers'      => $user->followers()->count(),
             'following'      => $user->followings()->count(),
         ]);
@@ -150,21 +146,43 @@ class UserController extends Controller
         $user = auth()->user();
 
         $savedShorts = $user->savedShorts()
-            ->with(['short' => fn($query) => $query->with('user:id,username,image')
-                    ->approved()
+            ->whereHas('short', function ($query) {
+                $query->approved()
                     ->published()
                     ->publicShort()
+                    ->where(function ($q) {
+                        $q->where('storage_driver', 'local')
+                            ->orWhereIn('storage_driver', function ($subQuery) {
+                                $subQuery->select('alias')
+                                    ->from('storage_settings')
+                                    ->where('status', Status::ENABLE);
+                            });
+                    });
+            })
+            ->with(['short' => function ($query) {
+                $query->with('user:id,username,image')
                     ->withCount('likes')
-                    ->withSum('stars', 'stars'),
-            ])
+                    ->withSum('stars', 'stars');
+            }])
             ->orderBy('id', 'desc')
             ->paginate();
 
-        $savedShorts->transform(function ($item) {
-            return $this->transformShorts(collect([$item->short]))->first();
+        $savedShorts->getCollection()->transform(function ($item) {
+
+            $short = $item->short;
+
+            $short->file_url = match ($short->storage_driver) {
+                'wasabi' => getS3FileUri($short->name),
+                'local'  => asset(getFilePath('shorts') . '/' . $short->name),
+                default  => route('short.file', $short->name),
+            };
+
+            $short->extension = pathinfo($short->name, PATHINFO_EXTENSION);
+
+            return $short;
         });
 
-        return apiResponse('saved_shorts', 'success', ['saved shorts'], [
+        return apiResponse("saved_shorts", "success", ["saved shorts"], [
             'shorts' => $savedShorts,
         ]);
     }
@@ -174,165 +192,45 @@ class UserController extends Controller
         $user = auth()->user();
 
         $likedShorts = $user->likes()
-            ->with(['short' => fn($query) => $query->with('user:id,username,image')
-                    ->approved()
+            ->whereHas('short', function ($query) {
+                $query->approved()
                     ->published()
                     ->publicShort()
+                    ->where(function ($q) {
+                        $q->where('storage_driver', 'local')
+                            ->orWhereIn('storage_driver', function ($subQuery) {
+                                $subQuery->select('alias')
+                                    ->from('storage_settings')
+                                    ->where('status', Status::ENABLE);
+                            });
+                    });
+            })
+            ->with(['short' => function ($query) {
+                $query->with('user:id,username,image')
                     ->withCount('likes')
-                    ->withSum('stars', 'stars'),
-            ])
+                    ->withSum('stars', 'stars');
+            }])
             ->orderBy('id', 'desc')
             ->paginate();
 
-        $likedShorts->transform(function ($item) {
-            return $this->transformShorts(collect([$item->short]))->first();
+        $likedShorts->getCollection()->transform(function ($item) {
+            $short = $item->short;
+
+            $short->file_url = match ($short->storage_driver) {
+                'wasabi' => getS3FileUri($short->name),
+                'local'  => asset(getFilePath('shorts') . '/' . $short->name),
+                default  => route('short.file', $short->name),
+            };
+
+            $short->extension = pathinfo($short->name, PATHINFO_EXTENSION);
+
+            return $short;
         });
 
-        return apiResponse('liked_shorts', 'success', ['liked shorts'], [
+        return apiResponse("liked_shorts", "success", ["liked shorts"], [
             'shorts' => $likedShorts,
         ]);
     }
-
-    // public function profileDetails()
-    // {
-    //     $pageTitle = 'Profile Details';
-    //     $user      = auth()->user();
-
-    //     $shorts = Short::with('user:id,username,image')
-    //         ->approved()
-    //         ->published()
-    //         ->publicShort()
-    //         ->where('user_id', $user->id)
-    //         ->where(function ($query) {
-    //             $query->where('storage_driver', 'local')
-    //                 ->orWhereIn('storage_driver', function ($subQuery) {
-    //                     $subQuery->select('alias')
-    //                         ->from('storage_settings')
-    //                         ->where('status', Status::ENABLE);
-    //                 });
-    //         })
-    //         ->withCount('likes')
-    //         ->withSum('stars', 'stars')
-    //         ->orderBy('id', 'desc')
-    //         ->paginate();
-
-    //     $shorts->transform(function ($short) use ($user) {
-    //         if ($short->storage_driver === 'wasabi') {
-    //             $fileUrl = getS3FileUri($short->name);
-    //         } elseif ($short->storage_driver === 'local') {
-    //             $fileUrl = asset(getFilePath('shorts') . '/' . $short->name);
-    //         } else {
-    //             $fileUrl = route('short.file', $short->name);
-    //         }
-
-    //         $extension        = pathinfo($short->name, PATHINFO_EXTENSION);
-    //         $short->file_url  = $fileUrl;
-    //         $short->extension = $extension;
-
-    //         return $short;
-    //     });
-
-    //     $userProfile = route('user.profile.details', $user->username);
-    //     $userQR      = cryptoQR($userProfile);
-
-    //     $totalLikes = $shorts->sum(function ($short) {
-    //         return $short->likes->count();
-    //     });
-
-    //     return responseManager("profile_details", $pageTitle, 'success', [
-    //         'user'           => $user,
-    //         'userProfile'    => $userProfile,
-    //         'userQr'         => $userQR,
-    //         'balance'        => $user->balance,
-    //         'imagePath'      => getFilePath('userProfile'),
-    //         'coverImagePath' => getFilePath('coverImage'),
-    //         'pageTitle'      => $pageTitle,
-    //         'shorts'         => $shorts,
-    //         'totalLikes'     => $totalLikes,
-    //         'followers'      => $user->followers()->count(),
-    //         'following'      => $user->followings()->count(),
-    //     ]);
-    // }
-
-    // public function savedShorts()
-    // {
-    //     $user = auth()->user();
-
-    //     $savedShorts = $user->savedShorts()
-    //         ->with(['short' => function ($query) {
-    //             $query->with('user:id,username,image')
-    //                 ->approved()
-    //                 ->published()
-    //                 ->publicShort()
-    //                 ->withCount('likes')
-    //                 ->withSum('stars', 'stars');
-    //         }])
-    //         ->orderBy('id', 'desc')
-    //         ->paginate();
-
-    //     $savedShorts->transform(function ($item) {
-    //         $short = $item->short;
-
-    //         if (!$short) {
-    //             return apiResponse("short_not_found", "error", ["shorts not found"]);
-    //         }
-
-    //         if ($short->storage_driver === 'wasabi') {
-    //             $fileUrl = getS3FileUri($short->name);
-    //         } elseif ($short->storage_driver === 'local') {
-    //             $fileUrl = asset(getFilePath('shorts') . '/' . $short->name);
-    //         } else {
-    //             $fileUrl = route('short.file', $short->name);
-    //         }
-
-    //         $short->file_url  = $fileUrl;
-    //         $short->extension = pathinfo($short->name, PATHINFO_EXTENSION);
-
-    //         return $short;
-    //     });
-
-    //     return apiResponse("saved_shorts", "success", ["saved shorts"], [
-    //         'shorts' => $savedShorts,
-    //     ]);
-    // }
-
-    // public function likedShorts()
-    // {
-    //     $user        = auth()->user();
-    //     $likedShorts = $user->likes()->with(['short' => function ($query) {
-    //         $query->with('user:id,username,image')
-    //             ->approved()
-    //             ->published()
-    //             ->publicShort()
-    //             ->withCount('likes')
-    //             ->withSum('stars', 'stars');
-    //     }])->orderBy('id', 'desc')->paginate();
-
-    //     $likedShorts->transform(function ($item) {
-    //         $short = $item->short;
-
-    //         if (!$short) {
-    //             return apiResponse("short_not_found", "error", ["shorts not found"]);
-    //         }
-
-    //         if ($short->storage_driver === 'wasabi') {
-    //             $fileUrl = getS3FileUri($short->name);
-    //         } elseif ($short->storage_driver === 'local') {
-    //             $fileUrl = asset(getFilePath('shorts') . '/' . $short->name);
-    //         } else {
-    //             $fileUrl = route('short.file', $short->name);
-    //         }
-
-    //         $short->file_url  = $fileUrl;
-    //         $short->extension = pathinfo($short->name, PATHINFO_EXTENSION);
-
-    //         return $short;
-    //     });
-
-    //     return apiResponse("liked_shorts", "success", ["liked shorts"], [
-    //         'shorts' => $likedShorts,
-    //     ]);
-    // }
 
     public function kycForm()
     {

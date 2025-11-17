@@ -27,16 +27,31 @@
                 </div>
                 @if($comment->replies && $comment->replies->count() > 0)
                     <button class="common-action-btn view-replies" data-comment-id="{{ $comment->id }}">
-                        <span class="count-text">― @lang('View') {{ $comment->replies->count() }} @lang('replies') </span> <i class="las la-angle-down"></i>
+                        <span class="count-text">― @lang('View replies') </span> <i class="las la-angle-down"></i>
                     </button>
                 @endif
             </div>
         </div>
+
+
         <div class="replies-container d-none">
+            {{-- @include('Template::user.short.view.comment.comment_replies_flat', ['replies' => $comment->replies]) --}}
+        </div>
+
+
+        {{-- <div class="replies-container d-none">
+
             @foreach($comment->replies as $reply)
                 @include('Template::user.short.view.comment.reply_item', ['reply' => $reply])
+                @if($reply->replies && $reply->replies->count() > 0)
+                    @foreach($reply->replies as $childReply)
+                        @include('Template::user.short.view.comment.reply_item', ['reply' => $childReply])
+                    @endforeach
+                @endif
             @endforeach
-        </div>
+
+        </div> --}}
+
         <div class="reply-form-container d-none">
             <form class="reply-form" data-comment-id="{{ $comment->id }}">
                 <input type="hidden" name="comment_id" value="{{ $comment->id }}">

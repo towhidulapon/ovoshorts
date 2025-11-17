@@ -511,11 +511,11 @@ class SiteController extends Controller
         $userId = auth()->check() ? auth()->user()->id : null;
         $page   = $request->input('page', 1);
 
-        $comments = Comment::with(['user', 'replies.user'])
+        $comments = Comment::with(['user'])
             ->where('shorts_id', $request->shorts_id)
             ->whereNull('parent_id')
             ->orderBy('id', 'desc')
-            ->paginate(getPaginate(8), ['*'], 'page', $page);
+            ->paginate(getPaginate(8));
 
         $html = '';
 
@@ -523,12 +523,37 @@ class SiteController extends Controller
             $html .= view('Template::user.short.view.comment.comment_item', ['comment' => $comment])->render();
         }
 
-        return apiResponse('comments', 'success', [], [
+        return apiResponse('comments', 'success', ["comments fetched successfully"], [
             'success'   => true,
             'comments'  => $comments->items(),
             'html'      => $html,
             'has_more'  => $comments->hasMorePages(),
             'next_page' => $comments->currentPage() + 1,
+        ]);
+    }
+
+    public function getReplies(Request $request)
+    {
+        $request->validate([
+            'comment_id' => 'required|exists:comments,id',
+        ]);
+
+        $comment = Comment::with([
+            'replies.user',
+            'replies.replies.user',
+        ])->find($request->comment_id);
+
+        $html = '';
+
+        foreach ($comment->replies as $reply) {
+            $html .= view('Template::user.short.view.comment.reply_item', [
+                'reply' => $reply,
+            ])->render();
+        }
+
+        return apiResponse('replies', 'success', ['Replies fetched'], [
+            'html'    => $html,
+            'success' => true,
         ]);
     }
 

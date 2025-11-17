@@ -62,6 +62,7 @@ Route::controller('SiteController')->group(function () {
     Route::post('shorts/like/{shortId}', 'like')->name('short.like');
     Route::post('shorts/unlike/{shortId}', 'unlike')->name('short.unlike');
     Route::get('get/comments', 'getComments')->name('user.comment.get');
+    Route::get('get/replies', 'getReplies')->name('user.replies.get');
 
 });
 

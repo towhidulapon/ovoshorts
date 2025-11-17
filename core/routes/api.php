@@ -23,7 +23,7 @@ Route::namespace('Api')->name('api.')->group(function () {
         Route::get('faq', 'faq');
 
         Route::get('shorts', 'index');
-        Route::post('shorts/record', 'recordView');
+        Route::post('shorts/record/view', 'recordView');
         Route::get('play-short/{id}', 'playShort');
 
         Route::post('shorts/analytics/track/{id}', 'trackAnalytics');
