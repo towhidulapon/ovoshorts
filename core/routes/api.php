@@ -24,6 +24,8 @@ Route::namespace('Api')->name('api.')->group(function () {
 
         Route::get('shorts', 'index');
         Route::post('shorts/record', 'recordView');
+        Route::get('play-short/{id}', 'playShort');
+
         Route::post('shorts/analytics/track/{id}', 'trackAnalytics');
         Route::get('shorts/analytics/get/{id}', 'getAnalytics');
 
@@ -34,7 +36,6 @@ Route::namespace('Api')->name('api.')->group(function () {
         Route::get('/get/comments', 'getComments');
 
         Route::post('shorts/share', 'share');
-        Route::get('/search/{index}', 'search');
         Route::get('/hashtag/{hashtag}', 'hashtag');
     });
 
@@ -79,6 +80,8 @@ Route::namespace('Api')->name('api.')->group(function () {
 
                     Route::get('dashboard', 'dashboard');
                     Route::get('profile-details', 'profileDetails');
+                    Route::get('saved-shorts', 'savedShorts');
+                    Route::get('liked-shorts', 'likedShorts');
                     Route::post('profile-setting', 'submitProfile');
                     Route::post('change-password', 'submitPassword');
 

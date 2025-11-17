@@ -415,6 +415,77 @@ class AppController extends Controller
         ]);
     }
 
+    public function playShort(Request $request, $shortId)
+    {
+
+        $clickedShort = Short::with('user:id,username,image')
+            ->approved()
+            ->published()
+            ->publicShort()
+            ->where(function ($query) {
+                $query->where('storage_driver', 'local')
+                    ->orWhereIn('storage_driver', function ($subQuery) {
+                        $subQuery->select('alias')
+                            ->from('storage_settings')
+                            ->where('status', Status::ENABLE);
+                    });
+            })
+            ->withCount('likes')
+            ->withSum('stars', 'stars')
+            ->find($shortId);
+
+        if (!$clickedShort) {
+            return apiResponse("short_not_found", "error", ["Short not found"]);
+        }
+
+        $clickedShort = $this->transformShort($clickedShort);
+
+        $otherShorts = Short::with('user:id,username,image')
+            ->approved()
+            ->published()
+            ->publicShort()
+            ->where(function ($query) {
+                $query->where('storage_driver', 'local')
+                    ->orWhereIn('storage_driver', function ($subQuery) {
+                        $subQuery->select('alias')
+                            ->from('storage_settings')
+                            ->where('status', Status::ENABLE);
+                    });
+            })
+            ->where('id', '<>', $shortId)
+            ->withCount('likes')
+            ->withSum('stars', 'stars')
+            ->orderBy('id', 'desc')
+            ->paginate();
+
+        $otherShorts->getCollection()->transform(fn($short) => $this->transformShort($short));
+
+        $allShorts = collect([$clickedShort])->merge($otherShorts->getCollection());
+        $otherShorts->setCollection($allShorts);
+
+        return apiResponse("play_short", "success", ["Short loaded"], [
+            'shorts' => $otherShorts,
+        ]);
+    }
+
+    protected function transformShort($short)
+    {
+        if (!$short) {
+            return null;
+        }
+
+        $fileUrl = match ($short->storage_driver) {
+            'wasabi' => getS3FileUri($short->name),
+            'local'  => asset(getFilePath('shorts') . '/' . $short->name),
+            default  => route('short.file', $short->name),
+        };
+
+        $short->file_url  = $fileUrl;
+        $short->extension = pathinfo($short->name, PATHINFO_EXTENSION);
+
+        return $short;
+    }
+
     public function getComments(Request $request)
     {
         $request->validate([
@@ -460,76 +531,6 @@ class AppController extends Controller
         ]);
     }
 
-    public function search(Request $request)
-    {
-        $pageTitle = 'Search User';
-        $search    = $request->search;
-
-        $token = $request->bearerToken();
-
-        $user = null;
-
-        if ($token) {
-            $personalToken = PersonalAccessToken::findToken($token);
-            if ($personalToken && $personalToken->tokenable instanceof User) {
-                $user = $personalToken->tokenable;
-            }
-        }
-
-        $shorts = Short::with('user:id,username,image')
-            ->approved()
-            ->published()
-            ->publicShort()
-            ->where(function ($query) {
-                $query->where('storage_driver', 'local')
-                    ->orWhereIn('storage_driver', function ($subQuery) {
-                        $subQuery->select('alias')
-                            ->from('storage_settings')
-                            ->where('status', Status::ENABLE);
-                    });
-            })
-            ->withCount('likes')
-            ->withSum('stars', 'stars')
-            ->orderBy('id', 'desc')
-            ->paginate();
-
-        $shorts->transform(function ($short) use ($user) {
-            if ($short->storage_driver === 'wasabi') {
-                $fileUrl = getS3FileUri($short->name);
-            } elseif ($short->storage_driver === 'local') {
-                $fileUrl = asset(getFilePath('shorts') . '/' . $short->name);
-            } else {
-                $fileUrl = route('short.file', $short->name);
-            }
-
-            $extension = pathinfo($short->name, PATHINFO_EXTENSION);
-
-            $liked = false;
-            if ($user) {
-                $liked = $short->likes()->where('user_id', $user->id)->exists();
-            }
-
-            $saved = false;
-            if ($user) {
-                $saved = $short->savedShorts()->where('user_id', $user->id)->exists();
-            }
-
-            $short->file_url  = $fileUrl;
-            $short->extension = $extension;
-            $short->liked     = $liked;
-            $short->saved     = $saved;
-
-            return $short;
-        });
-
-        return responseManager("userSearch", $pageTitle, 'success', [
-            'shorts'     => $shorts,
-            'search'     => $search,
-            'coverImage' => getFilePath('coverImage'),
-            'imagePath'  => getFilePath('userProfile'),
-        ]);
-    }
-
     private function recursiveComment($comment, $user)
     {
 
@@ -543,7 +544,7 @@ class AppController extends Controller
 
                     $singleCommentArray = $commentReply->toArray();
 
-                     $singleCommentArray['is_liked'] = $commentReply->isLikedBy($user?->id);
+                    $singleCommentArray['is_liked'] = $commentReply->isLikedBy($user?->id);
 
                     $singleCommentArray['parent'] = [
                         'username' => $commentReply->parent->user->username,
