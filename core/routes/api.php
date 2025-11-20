@@ -159,7 +159,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::controller('DashboardController')->prefix('dashboard')->group(function () {
                     Route::get('analytics', 'analytics');
                     Route::get('post-analytics/{id}', 'postAnalytics');
-                    Route::get('analytics/content', 'analyticsContent');
+                    Route::get('analytics/content', 'analyticsData');
                     Route::get('analytics/viewers', 'analyticsViewers');
                     Route::get('post', 'post');
                     Route::post('update/privacy', 'updatePrivacy');

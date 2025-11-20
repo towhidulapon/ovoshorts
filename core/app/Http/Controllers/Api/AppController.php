@@ -110,7 +110,8 @@ class AppController extends Controller
             })
             ->withCount('likes', 'comments')
             ->withSum('stars', 'stars')
-            ->orderBy('id', 'desc')
+            ->selectRaw("shorts.*, ((views_count * 1.5) + (TIMESTAMPDIFF(HOUR, created_at, NOW()) * -0.05) + (RAND() * 20)) as weight_score")
+            ->orderByDesc('weight_score')
             ->paginate();
 
         $shorts->transform(function ($short) use ($user) {
@@ -208,7 +209,7 @@ class AppController extends Controller
             $short->increment('total_play_time', $request->input('play_time'));
         }
 
-        return apiResponse("track", "success", [], [
+        return apiResponse("track", "success", [""], [
             'success' => true,
         ]);
     }

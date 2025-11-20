@@ -39,7 +39,7 @@
                             </a>
 
                             <p class="video-item-content__desc">
-                                {!! $userShort->description !!}
+                                {!! strLimit($userShort->description) !!}
                             </p>
                         </div>
                     @empty

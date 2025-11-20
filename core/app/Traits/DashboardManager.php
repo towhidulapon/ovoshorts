@@ -7,15 +7,19 @@ use App\Lib\StorageConfig;
 use App\Models\Short;
 use App\Models\ShortShare;
 use App\Models\ShortView;
+use App\Models\UserReaction;
 use Illuminate\Http\Request;
 
-trait DashboardManager {
+trait DashboardManager
+{
     protected $storageConfig;
 
-    public function __construct(StorageConfig $storageConfig) {
+    public function __construct(StorageConfig $storageConfig)
+    {
         $this->storageConfig = $storageConfig;
     }
-    public function analytics() {
+    public function analytics()
+    {
         $pageTitle    = 'Analytics';
         $countryViews = ShortView::whereHas('short', function ($q) {
             $q->where('user_id', auth()->id());
@@ -61,7 +65,8 @@ trait DashboardManager {
         ]);
     }
 
-    public function analyticsContent(Request $request) {
+    public function analyticsContent(Request $request)
+    {
         $pageTitle = "Content";
         $userId    = auth()->user()->id;
 
@@ -122,7 +127,8 @@ trait DashboardManager {
         ]);
     }
 
-    public function analyticsViewers() {
+    public function analyticsViewers()
+    {
         $pageTitle    = "Viewers";
         $totalViewers = ShortView::whereHas('short', function ($q) {
             $q->where('user_id', auth()->id());
@@ -157,7 +163,8 @@ trait DashboardManager {
         ]);
     }
 
-    public function post(Request $request) {
+    public function post(Request $request)
+    {
         $pageTitle = "Post";
         $sort      = request()->query('sort', 'id');
         $order     = request()->query('order', 'desc');
@@ -192,7 +199,8 @@ trait DashboardManager {
         ]);
     }
 
-    public function updatePrivacy(Request $request) {
+    public function updatePrivacy(Request $request)
+    {
         $request->validate([
             'post_id' => 'required|exists:shorts,id',
             'privacy' => 'required|in:1,2',
@@ -215,7 +223,8 @@ trait DashboardManager {
         ]);
     }
 
-    public function postAnalytics($id) {
+    public function postAnalytics($id)
+    {
         $pageTitle = "Analytics";
         $user      = auth()->user();
         $short     = Short::where('user_id', $user->id)->where('id', $id)->withCount('likes', 'comments', 'savedShorts')->firstOrFail();
@@ -263,7 +272,8 @@ trait DashboardManager {
         ]);
     }
 
-    public function pinShort($id) {
+    public function pinShort($id)
+    {
         $user             = auth()->user();
         $short            = Short::where('user_id', $user->id)->findOrFail($id);
         $short->is_pinned = $short->is_pinned == Status::YES ? Status::NO : Status::YES;
@@ -289,7 +299,8 @@ trait DashboardManager {
         ]);
     }
 
-    public function deleteShort($id) {
+    public function deleteShort($id)
+    {
         $user  = auth()->user();
         $short = Short::where('user_id', $user->id)->find($id);
 
@@ -300,7 +311,7 @@ trait DashboardManager {
             ]);
         }
 
-        $path  = 'shorts/' . $short->name;
+        $path = 'shorts/' . $short->name;
 
         try {
             if ($short->storage_driver === 'local') {
@@ -334,4 +345,34 @@ trait DashboardManager {
             'message' => 'Short deleted successfully',
         ]);
     }
+
+    public function analyticsData()
+    {
+        $pageTitle = 'Analytics Data';
+        $user      = auth()->user();
+
+        $shorts = Short::where('user_id', $user->id)->get();
+
+        $lastShort = Short::where('user_id', $user->id)->orderBy('views_count', 'desc')->first();
+        $lastShortViews = $lastShort ? $lastShort->views_count : 0;
+
+        $totalShortViews = $shorts->sum('views_count');
+        $totalShortLikes = UserReaction::whereIn('shorts_id', $shorts->pluck('id'))->count();
+
+        $newFollowers = $user->followers()
+            ->wherePivot('created_at', '>=', now()->subDays(7))
+            ->count();
+
+        $estimatedRewards = $user->stars * gs('star_price');
+
+        return apiResponse('analytics', 'success', [$pageTitle], [
+            'totalShortViews'  => $totalShortViews,
+            'totalShortLikes'  => $totalShortLikes,
+            'newFollowers'     => $newFollowers,
+            'lastShortViews'   => $lastShortViews,
+            'userBalance'      => showAmount($user->balance),
+            'estimatedRewards' => showAmount($estimatedRewards),
+        ]);
+    }
+
 }

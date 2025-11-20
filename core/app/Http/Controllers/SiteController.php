@@ -59,7 +59,8 @@ class SiteController extends Controller
             })
             ->withCount('likes')
             ->withSum('stars', 'stars')
-            ->orderBy('id', 'desc');
+            ->selectRaw("shorts.*, ((views_count * 1.5) + (TIMESTAMPDIFF(HOUR, created_at, NOW()) * -0.05) + (RAND() * 20)) as weight_score")
+            ->orderByDesc('weight_score');
 
         $shorts = $shortsQuery->paginate(getPaginate());
 
@@ -538,22 +539,40 @@ class SiteController extends Controller
             'comment_id' => 'required|exists:comments,id',
         ]);
 
-        $comment = Comment::with([
-            'replies.user',
-            'replies.replies.user',
-        ])->find($request->comment_id);
+        $perPage = 10;
+        $page    = $request->page ?? 1;
 
-        $html = '';
+        $comment = Comment::with(['replies.user'])->find($request->comment_id);
 
-        foreach ($comment->replies as $reply) {
-            $html .= view('Template::user.short.view.comment.reply_item', [
+        $flattenedReplies = collect();
+
+        $this->recursiveReplies($comment, $flattenedReplies);
+
+        $flattenedReplies = $flattenedReplies->sortBy('created_at')->values();
+
+        $paginatedReplies = $flattenedReplies->slice(($page - 1) * $perPage, $perPage);
+
+        $flattenedHtml = '';
+
+        foreach ($paginatedReplies as $reply) {
+            $flattenedHtml .= view('Template::user.short.view.comment.reply_item', [
                 'reply' => $reply,
             ])->render();
         }
 
+        $hasMore = ($page * $perPage) < $flattenedReplies->count();
+
+        // $flattenedReplies = $flattenedReplies->sortBy('created_at');
+
+        // foreach ($flattenedReplies as $reply) {
+        //     $flattenedHtml .= view('Template::user.short.view.comment.reply_item', ['reply' => $reply])->render();
+        // }
+
         return apiResponse('replies', 'success', ['Replies fetched'], [
-            'html'    => $html,
-            'success' => true,
+            'html'      => $flattenedHtml,
+            'has_more'  => $hasMore,
+            'next_page' => $page + 1,
+            'success'   => true,
         ]);
     }
 
@@ -574,7 +593,8 @@ class SiteController extends Controller
                             ->where('status', Status::ENABLE);
                     });
             })
-            ->orderBy('id', 'desc');
+            ->selectRaw("shorts.*,((views_count * 1.5) + (TIMESTAMPDIFF(HOUR, created_at, NOW()) * -0.05) + (RAND() * 20)) as weight_score")
+            ->orderByDesc('weight_score');
 
         if (auth()->check()) {
             $query->where('user_id', '!=', auth()->user()->id);
@@ -724,4 +744,25 @@ class SiteController extends Controller
             'hasMorePages' => $shorts->hasMorePages(),
         ]);
     }
+
+    private function recursiveReplies($comment, &$flattenedReplies)
+    {
+        $repliesHtml = '';
+
+        foreach ($comment->replies as $reply) {
+
+            $flattenedReplies->push($reply);
+
+            $repliesHtml .= view('Template::user.short.view.comment.reply_item', [
+                'reply' => $reply,
+            ])->render();
+
+            if ($reply->replies && $reply->replies->count() > 0) {
+                $repliesHtml .= $this->recursiveReplies($reply, $flattenedReplies);
+            }
+        }
+
+        return $repliesHtml;
+    }
+
 }

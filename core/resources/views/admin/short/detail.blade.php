@@ -98,7 +98,6 @@
                         @endif
                     </x-admin.ui.card.body>
                 </x-admin.ui.card>
-
             </div>
         @endif
     </div>

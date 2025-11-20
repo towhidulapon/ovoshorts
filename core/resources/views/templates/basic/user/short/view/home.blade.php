@@ -163,6 +163,27 @@
 
 @include('Template::user.short.login_modal')
 
+@push('style')
+    <style>
+        .load-more-replies {
+            background: transparent;
+            border: none;
+            color: hsl(var(--body-color));
+            font-size: 14px;
+            font-weight: 500;
+            padding: 6px 0;
+            cursor: pointer;
+            display: block;
+            margin: 10px 0;
+        }
+
+        .load-more-replies:hover {
+            color: hsl(var(--base));
+            text-decoration: underline;
+        }
+    </style>
+@endpush
+
 @push('script')
     <script>
         (function ($) {
@@ -435,6 +456,27 @@
                     });
                 }
 
+                function loadReplies(commentId, list, loadMoreBtn, page = 1) {
+                    $.ajax({
+                        type: "GET",
+                        url: "{{ route('user.replies.get') }}",
+                        data: { comment_id: commentId, page: page },
+                        success: function (response) {
+                            if (response.data.success) {
+                                list.append(response.data.html);
+
+                                if (response.data.has_more) {
+                                    loadMoreBtn.data('next-page', response.data.next_page);
+                                    loadMoreBtn.removeClass('d-none');
+                                } else {
+                                    loadMoreBtn.addClass('d-none');
+                                }
+                            }
+                        }
+                    });
+                }
+
+
 
                 $(document).on('click', '.comment-btn', function (e) {
                     e.preventDefault();
@@ -534,7 +576,7 @@
 
                                 var $repliesContainer = $rootComment.find('> .comment-item__content > .replies-container');
 
-                                $repliesContainer.prepend(response.html).removeClass('d-none');
+                                $repliesContainer.append(response.html).removeClass('d-none');
 
                                 var $viewRepliesBtn = $rootComment.find('.view-replies');
 
@@ -548,52 +590,6 @@
                         }
                     });
                 });
-
-
-
-
-
-
-
-
-                // $(document).on('submit', '.reply-form', function (e) {
-                //     e.preventDefault();
-                //     if (!isLoggedIn) {
-                //         $('.login-modal').modal('show');
-                //         return;
-                //     }
-                //     var $form = $(this);
-                //     var formData = new FormData(this);
-                //     formData.append("_token", "{{ csrf_token() }}");
-                //     $.ajax({
-                //         url: "{{ route('user.comment.reply.store') }}",
-                //         method: "POST",
-                //         data: formData,
-                //         contentType: false,
-                //         processData: false,
-                //         success: function (response) {
-                //             if (response.success) {
-                //                 $form[0].reset();
-                //                 $form.closest('.reply-form-container').addClass('d-none');
-
-                //                 var $repliesContainer = $form.closest('.comment-item').find('.replies-container');
-                //                 $repliesContainer.prepend(response.html);
-                //                 $repliesContainer.show();
-
-                //                 var $viewRepliesBtn = $form.closest('.comment-item').find('.view-replies');
-                //                 if ($viewRepliesBtn.length) {
-                //                     var currentCount = parseInt($viewRepliesBtn.find('.count-text').text().match(/\d+/)[0]);
-                //                     $viewRepliesBtn.find('.count-text').text('― View ' + (currentCount + 1) + ' replies');
-                //                 } else {
-                //                     var newBtnHtml = '<button class="common-action-btn view-replies" data-comment-id="' + $form.data('comment-id') + '">' +
-                //                         '<span class="count-text">― View 1 reply </span> <i class="las la-angle-down"></i>' +
-                //                         '</button>';
-                //                     $form.closest('.comment-item').find('.comment-item__action').append(newBtnHtml);
-                //                 }
-                //             }
-                //         }
-                //     });
-                // });
 
                 $(document).on('click', '.send-stars-btn', function () {
                     var receiverId = $(this).data('receiver-id');
@@ -642,7 +638,9 @@
 
                     var $btn = $(this);
                     var $commentItem = $btn.closest('.comment-item');
-                    var $replyFormContainer = $commentItem.find('.reply-form-container');
+                    var $replyFormContainer = $commentItem.children('.comment-item__content').children('.reply-form-container');
+
+                    $('.reply-form-container').not($replyFormContainer).addClass('d-none');
 
                     $replyFormContainer.toggleClass('d-none');
 
@@ -651,16 +649,6 @@
                     }
                 });
 
-                // $(document).on('click', '.view-replies', function (e) {
-                //     e.preventDefault();
-
-                //     var $btn = $(this);
-                //     var $commentItem = $btn.closest('.comment-item');
-                //     var $repliesContainer = $commentItem.find('.replies-container');
-
-                //     $repliesContainer.toggleClass('d-none');
-                //     $btn.find('i').toggleClass('la-angle-down la-angle-up');
-                // });
 
                 $(document).on('click', '.view-replies', function (e) {
                     e.preventDefault();
@@ -668,22 +656,25 @@
                     let btn = $(this);
                     let commentId = btn.data('comment-id');
                     let container = btn.closest('.comment-item').find('.replies-container');
+                    let list = container.find('.replies-list');
+                    let loadMoreBtn = container.find('.load-more-replies');
 
-                    $.ajax({
-                        type: "GET",
-                        url: "{{ route('user.replies.get') }}",
-                        data: { comment_id: commentId },
-                        success: function (response) {
-                            console.log(response);
-                            if (response.data.success) {
-                                console.log(response.data.html);
-                                container.html(response.data.html);
-                                container.toggleClass('d-none');
-                                btn.find('i').toggleClass('la-angle-down la-angle-up');
-                            }
-                        }
-                    });
+                    container.toggleClass('d-none');
 
+                    if (list.children().length === 0) {
+                        loadReplies(commentId, list, loadMoreBtn, 1);
+                    }
+                    btn.find('i').toggleClass('la-angle-down la-angle-up');
+                });
+
+                $(document).on('click', '.load-more-replies', function () {
+                    let btn = $(this);
+                    let container = btn.closest('.replies-container');
+                    let list = container.find('.replies-list');
+                    let commentId = btn.data('comment-id');
+                    let nextPage = btn.data('next-page') || 1;
+
+                    loadReplies(commentId, list, btn, nextPage);
                 });
 
 

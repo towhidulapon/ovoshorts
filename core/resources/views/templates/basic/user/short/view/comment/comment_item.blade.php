@@ -33,24 +33,10 @@
             </div>
         </div>
 
-
         <div class="replies-container d-none">
-            {{-- @include('Template::user.short.view.comment.comment_replies_flat', ['replies' => $comment->replies]) --}}
+            <div class="replies-list"></div>
+            <button class="load-more-replies d-none" data-comment-id="{{ $comment->id }}">@lang('Load more replies')</button>
         </div>
-
-
-        {{-- <div class="replies-container d-none">
-
-            @foreach($comment->replies as $reply)
-                @include('Template::user.short.view.comment.reply_item', ['reply' => $reply])
-                @if($reply->replies && $reply->replies->count() > 0)
-                    @foreach($reply->replies as $childReply)
-                        @include('Template::user.short.view.comment.reply_item', ['reply' => $childReply])
-                    @endforeach
-                @endif
-            @endforeach
-
-        </div> --}}
 
         <div class="reply-form-container d-none">
             <form class="reply-form" data-comment-id="{{ $comment->id }}">

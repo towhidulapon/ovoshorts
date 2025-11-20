@@ -36,7 +36,7 @@
                             </a>
 
                             @if (!$userShort->is_placeholder)
-                                <p class="video-item-content__desc">{!! $userShort->description !!}</p>
+                                <p class="video-item-content__desc">{!! strLimit($userShort->description) !!}</p>
                             @endif
                         </div>
                     @empty
