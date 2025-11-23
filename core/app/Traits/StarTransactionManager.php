@@ -42,6 +42,15 @@ trait StarTransactionManager
         $short           = Short::find($request->shorts_id);
         $shortTotalStars = $short->stars()->sum('stars');
 
+        if($receiver->notify_stars){
+            notify($request->receiver_id, 'STAR_ADDED', [
+                'username'   => auth()->user()->username,
+                'short'      => $short,
+                'stars'      => $request->stars,
+                'created_at' => now(),
+            ]);
+        }
+
         return apiResponse('star_sent', 'success', ['Stars sent successfully!'], [
             'stars_count' => $shortTotalStars,
             'stars_available' => $sender->stars

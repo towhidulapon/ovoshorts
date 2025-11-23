@@ -479,6 +479,49 @@
                 });
             }
 
+            // Infinite scroll for chat list
+            var currentChatPage = 1;
+            var hasMoreChatPages = {{ $chatUsers->hasMorePages() ? 'true' : 'false' }};
+            var isLoadingChatUsers = false;
+
+            function loadMoreChatUsers() {
+                if (isLoadingChatUsers || !hasMoreChatPages) return;
+
+                isLoadingChatUsers = true;
+
+                $.get('{{ route('user.message.sidebar') }}', {
+                    page: currentChatPage + 1
+                }, function(response) {
+                    if (response.view) {
+                        $('.message-group').append($(response.view).find('.message-item'));
+                        currentChatPage++;
+                        hasMoreChatPages = response.hasMorePages;
+
+                        // Subscribe to online status for new users
+                        $('.message-item').each(function() {
+                            const userId = $(this).data('user-id');
+                            if (userId) {
+                                subscribeToUserOnlineStatus(userId);
+                            }
+                        });
+                    }
+                })
+                .always(function() {
+                    isLoadingChatUsers = false;
+                });
+            }
+
+            // Scroll event for chat list
+            $('.message-sidebar__body').on('scroll', function() {
+                const scrollTop = $(this).scrollTop();
+                const scrollHeight = $(this)[0].scrollHeight;
+                const clientHeight = $(this).height();
+
+                if (scrollTop + clientHeight >= scrollHeight - 50 && !isLoadingChatUsers) {
+                    loadMoreChatUsers();
+                }
+            });
+
             $('#profilePicUpload1').on('change', function() {
                 const input = this;
                 const files = input.files;

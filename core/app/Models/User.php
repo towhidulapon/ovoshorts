@@ -33,8 +33,9 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'kyc_data'          => 'object',
         'verification_data' => 'object',
-        'ver_code_send_at'  => 'datetime',
-        'last_seen'         => 'datetime',
+        'ver_code_send_at'     => 'datetime',
+        'last_seen'            => 'datetime',
+        'show_activity_status' => 'integer',
     ];
 
     /**
@@ -147,6 +148,9 @@ class User extends Authenticatable
 
     public function isOnline()
     {
+        if (!$this->show_activity_status) {
+            return false;
+        }
         return $this->last_seen && $this->last_seen->gt(now()->subMinutes(5));
     }
 

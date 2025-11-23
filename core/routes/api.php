@@ -86,6 +86,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                     Route::post('change-password', 'submitPassword');
 
                     Route::get('user-info', 'userInfo');
+                    Route::post('update-activity-status', 'updateActivityStatus');
                     //KYC
                     Route::get('kyc-form', 'kycForm');
                     Route::post('kyc-submit', 'kycSubmit');
@@ -104,6 +105,12 @@ Route::namespace('Api')->name('api.')->group(function () {
                     Route::post('twofactor/disable', 'disable2fa');
 
                     Route::post('delete-account', 'deleteAccount');
+                });
+
+                Route::controller('NotificationController')->prefix('notifications')->group(function () {
+                    Route::get('/', 'index');
+                    Route::get('settings', 'getSettings');
+                    Route::post('save/settings', 'saveSettings');
                 });
 
                 Route::controller('ShortsUploadController')->prefix('shorts-upload')->group(function () {

@@ -30,13 +30,15 @@ trait CommentManager {
 
         $commentCount = Comment::where('shorts_id', $request->shorts_id)->whereNull('parent_id')->count();
 
-        $shortUser = $comment->short->user->id;
+        $shortUser = $comment->short->user;
 
-        notify($shortUser, 'COMMENT_ADDED', [
-            'username'   => $comment->user->username,
-            'comment'    => $comment->message,
-            'created_at' => $comment->created_at,
-        ], ['push']);
+        if($shortUser->notify_comment){
+            notify($shortUser, 'COMMENT_ADDED', [
+                'username'   => $comment->user->username,
+                'comment'    => $comment->message,
+                'created_at' => $comment->created_at,
+            ]);
+        }
 
         if (isApiRequest()) {
             return apiResponse('message_store', 'success', ['Comment added successfully'], [

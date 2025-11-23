@@ -525,4 +525,25 @@ class UserController extends Controller
         $notify[] = 'Account deleted successfully';
         return apiResponse("account_deleted", "success", $notify);
     }
+
+    public function updateActivityStatus(Request $request)
+    {
+        $request->validate([
+            'show_activity_status' => 'nullable',
+        ]);
+
+        $user = auth()->user();
+
+        if ($request->has('show_activity_status')) {
+            $user->show_activity_status = $request->show_activity_status;
+        }
+
+        $user->save();
+
+        return apiResponse("activity_status", "success", ["Activity status updated"], [
+            'settings' => [
+                'show_activity_status' => $user->show_activity_status,
+            ],
+        ]);
+    }
 }

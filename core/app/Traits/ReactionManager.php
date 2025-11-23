@@ -30,6 +30,14 @@ trait ReactionManager
 
         $likeCount = UserReaction::where('shorts_id', $request->shorts_id)->count();
 
+        if($request->shorts_owner_id->notify_like){
+            notify($request->shorts_owner_id, 'LIKE_ADDED', [
+                'username'   => auth()->user()->username,
+                'short'      => $request->shorts_id,
+                'created_at' => now(),
+            ]);
+        }
+
         return apiResponse('like', 'success', ['You have ' . $status . ' the short'], [
             'status'     => $status,
             'like_count' => showFormatCount($likeCount),

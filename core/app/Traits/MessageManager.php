@@ -17,18 +17,70 @@ trait MessageManager
     {
         $pageTitle = 'Messages';
         $user      = auth()->user();
+        $authId    = $user->id;
 
-        $sidebar = $this->getChatSidebar($user);
+        // Get conversation partner IDs
+        $partnerIds = Message::selectRaw("
+            CASE WHEN from_id = $authId THEN to_id ELSE from_id END AS user_id
+        ")
+            ->where('from_id', $authId)
+            ->orWhere('to_id', $authId)
+            ->pluck('user_id')
+            ->unique()
+            ->values();
 
-        $unreadCounts = $sidebar['unreadCounts'];
+        // Paginate chat users (10 per page)
+        $chatUsers = User::whereIn('id', $partnerIds)
+            ->where('id', '!=', $authId)
+            ->orderBy('id', 'DESC')
+            ->searchable(['username'])
+            ->paginate();
 
-        $chatUsers = $sidebar['chatUsers']->map(function ($chatUser) use ($sidebar) {
-            $latest                    = $sidebar['latestMessages']->get($chatUser->id);
-            $chatUser->last_message_at = $latest['at'] ?? now()->subYears(10);
-            $chatUser->unread_count    = $sidebar['unreadCounts']->get($chatUser->id) ?? 0;
-            $chatUser->is_online       = $chatUser->isOnline();
+        // Get unread counts
+        $unreadCounts = Message::where('to_id', $authId)
+            ->where('is_read', 0)
+            ->selectRaw('from_id, COUNT(*) AS unread')
+            ->groupBy('from_id')
+            ->pluck('unread', 'from_id');
+
+        // Transform chat users with additional data
+        $chatUsers->getCollection()->transform(function ($chatUser) use ($authId, $unreadCounts) {
+            $latest = Message::where(function ($q) use ($authId, $chatUser) {
+                $q->where('from_id', $authId)->where('to_id', $chatUser->id);
+            })
+                ->orWhere(function ($q) use ($authId, $chatUser) {
+                    $q->where('from_id', $chatUser->id)->where('to_id', $authId);
+                })
+                ->orderByDesc('last_message_at')
+                ->first();
+
+            if ($latest) {
+                if (!empty($latest->message)) {
+                    $chatUser->last_message = $latest->message;
+                } elseif ($latest->images && $latest->images->count() > 0) {
+                    $first = $latest->images->first();
+                    $chatUser->last_message = $first->is_video == Status::VIDEO
+                        ? "🎥 Video"
+                        : "📷 Photo";
+                } else {
+                    $chatUser->last_message = null;
+                }
+            } else {
+                $chatUser->last_message = null;
+            }
+
+            $chatUser->last_message_time = $latest->last_message_at ?? now()->subYears(10);
+            $chatUser->last_message_at   = $latest ? diffForHumans($latest->last_message_at) : null;
+            $chatUser->unread_count      = $unreadCounts[$chatUser->id] ?? 0;
+            $chatUser->is_online         = $chatUser->isOnline();
+            $chatUser->last_seen_ago     = $chatUser->last_seen ? $chatUser->last_seen->diffForHumans() : null;
+
             return $chatUser;
-        })->sortByDesc('last_message_at')->values();
+        });
+
+        // Sort by last message time
+        $sorted = $chatUsers->getCollection()->sortByDesc('last_message_time')->values();
+        $chatUsers->setCollection($sorted);
 
         $activeUser = null;
         $messages   = collect();
@@ -45,7 +97,6 @@ trait MessageManager
                 ->get();
 
             $activeUser->is_online = $activeUser->isOnline();
-
         }
 
         return view('Template::user.message.index', compact(
@@ -285,6 +336,7 @@ trait MessageManager
             ->values();
 
         $chatUsers = User::whereIn('id', $partnerIds)
+            ->where('id', '!=', $authId)
             ->orderBy('id', 'DESC')
             ->searchable(['username'])
             ->paginate();
@@ -344,54 +396,23 @@ trait MessageManager
                 [
                     'chatUsers'  => $chatUsers,
                     'image_path' => getFilePath('userProfile'),
+                    'hasMorePages' => $chatUsers->hasMorePages(),
                 ]
             );
         }
 
+        $view = 'Template::partials.chat_list';
+        $html = view($view, [
+            'chatUsers'    => $chatUsers,
+            'activeUser'   => null,
+            'unreadCounts' => $unread,
+        ])->render();
+
         return response()->json([
-            'view' => view('Template::partials.chat_list', [
-                'chatUsers' => $chatUsers,
-            ])->render(),
+            'view' => $html,
+            'hasMorePages' => $chatUsers->hasMorePages(),
         ]);
     }
-
-    // public function fetchSidebar(Request $request)
-    // {
-    //     $user    = auth()->user();
-    //     $sidebar = $this->getChatSidebar($user, $request->input('activeUserId'));
-
-    //     $chatUsers = $sidebar['chatUsers']->map(function ($chatUser) use ($sidebar) {
-    //         $latest = $sidebar['latestMessages']->get($chatUser->id);
-
-    //         $chatUser->last_message_time = $latest['at'] ?? now()->subYears(10);
-    //         $chatUser->last_message_at   = $latest['at'] ? diffForHumans($latest['at']) : null;
-    //         $chatUser->last_message      = $latest['text'] ?? null;
-    //         $chatUser->unread_count      = $sidebar['unreadCounts']->get($chatUser->id) ?? 0;
-    //         $chatUser->is_online         = $chatUser->isOnline();
-
-    //         return $chatUser;
-    //     })->sortByDesc('last_message_time')->values();
-
-    //     if (isApiRequest()) {
-    //         $notify[] = 'Users Chat List';
-    //         return apiResponse('message chat list', 'success', $notify, [
-    //             'chatUsers'  => $chatUsers,
-    //             'activeUser' => $sidebar['activeUser'],
-    //             'image_path' => getFilePath('userProfile'),
-    //         ]);
-    //     }
-
-    //     $view = 'Template::partials.chat_list';
-    //     $html = view($view, [
-    //         'chatUsers'    => $chatUsers,
-    //         'activeUser'   => $sidebar['activeUser'],
-    //         'unreadCounts' => $sidebar['unreadCounts'],
-    //     ])->render();
-
-    //     return response()->json([
-    //         'view' => $html,
-    //     ]);
-    // }
 
     private function getChatSidebar($user, $activeUserId = null)
     {

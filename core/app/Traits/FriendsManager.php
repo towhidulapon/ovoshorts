@@ -2,7 +2,6 @@
 
 namespace App\Traits;
 
-use App\Constants\Status;
 use App\Models\Short;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -19,14 +18,7 @@ trait FriendsManager
                 $q->approved()
                     ->published()
                     ->publicShort()
-                    ->where(function ($query) {
-                        $query->where('storage_driver', 'local')
-                            ->orWhereIn('storage_driver', function ($subQuery) {
-                                $subQuery->select('alias')
-                                    ->from('storage_settings')
-                                    ->where('status', Status::ENABLE);
-                            });
-                    })
+                    ->withActiveStorage()
                     ->orderBy('id', 'desc');
             },
         ]);
@@ -79,6 +71,14 @@ trait FriendsManager
             return apiResponse("follow", 'error', ['you can not follow yourself'], []);
         }
         auth()->user()->followings()->syncWithoutDetaching([$user->id]);
+
+        if ($user->notify_follow) {
+            notify($user->id, 'FOLLOW_ADDED', [
+                'username'   => auth()->user()->username,
+                'created_at' => now(),
+            ]);
+        }
+
         return responseManager("follow", 'You have followed ' . $user->username, 'success', []);
     }
 
@@ -107,14 +107,7 @@ trait FriendsManager
             $q->approved()
                 ->published()
                 ->publicShort()
-                ->where(function ($query) {
-                    $query->where('storage_driver', 'local')
-                        ->orWhereIn('storage_driver', function ($subQuery) {
-                            $subQuery->select('alias')
-                                ->from('storage_settings')
-                                ->where('status', Status::ENABLE);
-                        });
-                })
+                ->withActiveStorage()
                 ->orderBy('id', 'desc');
         }]);
 
@@ -143,6 +136,7 @@ trait FriendsManager
             $q->approved()
                 ->published()
                 ->publicShort()
+                ->withActiveStorage()
                 ->latest();
         }]);
 
@@ -158,51 +152,27 @@ trait FriendsManager
 
     public function followingShorts(Request $request)
     {
-        $user         = auth()->user();
-        $followingIds = $user->followings->pluck('id')->toArray();
+        $user = auth()->user();
 
         $shorts = Short::with('user:id,username,image')
-            ->whereIn('user_id', $followingIds)
+            ->whereIn('user_id', $user->followings()->select('users.id'))
             ->approved()
             ->published()
             ->publicShort()
-            ->where(function ($query) {
-                $query->where('storage_driver', 'local')
-                    ->orWhereIn('storage_driver', function ($subQuery) {
-                        $subQuery->select('alias')
-                            ->from('storage_settings')
-                            ->where('status', Status::ENABLE);
-                    });
-            })
+            ->withActiveStorage()
             ->withCount('likes', 'comments')
+            ->withExists(['likes as liked' => function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            }])
+            ->withExists(['savedShorts as saved' => function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            }])
             ->orderBy('id', 'desc')
             ->paginate();
 
-        $shorts->transform(function ($short) use ($user) {
-            if ($short->storage_driver === 'wasabi') {
-                $fileUrl = getS3FileUri($short->name);
-            } elseif ($short->storage_driver === 'local') {
-                $fileUrl = asset(getFilePath('shorts') . '/' . $short->name);
-            } else {
-                $fileUrl = route('short.file', $short->name);
-            }
-
-            $extension = pathinfo($short->name, PATHINFO_EXTENSION);
-
-            $liked = false;
-            if ($user) {
-                $liked = $short->likes()->where('user_id', $user->id)->exists();
-            }
-
-            $saved = false;
-            if ($user) {
-                $saved = $short->savedShorts()->where('user_id', $user->id)->exists();
-            }
-
-            $short->file_url  = $fileUrl;
-            $short->extension = $extension;
-            $short->liked     = $liked;
-            $short->saved     = $saved;
+        $shorts->transform(function ($short) {
+            $short->file_url  = $short->file_url;
+            $short->extension = pathinfo($short->name, PATHINFO_EXTENSION);
             return $short;
         });
 
@@ -239,7 +209,7 @@ trait FriendsManager
         }
     }
 
-    public function newFollowers(Request $request)
+    public function newFollowers()
     {
         $user = auth()->user();
 

@@ -120,4 +120,12 @@ class Short extends Model
             return $html;
         });
     }
+    public function getFileUrlAttribute()
+    {
+        return match ($this->storage_driver) {
+            'wasabi' => getS3FileUri($this->name),
+            'local'  => asset(getFilePath('shorts') . '/' . $this->name),
+            default  => route('short.file', $this->name),
+        };
+    }
 }
