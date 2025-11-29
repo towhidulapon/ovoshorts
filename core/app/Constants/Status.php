@@ -31,6 +31,7 @@ class Status
 
     const USER_ACTIVE = 1;
     const USER_BAN    = 0;
+    const USER_DELETE = 9;
 
     const KYC_UNVERIFIED = 0;
     const KYC_PENDING    = 2;
@@ -64,11 +65,11 @@ class Status
     const VERIFICATION_PENDING    = 2;
     const VERIFICATION_REJECTED   = 3;
 
-    const MANUAL = 0;
-    const AUTOMATIC   = 1;
+    const MANUAL    = 0;
+    const AUTOMATIC = 1;
 
-    const NOW    = 1;
-    const LATER  = 2;
+    const NOW   = 1;
+    const LATER = 2;
 
     const FREE = 1;
     const PAID = 2;

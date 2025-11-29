@@ -1,6 +1,7 @@
 <?php
 
 use App\Constants\Status;
+use App\Events\QrCodeLogin;
 use App\Lib\Captcha;
 use App\Lib\ClientInfo;
 use App\Lib\CurlRequest;
@@ -10,16 +11,20 @@ use App\Lib\GoogleAuthenticator;
 use App\Models\Extension;
 use App\Models\Frontend;
 use App\Models\GeneralSetting;
+use App\Models\QrCode;
 use App\Models\StorageSetting;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Models\UserLogin;
 use App\Notify\Notify;
 use Aws\Credentials\Credentials;
 use Aws\S3\S3Client;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
+use Laravel\Sanctum\PersonalAccessToken;
 
 function systemDetails()
 {
@@ -754,7 +759,6 @@ function formatPlayTime($seconds)
     return sprintf('%dh:%02dm:%02ds', $hours, $minutes, $seconds);
 }
 
-
 function prepareShortData($short, $userReactions = [])
 {
     if ($short->storage_driver === 'wasabi') {
@@ -814,4 +818,214 @@ function userReferralCommission($user, $amount)
 
     return true;
 
+}
+
+function keyGenerator($length = 50)
+{
+    $characters = 'abcdefghijklmnpqrstuvwxyz0123456789';
+    $string     = '';
+    $max        = strlen($characters) - 1;
+    for ($i = 0; $i < $length; $i++) {
+        $string .= $characters[mt_rand(0, $max)];
+    }
+    return $string;
+}
+
+function getQrCodeUrl($guard = 'user')
+{
+    $user       = auth()->user();
+    $columnName = 'user_id';
+
+    $qrCode = $user->qrCode;
+
+    if (!$qrCode) {
+        $qrCode              = new QrCode();
+        $qrCode->$columnName = $user->id;
+        $qrCode->unique_code = keyGenerator(15);
+        $qrCode->save();
+    }
+
+    $uniqueCode = $qrCode->unique_code;
+    $qrCode     = cryptoQR($uniqueCode);
+
+    return $qrCode;
+}
+
+function getQrCodeUrlForLogin($guard = "user", $checkExists = true)
+{
+    $columnName = "for_" . $guard . "_login";
+
+    if ($checkExists) {
+        $qrCode = QrCode::where($columnName, Status::YES)->first();
+    } else {
+        $qrCode = null;
+    }
+
+    if (!$qrCode) {
+        $qrCode              = new QrCode();
+        $qrCode->$columnName = Status::YES;
+        $qrCode->unique_code = keyGenerator(15);
+        $qrCode->save();
+    }
+
+    $code = base64_encode($qrCode->unique_code);
+
+    return $code;
+}
+
+function qrCodeLoginAttempt($guard, $encodeId, $encodedCode)
+{
+    try {
+        $code = base64_decode($encodedCode);
+    } catch (Exception $ex) {
+        $notify[] = "The something went to wrong";
+        return apiResponse('exception', "error", $notify);
+    }
+
+    $columnName = "for_" . $guard . "_login";
+    $qrCode     = QrCode::where($columnName, Status::YES)->where('unique_code', $code)->first();
+
+    if (!$qrCode) {
+        $message[] = "The qr code token is mismatch, Please try again";
+        return apiResponse('expired', 'error', $message);
+    }
+
+    try {
+        $id = base64_decode($encodeId);
+    } catch (Exception $ex) {
+        $notify[] = "The something went to wrong";
+        return apiResponse('exception', "error", $notify);
+    }
+
+    $guardData = [
+        'user' => [
+            'model_class' => User::class,
+            'column_name' => 'user_id',
+        ],
+    ][$guard];
+
+    $model = $guardData['model_class'];
+    $user  = $model::find($id);
+
+    if (!$user) {
+        $notify[] = "The $guard account is not found";
+        return apiResponse('not_found', "error", $notify);
+    }
+
+    if ($user->status == Status::USER_BAN) {
+        $notify[] = "Your account is banned";
+        return apiResponse('banned', "error", $notify);
+    }
+
+    if ($user->status == Status::USER_DELETE) {
+        $notify[] = "Your account is deleted";
+        return apiResponse('banned', "error", $notify);
+    }
+
+    //check the token
+    $rawToken = base64_decode(request()->s_token);
+
+    if (!$rawToken) {
+        $notify[] = "Something went to wrong. Please try again";
+        return apiResponse('exception', "error", $notify);
+    }
+
+    try {
+        $rawToken = base64_decode(request()->s_token);
+    } catch (Exception $ex) {
+        $notify[] = "Something went to wrong. Please try again";
+        return apiResponse('exception', "error", $notify);
+    }
+
+    [$tokenId, $token] = explode('|', $rawToken, 2);
+    $accessToken       = PersonalAccessToken::find($tokenId);
+
+    if (!$accessToken) {
+        $notify[] = "Something went to wrong. Please try again";
+        return apiResponse('error', "error", $notify);
+    }
+
+    if (!hash_equals($accessToken->token, hash('sha256', $token))) {
+        $notify[] = "Something went to wrong. Please try again";
+        return apiResponse('error', "error", $notify);
+    }
+
+    $tokenName = $guard . "_token";
+
+    if ($tokenName != $accessToken->name) {
+        $notify[] = "Something went to wrong. Please try again";
+        return apiResponse('error', "error", $notify);
+    }
+
+    $tokenUser = @$accessToken->tokenable;
+
+    if (@$tokenUser->username != @$user->username) {
+        $notify[] = "Something went to wrong. Please try again";
+        return apiResponse('error', "error", $notify);
+    }
+
+    Auth::loginUsingId($id);
+
+    //save ip data
+    $ip        = getRealIP();
+    $exist     = UserLogin::where('user_ip', $ip)->first();
+    $userLogin = new UserLogin();
+
+    if ($exist) {
+        $userLogin->longitude    = $exist->longitude;
+        $userLogin->latitude     = $exist->latitude;
+        $userLogin->city         = $exist->city;
+        $userLogin->country_code = $exist->country_code;
+        $userLogin->country      = $exist->country;
+    } else {
+        $info                    = json_decode(json_encode(getIpInfo()), true);
+        $userLogin->longitude    = @implode(',', $info['long']);
+        $userLogin->latitude     = @implode(',', $info['lat']);
+        $userLogin->city         = @implode(',', $info['city']);
+        $userLogin->country_code = @implode(',', $info['code']);
+        $userLogin->country      = @implode(',', $info['country']);
+    }
+
+    $columnName = $guardData['column_name'];
+
+    $userAgent              = osBrowser();
+    $userLogin->$columnName = $user->id;
+    $userLogin->user_ip     = $ip;
+
+    $userLogin->browser = @$userAgent['browser'];
+    $userLogin->os      = @$userAgent['os_platform'];
+    $userLogin->save();
+
+    $notify[] = "Login successfully";
+    return apiResponse('success', "success", $notify);
+}
+
+function verifyQrCodeForLogin($encodedCode, $guard)
+{
+    try {
+        $code = base64_decode($encodedCode);
+    } catch (Exception $ex) {
+        $notify[] = "The something went to wrong";
+        return apiResponse('exception', "error", $notify);
+    }
+
+    $columnName = "for_" . $guard . "_login";
+    $qrCode     = QrCode::where($columnName, Status::YES)->where('unique_code', $code)->first();
+
+    if (!$qrCode) {
+        $message[] = "The qr code is not available, Please try again";
+        return apiResponse('expired', 'error', $message);
+    }
+
+    $user  = auth()->user();
+    $token = request()->bearerToken();
+
+    event(new QrCodeLogin("$guard-qr-code-login", [
+        "user"    => base64_encode($user->id),
+        "s_token" => base64_encode($token),
+        'qr_code' => $encodedCode,
+    ]));
+
+    $message[] = "Qr code login successfully";
+    return apiResponse('success', 'success', $message);
 }

@@ -20,19 +20,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Session;
 
-class SiteController extends Controller
-{
+class SiteController extends Controller {
 
     use StarManager;
     protected $storageConfig;
 
-    public function __construct(StorageConfig $storageConfig)
-    {
+    public function __construct(StorageConfig $storageConfig) {
         $this->storageConfig = $storageConfig;
     }
 
-    public function index()
-    {
+    public function index() {
         $reference = @$_GET['reference'];
         if ($reference) {
             session()->put('reference', $reference);
@@ -49,18 +46,10 @@ class SiteController extends Controller
             ->approved()
             ->published()
             ->publicShort()
-            ->where(function ($query) {
-                $query->where('storage_driver', 'local')
-                    ->orWhereIn('storage_driver', function ($subQuery) {
-                        $subQuery->select('alias')
-                            ->from('storage_settings')
-                            ->where('status', Status::ENABLE);
-                    });
-            })
+            ->withActiveStorage()
             ->withCount('likes')
             ->withSum('stars', 'stars')
-            ->selectRaw("shorts.*, ((views_count * 1.5) + (TIMESTAMPDIFF(HOUR, created_at, NOW()) * -0.05) + (RAND() * 20)) as weight_score")
-            ->orderByDesc('weight_score');
+            ->inRandomOrder();
 
         $shorts = $shortsQuery->paginate(getPaginate());
 
@@ -73,25 +62,17 @@ class SiteController extends Controller
         return view('Template::home', compact('pageTitle', 'sections', 'following', 'shorts', 'seoContents', 'seoImage', 'hasMorePages'));
     }
 
-    public function loadMoreShorts(Request $request)
-    {
+    public function loadMoreShorts(Request $request) {
         $following = auth()->check() ? auth()->user()->followings->pluck('id')->toArray() : [];
         $shorts    = Short::with('user', 'comments.user', 'comments.replies.user')
             ->approved()
             ->published()
             ->publicShort()
-            ->where(function ($query) {
-                $query->where('storage_driver', 'local')
-                    ->orWhereIn('storage_driver', function ($subQuery) {
-                        $subQuery->select('alias')
-                            ->from('storage_settings')
-                            ->where('status', Status::ENABLE);
-                    });
-            })
+            ->withActiveStorage()
             ->withCount('likes')
             ->withSum('stars', 'stars')
-            ->orderBy('id', 'desc')
-            ->paginate(getPaginate(), ['*'], 'page', $request->page);
+            ->inRandomOrder()
+            ->paginate(getPaginate());
 
         $html = '';
 
@@ -112,8 +93,7 @@ class SiteController extends Controller
         ]);
     }
 
-    public function recordView(Request $request)
-    {
+    public function recordView(Request $request) {
         $request->validate([
             'shorts_id' => 'required|exists:shorts,id',
         ]);
@@ -154,8 +134,7 @@ class SiteController extends Controller
         ]);
     }
 
-    public function trackAnalytics(Request $request, $id)
-    {
+    public function trackAnalytics(Request $request, $id) {
         $request->validate([
             'play_time' => 'nullable|integer|min:0',
         ]);
@@ -169,8 +148,7 @@ class SiteController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function getAnalytics($id)
-    {
+    public function getAnalytics($id) {
         $short = Short::where('id', $id)->approved()->firstOrFail();
         return response()->json([
             'total_play_time' => $short->total_play_time,
@@ -178,8 +156,7 @@ class SiteController extends Controller
         ]);
     }
 
-    public function search(Request $request)
-    {
+    public function search(Request $request) {
         $pageTitle = 'Search User';
         $search    = $request->search;
 
@@ -187,14 +164,7 @@ class SiteController extends Controller
             ->searchable(['user:username', 'description'])
             ->approved()
             ->published()
-            ->where(function ($query) {
-                $query->where('storage_driver', 'local')
-                    ->orWhereIn('storage_driver', function ($subQuery) {
-                        $subQuery->select('alias')
-                            ->from('storage_settings')
-                            ->where('status', Status::ENABLE);
-                    });
-            })
+            ->withActiveStorage()
             ->orderBy('id', 'desc')
             ->get()
             ->map(function ($short) {
@@ -221,8 +191,7 @@ class SiteController extends Controller
         ]);
     }
 
-    public function hashtag($hashtag)
-    {
+    public function hashtag($hashtag) {
         $pageTitle = 'Search';
 
         $shorts = Short::with('user', 'storage', 'comments.user', 'comments.replies.user', 'savedShorts')
@@ -230,14 +199,7 @@ class SiteController extends Controller
             ->published()
             ->publicShort()
             ->where('description', 'like', '%' . '#' . $hashtag . '%')
-            ->where(function ($query) {
-                $query->where('storage_driver', 'local')
-                    ->orWhereIn('storage_driver', function ($subQuery) {
-                        $subQuery->select('alias')
-                            ->from('storage_settings')
-                            ->where('status', Status::ENABLE);
-                    });
-            })
+            ->withActiveStorage()
             ->orderBy('id', 'desc')
             ->get();
 
@@ -267,8 +229,7 @@ class SiteController extends Controller
         ]);
     }
 
-    public function pages($slug)
-    {
+    public function pages($slug) {
         $page        = Page::where('tempname', activeTemplate())->where('slug', $slug)->firstOrFail();
         $pageTitle   = $page->name;
         $sections    = $page->secs;
@@ -277,8 +238,7 @@ class SiteController extends Controller
         return view('Template::pages', compact('pageTitle', 'sections', 'seoContents', 'seoImage'));
     }
 
-    public function policyPages($slug)
-    {
+    public function policyPages($slug) {
         $policy      = Frontend::where('slug', $slug)->where('data_keys', 'policy_pages.element')->firstOrFail();
         $pageTitle   = $policy->data_values->title;
         $seoContents = $policy->seo_content;
@@ -286,8 +246,7 @@ class SiteController extends Controller
         return view('Template::policy', compact('policy', 'pageTitle', 'seoContents', 'seoImage'));
     }
 
-    public function changeLanguage($lang = null)
-    {
+    public function changeLanguage($lang = null) {
         $language = Language::where('code', $lang)->first();
         if (!$language) {
             $lang = 'en';
@@ -297,8 +256,7 @@ class SiteController extends Controller
         return back();
     }
 
-    public function blogs()
-    {
+    public function blogs() {
         $pageTitle   = 'Blogs';
         $blogs       = Frontend::where('data_keys', 'blog.element')->latest()->paginate(getPaginate(21));
         $latest      = Frontend::latest()->where('data_keys', 'blog.element')->limit(10)->get();
@@ -308,8 +266,7 @@ class SiteController extends Controller
         return view('Template::blogs', compact('pageTitle', 'blogs', 'latest', 'sections', 'seoContents', 'seoImage'));
     }
 
-    public function blogDetails($slug)
-    {
+    public function blogDetails($slug) {
         $blog        = Frontend::where('slug', $slug)->where('data_keys', 'blog.element')->firstOrFail();
         $pageTitle   = $blog->data_values->title;
         $seoContents = $blog->seo_content;
@@ -317,13 +274,11 @@ class SiteController extends Controller
         return view('Template::blog_details', compact('blog', 'pageTitle', 'seoContents', 'seoImage'));
     }
 
-    public function cookieAccept()
-    {
+    public function cookieAccept() {
         Cookie::queue('gdpr_cookie', gs('site_name'), 43200);
     }
 
-    public function cookiePolicy()
-    {
+    public function cookiePolicy() {
         $cookieContent = Frontend::where('data_keys', 'cookie.data')->first();
         abort_if($cookieContent->data_values->status != Status::ENABLE, 404);
         $pageTitle = 'Cookie Policy';
@@ -331,8 +286,7 @@ class SiteController extends Controller
         return view('Template::cookie', compact('pageTitle', 'cookie'));
     }
 
-    public function placeholderImage($size = null)
-    {
+    public function placeholderImage($size = null) {
         $imgWidth  = explode('x', $size)[0];
         $imgHeight = explode('x', $size)[1];
         $text      = $imgWidth . '×' . $imgHeight;
@@ -366,8 +320,7 @@ class SiteController extends Controller
         return response($imageData)->header('Content-Type', 'image/jpeg');
     }
 
-    public function maintenance()
-    {
+    public function maintenance() {
         $pageTitle = 'Maintenance Mode';
         if (gs('maintenance_mode') == Status::DISABLE) {
             return to_route('home');
@@ -376,8 +329,7 @@ class SiteController extends Controller
         return view('Template::maintenance', compact('pageTitle', 'maintenance'));
     }
 
-    public function getFile($filename)
-    {
+    public function getFile($filename) {
         $short = Short::where('name', $filename)->firstOrFail();
         $path  = 'shorts/' . $filename;
 
@@ -391,8 +343,7 @@ class SiteController extends Controller
         return $this->storageConfig->getFileResponse($short->storage_driver, $path);
     }
 
-    public function share(Request $request)
-    {
+    public function share(Request $request) {
         $request->validate([
             'shorts_id' => 'required|exists:shorts,id',
             'platform'  => 'required|in:telegram,whatsapp,facebook,modal,link,messenger,pinterest,linkedin',
@@ -422,26 +373,16 @@ class SiteController extends Controller
         ]);
     }
 
-    public function viewShort($id, $token = null)
-    {
+    public function viewShort($id, $token = null) {
         $pageTitle = 'View Short';
         $short     = Short::with('user', 'comments.user', 'comments.replies.user', 'savedShorts')
             ->where('id', $id)
             ->approved()
             ->published()
-            ->where(function ($query) {
-                $query->where('storage_driver', 'local')
-                    ->orWhereIn('storage_driver', function ($subQuery) {
-                        $subQuery->select('alias')
-                            ->from('storage_settings')
-                            ->where('status', Status::ENABLE);
-                    });
-            })
+            ->withActiveStorage()
             ->withCount('likes')
             ->withSum('stars', 'stars')
             ->firstOrFail();
-
-        $short = prepareShortData($short);
 
         if ($token) {
             $share = ShortShare::where('token', $token)
@@ -458,11 +399,12 @@ class SiteController extends Controller
             }
         }
 
+        $short = prepareShortData($short);
+
         return view('Template::user.short.view.single_post', compact('short', 'pageTitle'));
     }
 
-    public function getShorts(Request $request)
-    {
+    public function getShorts(Request $request) {
         $request->validate([
             'user_id' => 'required|exists:users,id',
         ]);
@@ -471,18 +413,11 @@ class SiteController extends Controller
             ->where('id', '!=', $request->exclude_short_id)
             ->approved()
             ->published()
-            ->where(function ($query) {
-                $query->where('storage_driver', 'local')
-                    ->orWhereIn('storage_driver', function ($subQuery) {
-                        $subQuery->select('alias')
-                            ->from('storage_settings')
-                            ->where('status', Status::ENABLE);
-                    });
-            })
+            ->withActiveStorage()
             ->withCount('likes')
             ->withSum('stars', 'stars')
             ->orderBy('id', 'desc')
-            ->paginate(getPaginate(), ['*'], 'page', $request->input('page', 1));
+            ->paginate(getPaginate());
 
         $userShorts->getCollection()->transform(function ($short) {
             return prepareShortData($short);
@@ -503,14 +438,13 @@ class SiteController extends Controller
         ]);
     }
 
-    public function getComments(Request $request)
-    {
+    public function getComments(Request $request) {
         $request->validate([
             'shorts_id' => 'required|exists:shorts,id',
         ]);
 
         $userId = auth()->check() ? auth()->user()->id : null;
-        $page   = $request->input('page', 1);
+        // $page   = $request->input('page', 1);
 
         $comments = Comment::with(['user'])
             ->where('shorts_id', $request->shorts_id)
@@ -533,8 +467,7 @@ class SiteController extends Controller
         ]);
     }
 
-    public function getReplies(Request $request)
-    {
+    public function getReplies(Request $request) {
         $request->validate([
             'comment_id' => 'required|exists:comments,id',
         ]);
@@ -562,12 +495,6 @@ class SiteController extends Controller
 
         $hasMore = ($page * $perPage) < $flattenedReplies->count();
 
-        // $flattenedReplies = $flattenedReplies->sortBy('created_at');
-
-        // foreach ($flattenedReplies as $reply) {
-        //     $flattenedHtml .= view('Template::user.short.view.comment.reply_item', ['reply' => $reply])->render();
-        // }
-
         return apiResponse('replies', 'success', ['Replies fetched'], [
             'html'      => $flattenedHtml,
             'has_more'  => $hasMore,
@@ -576,8 +503,7 @@ class SiteController extends Controller
         ]);
     }
 
-    public function explore($id = 0)
-    {
+    public function explore($id = 0) {
         $pageTitle = 'Explore Shorts';
 
         $query = Short::query()
@@ -585,14 +511,7 @@ class SiteController extends Controller
             ->approved()
             ->published()
             ->publicShort()
-            ->where(function ($query) {
-                $query->where('storage_driver', 'local')
-                    ->orWhereIn('storage_driver', function ($subQuery) {
-                        $subQuery->select('alias')
-                            ->from('storage_settings')
-                            ->where('status', Status::ENABLE);
-                    });
-            })
+            ->withActiveStorage()
             ->selectRaw("shorts.*,((views_count * 1.5) + (TIMESTAMPDIFF(HOUR, created_at, NOW()) * -0.05) + (RAND() * 20)) as weight_score")
             ->orderByDesc('weight_score');
 
@@ -606,8 +525,8 @@ class SiteController extends Controller
 
         if (request()->ajax()) {
             $id     = request()->get('id', $id);
-            $page   = request()->get('page', 1);
-            $shorts = $query->paginate(getPaginate(), ['*'], 'page', $page);
+
+            $shorts = $query->paginate(getPaginate());
 
             $shorts->getCollection()->transform(function ($short) {
                 return prepareShortData($short);
@@ -632,19 +551,11 @@ class SiteController extends Controller
         return view('Template::user.short.explore', compact('pageTitle', 'categories', 'shorts', 'id'));
     }
 
-    public function exploreShorts($id = 0)
-    {
+    public function exploreShorts($id = 0) {
         $query = Short::query()
             ->published()
             ->publicShort()
-            ->where(function ($query) {
-                $query->where('storage_driver', 'local')
-                    ->orWhereIn('storage_driver', function ($subQuery) {
-                        $subQuery->select('alias')
-                            ->from('storage_settings')
-                            ->where('status', Status::ENABLE);
-                    });
-            })
+            ->withActiveStorage()
             ->orderBy('id', 'desc');
 
         if ($id) {
@@ -656,8 +567,7 @@ class SiteController extends Controller
         return view('Template::user.short.explore_shorts', compact('shorts'))->render();
     }
 
-    public function userProfile($username = null)
-    {
+    public function userProfile($username = null) {
         $pageTitle = 'User Details';
         $follower  = User::where('username', $username)->first();
         if (!$follower) {
@@ -672,15 +582,8 @@ class SiteController extends Controller
             ->where('user_id', $follower->id)
             ->published()
             ->publicShort()
-            ->where(function ($query) {
-                $query->where('storage_driver', 'local')
-                    ->orWhereIn('storage_driver', function ($subQuery) {
-                        $subQuery->select('alias')
-                            ->from('storage_settings')
-                            ->where('status', Status::ENABLE);
-                    });
-            });
-        $shorts = $shortsQuery->orderBy('id', 'desc')->paginate(getPaginate(), ['*'], 'page', 1);
+            ->withActiveStorage();
+        $shorts = $shortsQuery->orderBy('id', 'desc')->paginate(getPaginate());
 
         $shorts->getCollection()->transform(function ($short) {
             return prepareShortData($short);
@@ -701,27 +604,19 @@ class SiteController extends Controller
         ]);
     }
 
-    public function userProfileShorts(Request $request, $username = null)
-    {
+    public function userProfileShorts(Request $request, $username = null) {
         $follower = User::where('username', $username)->first();
         if (!$follower) {
             return apiResponse("details", 'error', ['user not found'], []);
         }
 
         $sort        = $request->input('sort', 'latest');
-        $page        = $request->input('page', 2);
+        // $page        = $request->input('page', 2);
         $shortsQuery = Short::with('likes')
             ->where('user_id', $follower->id)
             ->published()
             ->publicShort()
-            ->where(function ($query) {
-                $query->where('storage_driver', 'local')
-                    ->orWhereIn('storage_driver', function ($subQuery) {
-                        $subQuery->select('alias')
-                            ->from('storage_settings')
-                            ->where('status', Status::ENABLE);
-                    });
-            });
+            ->withActiveStorage();
 
         switch ($sort) {
             case 'popular':
@@ -736,7 +631,7 @@ class SiteController extends Controller
                 break;
         }
 
-        $shorts = $shortsQuery->paginate(getPaginate(), ['*'], 'page', $page);
+        $shorts = $shortsQuery->paginate(getPaginate());
         $html   = view('Template::user.friend.shorts', compact('shorts'))->render();
 
         return apiResponse("user_shorts", 'success', ['shorts'], [
@@ -745,8 +640,7 @@ class SiteController extends Controller
         ]);
     }
 
-    private function recursiveReplies($comment, &$flattenedReplies)
-    {
+    private function recursiveReplies($comment, &$flattenedReplies) {
         $repliesHtml = '';
 
         foreach ($comment->replies as $reply) {
@@ -764,5 +658,4 @@ class SiteController extends Controller
 
         return $repliesHtml;
     }
-
 }

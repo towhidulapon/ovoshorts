@@ -6,6 +6,7 @@ use App\Models\Comment;
 use App\Models\Short;
 use App\Models\StarsTransaction;
 use App\Models\UserReaction;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class NotificationService
 {
@@ -17,20 +18,20 @@ class NotificationService
             ->whereNot('user_id', $user->id)
             ->with(['user:id,username,image', 'short:id,cover_image'])
             ->select('id', 'user_id', 'shorts_id', 'created_at')
-            ->get();
+            ->paginate();
 
         $comments = Comment::whereIn('shorts_id', $userShortIds)
             ->whereNot('user_id', $user->id)
             ->whereNull('parent_id')
             ->with(['user:id,username,image', 'short:id,cover_image'])
             ->select('id', 'user_id', 'shorts_id', 'message', 'created_at')
-            ->get();
+            ->paginate();
 
         $stars = StarsTransaction::whereIn('short_id', $userShortIds)
             ->whereNot('sender_id', $user->id)
             ->with(['sender:id,username,image', 'short:id,cover_image'])
             ->select('id', 'sender_id', 'short_id', 'stars', 'created_at')
-            ->get();
+            ->paginate();
 
         $followers = $user->followers()
             ->where('follows.created_at', '>=', now()->subDays(7))
@@ -72,6 +73,26 @@ class NotificationService
             $followers->toArray()
         ))->sortByDesc('created_at')->values();
 
-        return $notifications;
+        return self::paginate($notifications, getPaginate());
+
+        // return $notifications;
     }
+
+
+public static function paginate($items, $perPage)
+{
+    $page = request()->get('page', 1);
+
+    return new LengthAwarePaginator(
+        $items->slice(($page - 1) * $perPage, $perPage)->values(),
+        $items->count(),
+        $perPage,
+        $page,
+        [
+            'path' => request()->url(),
+            'query' => request()->query(),
+        ]
+    );
+}
+
 }

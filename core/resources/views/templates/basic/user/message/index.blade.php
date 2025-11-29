@@ -479,7 +479,6 @@
                 });
             }
 
-            // Infinite scroll for chat list
             var currentChatPage = 1;
             var hasMoreChatPages = {{ $chatUsers->hasMorePages() ? 'true' : 'false' }};
             var isLoadingChatUsers = false;
@@ -497,7 +496,6 @@
                         currentChatPage++;
                         hasMoreChatPages = response.hasMorePages;
 
-                        // Subscribe to online status for new users
                         $('.message-item').each(function() {
                             const userId = $(this).data('user-id');
                             if (userId) {
@@ -511,7 +509,6 @@
                 });
             }
 
-            // Scroll event for chat list
             $('.message-sidebar__body').on('scroll', function() {
                 const scrollTop = $(this).scrollTop();
                 const scrollHeight = $(this)[0].scrollHeight;

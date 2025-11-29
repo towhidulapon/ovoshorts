@@ -106,7 +106,7 @@ class LoginController extends Controller
         ];
         if ($this->username() === 'mobile') {
             $validationRule['dial_code'] = 'required|string';
-            $validationRule['mobile'] = 'required|numeric';
+            $validationRule['mobile']    = 'required|numeric';
         }
 
         $validate = Validator::make($request->all(), $validationRule);
@@ -190,10 +190,15 @@ class LoginController extends Controller
         try {
             $loginResponse = $socialLogin->login();
             $response[]    = 'Login Successful';
-            return apiResponse("login_success", "success", $loginResponse);
+            return apiResponse("login_success", "success", $response, $loginResponse);
         } catch (\Exception $e) {
             $notify[] = $e->getMessage();
             return apiResponse("login_error", "success", $notify);
         }
+    }
+
+    public function loginWithQrCode($encodedCode)
+    {
+        return verifyQrCodeForLogin($encodedCode, 'user');
     }
 }

@@ -47,6 +47,7 @@ Route::namespace('Api')->name('api.')->group(function () {
     Route::namespace('Auth')->group(function () {
         Route::controller('LoginController')->group(function () {
             Route::post('login', 'login');
+            Route::post('login-with/qr-code/{code}', 'loginWithQrCode');
             Route::post('check-token', 'checkToken');
             Route::post('social-login', 'socialLogin');
         });
@@ -86,6 +87,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                     Route::post('change-password', 'submitPassword');
 
                     Route::get('user-info', 'userInfo');
+                    Route::get('activity-status', 'activityStatus');
                     Route::post('update-activity-status', 'updateActivityStatus');
                     //KYC
                     Route::get('kyc-form', 'kycForm');
@@ -116,8 +118,6 @@ Route::namespace('Api')->name('api.')->group(function () {
                 Route::controller('ShortsUploadController')->prefix('shorts-upload')->group(function () {
                     Route::post('upload', 'uploadShort');
                     Route::get('categories', 'getCategories');
-                    // Route::post('draft', 'createDraft');
-                    // Route::get('delete-draft/{id?}', 'deleteDraft');
                 });
 
                 Route::controller('CommentController')->prefix('comment')->group(function () {

@@ -2,36 +2,7 @@
     <div class="setting-header-left">
         <a href="{{ route('home') }}"> <img src="{{ siteLogo() }}" alt="img"> </a>
     </div>
-    <div class="setting-header-middle">
-        <div class="input-group-custom">
-            <input class="input-group-custom__input form-control form--control" type="text" placeholder="Find related content">
-            <span class="input-group-custom__icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path d="M11.5 2C16.75 2 21 6.25 21 11.5C21 16.75 16.75 21 11.5 21C6.25 21 2 16.75 2 11.5C2 7.8 4.11 4.6 7.2 3.03" stroke="CurrentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    </path>
-                    <path d="M22 22L20 20" stroke="CurrentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg>
-            </span>
-        </div>
-    </div>
     <div class="setting-header-right">
-        <div class="search-form-wrapper">
-            <form class="search-form" action="#">
-                <div class="form-group">
-                    <input class="form--control" name="search" type="text" value="" placeholder="@lang('Search Here...')" id="search">
-                    <button class="search-form-btn" type="submit">
-                        <i class="las la-search"></i>
-                    </button>
-                </div>
-            </form>
-            <button class="sm-search-btn d-md-none d-block" type="button">
-                <i class="las la-search"></i>
-            </button>
-            <button class="search-close d-none" type="button">
-                <i class="las la-times"></i>
-            </button>
-        </div>
-
         @auth
             <a href="{{ route('user.message.index') }}" class="message-btn-trigger">
                 <span class="icon">

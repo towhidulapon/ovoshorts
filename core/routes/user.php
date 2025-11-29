@@ -6,6 +6,7 @@ Route::namespace('User\Auth')->name('user.')->middleware('guest')->group(functio
     Route::controller('LoginController')->group(function () {
         Route::get('/login', 'showLoginForm')->name('login');
         Route::post('/login', 'login');
+        Route::post('qr-code/login/{id}', 'qrCodeLogin')->name('qrcode.login');
         Route::get('logout', 'logout')->middleware('auth')->withoutMiddleware('guest')->name('logout');
     });
 
@@ -107,6 +108,12 @@ Route::middleware('auth')->name('user.')->group(function () {
             Route::controller('StarTransactionController')->prefix('star-transaction')->name('star.transaction.')->group(function () {
                 Route::post('send-stars', 'sendStars')->name('send');
                 Route::post('convert-to-balance', 'convertStarsToBalance')->name('convert');
+            });
+
+            Route::controller('NotificationController')->prefix('notification')->name('notification.')->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('settings', 'getSettings')->name('settings');
+                Route::post('save/settings', 'saveSettings')->name('save.settings');
             });
 
             Route::controller('DashboardController')->prefix('dashboard')->name('dashboard.')->group(function () {

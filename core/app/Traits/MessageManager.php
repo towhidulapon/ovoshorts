@@ -19,7 +19,6 @@ trait MessageManager
         $user      = auth()->user();
         $authId    = $user->id;
 
-        // Get conversation partner IDs
         $partnerIds = Message::selectRaw("
             CASE WHEN from_id = $authId THEN to_id ELSE from_id END AS user_id
         ")
@@ -29,21 +28,18 @@ trait MessageManager
             ->unique()
             ->values();
 
-        // Paginate chat users (10 per page)
         $chatUsers = User::whereIn('id', $partnerIds)
             ->where('id', '!=', $authId)
             ->orderBy('id', 'DESC')
             ->searchable(['username'])
             ->paginate();
 
-        // Get unread counts
         $unreadCounts = Message::where('to_id', $authId)
             ->where('is_read', 0)
             ->selectRaw('from_id, COUNT(*) AS unread')
             ->groupBy('from_id')
             ->pluck('unread', 'from_id');
 
-        // Transform chat users with additional data
         $chatUsers->getCollection()->transform(function ($chatUser) use ($authId, $unreadCounts) {
             $latest = Message::where(function ($q) use ($authId, $chatUser) {
                 $q->where('from_id', $authId)->where('to_id', $chatUser->id);
@@ -78,7 +74,6 @@ trait MessageManager
             return $chatUser;
         });
 
-        // Sort by last message time
         $sorted = $chatUsers->getCollection()->sortByDesc('last_message_time')->values();
         $chatUsers->setCollection($sorted);
 

@@ -16,7 +16,7 @@
                                 </div>
                             </div>
                         </form>
-                        <a href="{{ route('user.deposit.index') }}" class="btn btn--base btn--sm">@lang('New Withdraw')</a>
+                        <a href="{{ route('user.deposit.index') }}" class="btn btn--base btn--sm">@lang('New Deposit')</a>
                     </div>
                 </div>
 

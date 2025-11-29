@@ -24,10 +24,18 @@ class LoginController extends Controller
 
     public function showLoginForm()
     {
-        $pageTitle = "Login";
         Intended::identifyRoute();
-        return view('Template::user.auth.login', compact('pageTitle'));
+        $pageTitle = "Login";
+        $qrCode    = getQrCodeUrlForLogin();
+        return view('Template::user.auth.login', compact('pageTitle', 'qrCode'));
     }
+
+    // public function showLoginForm()
+    // {
+    //     $pageTitle = "Login";
+    //     Intended::identifyRoute();
+    //     return view('Template::user.auth.login', compact('pageTitle'));
+    // }
 
     public function login(Request $request)
     {
@@ -133,6 +141,14 @@ class LoginController extends Controller
 
         $redirection = Intended::getRedirection();
         return $redirection ? $redirection : to_route('home');
+    }
+
+    public function qrCodeLogin(Request $request, $id)
+    {
+        $request->validate([
+            'qrcode' => 'required',
+        ]);
+        return qrCodeLoginAttempt('user', $id, $request->qrcode);
     }
 
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\User;
 
 use App\Constants\Status;
@@ -8,16 +9,15 @@ use App\Models\Short;
 use App\Models\StorageSetting;
 use App\Rules\FileTypeValidate;
 use App\Traits\ShortsManager;
-use Illuminate\Support\Str;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
-class ShortsUploadController extends Controller
-{
+class ShortsUploadController extends Controller {
     use ShortsManager;
 
-    public function index($id = 0)
-    {
+    public function index($id = 0) {
         $pageTitle = 'Upload Shorts';
         $userId    = auth()->user()->id;
         $short     = null;
@@ -29,8 +29,7 @@ class ShortsUploadController extends Controller
         return view('Template::user.short.index', compact('pageTitle', 'short', 'categories', 'latestDraft'));
     }
 
-    public function initiateUpload(Request $request)
-    {
+    public function initiateUpload(Request $request) {
         $request->validate([
             'filename' => 'required|string',
         ]);
@@ -59,8 +58,7 @@ class ShortsUploadController extends Controller
         ]);
     }
 
-    public function uploadChunk(Request $request)
-    {
+    public function uploadChunk(Request $request) {
         $request->validate([
             'upload_id'   => 'required',
             'chunk'       => 'required|file',
@@ -83,8 +81,7 @@ class ShortsUploadController extends Controller
         ]);
     }
 
-    public function completeUpload(Request $request)
-    {
+    public function completeUpload(Request $request) {
         $request->validate([
             'upload_id' => 'required',
             'filename'  => 'required|string',
@@ -123,6 +120,8 @@ class ShortsUploadController extends Controller
         }
         fclose($file);
 
+        DB::beginTransaction();
+
         try {
             $driver = $this->storageConfig->configure();
         } catch (\Exception $e) {
@@ -132,29 +131,59 @@ class ShortsUploadController extends Controller
         $storage = StorageSetting::where('alias', $driver)->first();
         $short   = Short::where('upload_id', $uploadId)->first();
 
-        if (!$storage) {
-            $success = $this->storageConfig->storeLocalFile($finalFileName, $tempFile);
-            if (!$success) {
-                return apiResponse("upload", 'error', ["Failed to save file to local storage"]);
-            }
-            $storageId     = 0;
-            $storageDriver = 'local';
-        } else {
-            if (file_exists($tempFile)) {
-                $this->storageConfig->storeFile($driver, $finalFileName, new UploadedFile($tempFile, $finalFileName));
+        try {
+            if (!$storage) {
+                $success = $this->storageConfig->storeLocalFile($finalFileName, $tempFile);
+                if (!$success) {
+                    return apiResponse("upload", 'error', ["Failed to save file to local storage"]);
+                }
+                $storageId     = 0;
+                $storageDriver = 'local';
             } else {
-                return apiResponse("upload", 'error', ["File not found"]);
+                if (file_exists($tempFile)) {
+                    $uploadStatus = $this->storageConfig->storeFile($driver, $finalFileName, new UploadedFile($tempFile, $finalFileName));
+                    if (!$uploadStatus) {
+                        throw new \Exception("Failed to upload file to storage");
+                    }
+                } else {
+                    return apiResponse("upload", 'error', ["File not found"]);
+                }
+                $storageId     = $storage->id;
+                $storageDriver = $driver;
             }
-            $storageId     = $storage->id;
-            $storageDriver = $driver;
-        }
 
-        if ($short) {
-            $short->name           = $finalFileName;
-            $short->storage_id     = $storageId;
-            $short->storage_driver = $storageDriver;
-            $short->temp_path      = $tempPath;
-            $short->save();
+            if ($short) {
+                $short->name           = $finalFileName;
+                $short->storage_id     = $storageId;
+                $short->storage_driver = $storageDriver;
+                $short->temp_path      = $tempPath;
+                $short->save();
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            if (file_Exists($tempFile)) {
+                unlink($tempFile);
+            }
+
+            if (is_dir($chunkDir)) {
+                $files = glob($chunkDir . '/*');
+                foreach ($files as $file) {
+                    if (is_file($file)) {
+                        unlink($file);
+                    }
+                }
+                rmdir($chunkDir);
+            }
+
+            if ($short) {
+                $short->delete();
+            }
+
+            return apiResponse("upload", 'error', ["Upload Failed: " . $e->getMessage()]);
         }
 
         return apiResponse("upload", 'success', ["Upload Completed"], [
@@ -164,8 +193,7 @@ class ShortsUploadController extends Controller
         ]);
     }
 
-    public function store(Request $request, $id = 0)
-    {
+    public function store(Request $request, $id = 0) {
         $isUpdate = $id != 0;
 
         $baseRules = [
@@ -326,5 +354,4 @@ class ShortsUploadController extends Controller
 
         return responseManager("short_upload", $message, "success");
     }
-
 }

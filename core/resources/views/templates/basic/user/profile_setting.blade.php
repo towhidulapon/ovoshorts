@@ -31,8 +31,8 @@
                                     <div class="auth-user-pic__btns">
                                         <input class="d-none" type="file" name="image" id="auth-user-pic"
                                             accept=".png,.jpg,.jpeg">
-                                        <label class="btn btn--sm btn-outline--base" for="auth-user-pic">Change
-                                            picture</label>
+                                        <label class="btn btn--sm btn-outline--base" for="auth-user-pic">@lang('Change
+                                        picture')</label>
                                     </div>
                                 </div>
 

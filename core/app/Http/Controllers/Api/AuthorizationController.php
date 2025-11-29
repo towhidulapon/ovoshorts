@@ -103,7 +103,9 @@ class AuthorizationController extends Controller
             $user->save();
             $notify[] = 'Email verified successfully';
 
-            return apiResponse("email_verified", "success", $notify);
+            return apiResponse("email_verified", "success", $notify, [
+                'user' => $user
+            ]);
         }
 
         $notify[] = 'Verification code doesn\'t match';

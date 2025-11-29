@@ -103,7 +103,7 @@ trait ShortsManager
         }
 
         $short->is_visible     = $request->visibility;
-        $short->allow_comments = $request->comment ?? 0;
+        $short->allow_comments = $request->comment;
         $short->category_id    = $request->category_id;
         $short->post_at        = $request->schedule_time ?? now();
         $short->storage_id     = $storageId;

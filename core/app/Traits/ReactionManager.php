@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Models\UserReaction;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 trait ReactionManager
@@ -30,8 +31,10 @@ trait ReactionManager
 
         $likeCount = UserReaction::where('shorts_id', $request->shorts_id)->count();
 
-        if($request->shorts_owner_id->notify_like){
-            notify($request->shorts_owner_id, 'LIKE_ADDED', [
+        $owner = User::find($request->shorts_owner_id);
+
+        if($owner->notify_like){
+            notify($owner, 'LIKE_ADDED', [
                 'username'   => auth()->user()->username,
                 'short'      => $request->shorts_id,
                 'created_at' => now(),
