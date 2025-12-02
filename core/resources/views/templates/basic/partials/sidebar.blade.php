@@ -87,49 +87,47 @@
                     </a>
                 </li>
                 @if (auth()->check())
-                        <li class="sidebar-menu-list__item has-sidebar">
-                            <a href="#" class="sidebar-menu-list__link">
-                                <span class="icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="25" viewBox="0 0 24 25" fill="none">
-                                        <path d="M7 14.5L9.79289 11.7071C10.1834 11.3166 10.8166 11.3166 11.2071 11.7071L12.7929 13.2929C13.1834 13.6834 13.8166 13.6834 14.2071 13.2929L17 10.5" stroke="CurrentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M21.5 5V20C21.5 21.1046 20.6046 22 19.5 22H4.5C3.39543 22 2.5 21.1046 2.5 20V5C2.5 3.89543 3.39543 3 4.5 3H19.5C20.6046 3 21.5 3.89543 21.5 5Z" stroke="CurrentColor" stroke-width="2" stroke-linejoin="round" />
-                                    </svg>
-                                </span>
-                                <span class="text">@lang('Activity')</span>
-                            </a>
-                        </li>
+                                            <li class="sidebar-menu-list__item has-sidebar">
+                                                <a href="#" class="sidebar-menu-list__link">
+                                                    <span class="icon">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="25" viewBox="0 0 24 25" fill="none">
+                                                            <path d="M7 14.5L9.79289 11.7071C10.1834 11.3166 10.8166 11.3166 11.2071 11.7071L12.7929 13.2929C13.1834 13.6834 13.8166 13.6834 14.2071 13.2929L17 10.5" stroke="CurrentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                            <path d="M21.5 5V20C21.5 21.1046 20.6046 22 19.5 22H4.5C3.39543 22 2.5 21.1046 2.5 20V5C2.5 3.89543 3.39543 3 4.5 3H19.5C20.6046 3 21.5 3.89543 21.5 5Z" stroke="CurrentColor" stroke-width="2" stroke-linejoin="round" />
+                                                        </svg>
+                                                    </span>
+                                                    <span class="text">@lang('Activity')</span>
+                                                </a>
+                                            </li>
 
-                        <li class="sidebar-menu-list__item">
-                            <a href="{{ route('user.message.index') }}" class="sidebar-menu-list__link {{ request()->routeIs('user.message.index') ? 'active' : '' }}">
-                                <span class="icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="25" viewBox="0 0 24 25" fill="none">
-                                        <path d="M14.1706 20.8905C18.3536 20.6125 21.6856 17.2332 21.9598 12.9909C22.0134 12.1607 22.0134 11.3009 21.9598 10.4707C21.6856 6.22838 18.3536 2.84913 14.1706 2.57107C12.7435 2.47621 11.2536 2.47641 9.8294 2.57107C5.64639 2.84913 2.31441 6.22838 2.04024 10.4707C1.98659 11.3009 1.98659 12.1607 2.04024 12.9909C2.1401 14.536 2.82343 15.9666 3.62791 17.1746C4.09501 18.0203 3.78674 19.0758 3.30021 19.9978C2.94941 20.6626 2.77401 20.995 2.91484 21.2351C3.05568 21.4752 3.37026 21.4829 3.99943 21.4982C5.24367 21.5285 6.08268 21.1757 6.74868 20.6846C7.1264 20.4061 7.31527 20.2668 7.44544 20.2508C7.5756 20.2348 7.83177 20.3403 8.34401 20.5513C8.8044 20.7409 9.33896 20.8579 9.8294 20.8905C11.2536 20.9852 12.7435 20.9854 14.1706 20.8905Z" stroke="CurrentColor" stroke-width="2" stroke-linejoin="round" />
-                                        <path d="M8.5 14.5H15.5M8.5 9.5H12" stroke="CurrentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                </span>
-                                <span class="text">@lang('Messages')</span>
-                            </a>
-                        </li>
+                                            <li class="sidebar-menu-list__item">
+                                                <a href="{{ route('user.message.index') }}" class="sidebar-menu-list__link {{ request()->routeIs('user.message.index') ? 'active' : '' }}">
+                                                    <span class="icon">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="25" viewBox="0 0 24 25" fill="none">
+                                                            <path d="M14.1706 20.8905C18.3536 20.6125 21.6856 17.2332 21.9598 12.9909C22.0134 12.1607 22.0134 11.3009 21.9598 10.4707C21.6856 6.22838 18.3536 2.84913 14.1706 2.57107C12.7435 2.47621 11.2536 2.47641 9.8294 2.57107C5.64639 2.84913 2.31441 6.22838 2.04024 10.4707C1.98659 11.3009 1.98659 12.1607 2.04024 12.9909C2.1401 14.536 2.82343 15.9666 3.62791 17.1746C4.09501 18.0203 3.78674 19.0758 3.30021 19.9978C2.94941 20.6626 2.77401 20.995 2.91484 21.2351C3.05568 21.4752 3.37026 21.4829 3.99943 21.4982C5.24367 21.5285 6.08268 21.1757 6.74868 20.6846C7.1264 20.4061 7.31527 20.2668 7.44544 20.2508C7.5756 20.2348 7.83177 20.3403 8.34401 20.5513C8.8044 20.7409 9.33896 20.8579 9.8294 20.8905C11.2536 20.9852 12.7435 20.9854 14.1706 20.8905Z" stroke="CurrentColor" stroke-width="2" stroke-linejoin="round" />
+                                                            <path d="M8.5 14.5H15.5M8.5 9.5H12" stroke="CurrentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                        </svg>
+                                                    </span>
+                                                    <span class="text">@lang('Messages')</span>
+                                                </a>
+                                            </li>
 
-                        <li class="sidebar-menu-list__profile sidebar-menu-list__item">
-                            <a href="{{ route('user.profile.details') }}" class="sidebar-menu-list__link">
-                                <div class="profile__thumb">
-                                    <img src="{{ auth()->user()->image ? getImage(getFilePath('userProfile') . '/' . auth()->user()->image, getFileSize('userProfile')) : asset('assets/images/avatar.jpg') }}" class="user-img" alt="img">
-                                </div>
-                                <h6 class="profile__content__title">
-                                    {{ auth()->user()->username }}
-                                </h6>
-                            </a>
-                        </li>
-                    </ul>
+                                            <li class="sidebar-menu-list__profile sidebar-menu-list__item">
+                                                <a href="{{ route('user.profile.details') }}" class="sidebar-menu-list__link">
+                                                    <div class="profile__thumb">
+                                                        <img src="{{ auth()->user()->image ? getImage(getFilePath('userProfile') . '/' . auth()->user()->image, getFileSize('userProfile')) : asset('assets/images/avatar.jpg') }}" class="user-img" alt="img">
+                                                    </div>
+                                                    <h6 class="profile__content__title">
+                                                        {{ auth()->user()->username }}
+                                                    </h6>
+                                                </a>
+                                            </li>
+                                        </ul>
 
-                    @php
-    $followings = auth()->user()->followings()->take(5)->get();
-                    @endphp
+                    <span class="sidebar-menu__following__title fs-14 fw-700 mb-3">@lang('Following Accounts')</span>
 
-                    <div class="sidebar-menu__following sidebar-following-container">
-                        @include('Template::partials.sidebar_followings')
-                    </div>
+                                        <div class="sidebar-menu__following sidebar-following-container sidebar-menu-list  sidebar-menu-list__main">
+                                            @include('Template::partials.sidebar_followings')
+                                        </div>
                 @endif
         </div>
 
@@ -281,7 +279,5 @@
                 @endif
             </div>
         </div>
-
-
     </div>
 

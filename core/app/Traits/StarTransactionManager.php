@@ -14,6 +14,7 @@ trait StarTransactionManager
         $request->validate([
             'receiver_id' => 'required|exists:users,id',
             'stars'       => 'required|integer|gte:0',
+            'shorts_id'   => 'required|exists:shorts,id',
         ]);
 
         if ($request->receiver_id == auth()->user()->id) {
@@ -43,7 +44,7 @@ trait StarTransactionManager
         $shortTotalStars = $short->stars()->sum('stars');
 
         if($receiver->notify_stars){
-            notify($request->receiver_id, 'STAR_ADDED', [
+            notify($receiver, 'STAR_ADDED', [
                 'username'   => auth()->user()->username,
                 'short'      => $short,
                 'stars'      => $request->stars,

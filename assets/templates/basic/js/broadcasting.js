@@ -21,3 +21,17 @@ makeAuthEndPointForPusher = (socketId, channelName) => {
   );
   return endpoint;
 };
+
+const pusherConnection = (channelName, eventName, callback) => {
+  pusher.connection.bind("connected", () => {
+    const SOCKET_ID = pusher.connection.socket_id;
+    const CHANNEL_NAME = `private-${channelName}`;
+    pusher.config.authEndpoint = `${BASE_URL}/pusher/auth/${SOCKET_ID}/${CHANNEL_NAME}`;
+    let channel = pusher.subscribe(CHANNEL_NAME);
+    channel.bind("pusher:subscription_succeeded", function () {
+      channel.bind(eventName, function (data) {
+        callback(data);
+      });
+    });
+  });
+};

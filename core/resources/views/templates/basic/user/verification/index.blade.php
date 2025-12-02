@@ -23,13 +23,9 @@
                             </div>
 
                             <div class="text-center my-4">
-                                <form action="{{ route('user.verification.purchase') }}" method="POST">
-                                    @csrf
-                                    <input type="hidden" name="amount" value="{{ gs('verification_price') }}">
-                                    <button type="submit" class="btn btn-success w-100">
-                                        @lang('Get Verified Now for') {{ showAmount(gs('verification_price')) }}
-                                    </button>
-                                </form>
+                                <a href="{{ route('user.verification.purchase') }}" class="btn btn-success w-100">
+                                    @lang('Get Verified Now for') {{ showAmount(gs('verification_price')) }}
+                                </a>
                             </div>
                         </div>
                     </div>

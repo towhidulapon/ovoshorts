@@ -167,14 +167,7 @@ class ProfileController extends Controller {
             ->with('likes', 'user')
             ->approved()
             ->published()
-            ->where(function ($query) {
-                $query->where('storage_driver', 'local')
-                    ->orWhereIn('storage_driver', function ($subQuery) {
-                        $subQuery->select('alias')
-                            ->from('storage_settings')
-                            ->where('status', Status::ENABLE);
-                    });
-            });
+            ->withActiveStorage();
     }
 
 

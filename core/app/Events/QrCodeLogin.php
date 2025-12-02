@@ -20,7 +20,7 @@ class QrCodeLogin implements ShouldBroadcastNow
     public $chanelName;
     public $eventName;
 
-    public function __construct($chanelName, $data = [], $eventName = "qr-code-login")
+    public function __construct($chanelName, $data = [], $eventName = "user-qr-code-login")
     {
         $this->data       = $data;
         $this->chanelName = $chanelName;

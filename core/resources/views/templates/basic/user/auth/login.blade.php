@@ -145,32 +145,73 @@
 
             loginQrInit();
 
-            var qrLoginChannel = pusher.subscribe('user-qr-code-login');
-            qrLoginChannel.bind('qr-code-login', function (data) {
-                if (data.data.qr_code != qrcode) return;
+            // var qrLoginChannel = pusher.subscribe('user-qr-code-login');
+            // qrLoginChannel.bind('user-qr-code-login', function (data) {
+            //     console.log(data,'tuttttttt');
+            //     if (data.data.qr_code != qrcode) return;
+
+            //     const user = data.data.user;
+            //     const action = '{{ route('user.qrcode.login', ':user') }}';
+
+            //     $.post(action.replace(":user", user), {
+            //         _token: "{{ csrf_token() }}",
+            //         s_token: data.data.s_token,
+            //         qrcode
+            //     }, function (response) {
+            //         if (response.status === "success") {
+            //             setTimeout(() => {
+            //                 window.location = '{{ route('user.home') }}';
+            //             }, 1500);
+            //         } else {
+            //             notify('error', response.message);
+            //         }
+            //     });
+            // });
+
+            // var qrResetChannel = pusher.subscribe('user-qr_code_reset');
+            // qrResetChannel.bind('qr_code_reset', function (data) {
+            //     console.log(2121);
+
+            //     qrcode = data.data.qr_code;
+            //     loginQrInit();
+            // });
+
+
+
+
+
+            pusherConnection(`user-qr-code-login`, "user-qr-code-login", function (data) {
+                console.log('data', data.data, typeof data, data.data.qr_code);
+
+                if (data.data.qr_code != qrcode) return false;
+
+                $(".qr-code-loading").removeClass('d-none');
+                $(".qr-code-thumb").addClass('has-loading');
 
                 const user = data.data.user;
-                const action = '{{ route('user.qrcode.login', ':user') }}';
+                const action = '{{ route("user.qrcode.login", ':user') }}';
+                $.ajax({
+                    type: "POST",
+                    url: action.replace(":user", user),
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        s_token: data.data.s_token,
+                        qrcode
+                    },
+                    success: function (response) {
+                        if (response.status == 'success') {
+                            setTimeout(() => {
+                                window.location = '{{ route('user.home') }}';
+                            }, 2000);
+                        } else {
+                            $(".qr-code-loading").addClass('d-none');
+                            $(".qr-code-thumb").removeClass('has-loading');
+                            $(".qr-code-loading").addClass('d-none');
+                            notify('error', response.message);
+                        }
 
-                $.post(action.replace(":user", user), {
-                    _token: "{{ csrf_token() }}",
-                    s_token: data.data.s_token,
-                    qrcode
-                }, function (response) {
-                    if (response.status === "success") {
-                        setTimeout(() => {
-                            window.location = '{{ route('user.home') }}';
-                        }, 1500);
-                    } else {
-                        notify('error', response.message);
                     }
                 });
-            });
-
-            var qrResetChannel = pusher.subscribe('user-qr_code_reset');
-            qrResetChannel.bind('qr_code_reset', function (data) {
-                qrcode = data.data.qr_code;
-                loginQrInit();
             });
 
 

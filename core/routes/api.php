@@ -47,7 +47,7 @@ Route::namespace('Api')->name('api.')->group(function () {
     Route::namespace('Auth')->group(function () {
         Route::controller('LoginController')->group(function () {
             Route::post('login', 'login');
-            Route::post('login-with/qr-code/{code}', 'loginWithQrCode');
+            Route::post('login-with/qr-code/{code}', 'loginWithQrCode')->middleware('auth:sanctum');
             Route::post('check-token', 'checkToken');
             Route::post('social-login', 'socialLogin');
         });
@@ -160,10 +160,12 @@ Route::namespace('Api')->name('api.')->group(function () {
                     Route::get('/verification-data', 'verificationData');
                     Route::post('/apply', 'applyVerification');
                     Route::post('/purchase', 'purchaseVerification');
-                    Route::post('/store-info', 'storePaymentInfo');
+                    Route::post('/payment-info', 'storePaymentInfo');
                 });
 
                 Route::controller('DashboardController')->prefix('dashboard')->group(function () {
+                    Route::get('edit/{id}', 'editShort');
+                    Route::post('update/short/{id}', 'updateShort');
                     Route::get('analytics', 'analytics');
                     Route::get('post-analytics/{id}', 'postAnalytics');
                     Route::get('analytics/content', 'analyticsData');

@@ -4,10 +4,10 @@ namespace App\Traits;
 
 use App\Constants\Status;
 use App\Lib\StorageConfig;
+use App\Models\Category;
 use App\Models\Short;
 use App\Models\ShortShare;
 use App\Models\ShortView;
-use App\Models\UserReaction;
 use Illuminate\Http\Request;
 
 trait DashboardManager
@@ -353,11 +353,10 @@ trait DashboardManager
 
         $shorts = Short::where('user_id', $user->id)->get();
 
-        $lastShort = Short::where('user_id', $user->id)->orderBy('views_count', 'desc')->first();
+        $lastShort      = Short::where('user_id', $user->id)->orderBy('views_count', 'desc')->first();
         $lastShortViews = $lastShort ? $lastShort->views_count : 0;
 
         $totalShortViews = $shorts->sum('views_count');
-        $totalShortLikes = UserReaction::whereIn('shorts_id', $shorts->pluck('id'))->count();
 
         $newFollowers = $user->followers()
             ->wherePivot('created_at', '>=', now()->subDays(7))
@@ -367,7 +366,7 @@ trait DashboardManager
 
         return apiResponse('analytics', 'success', [$pageTitle], [
             'totalShortViews'  => $totalShortViews,
-            'totalShortLikes'  => $totalShortLikes,
+            'totalShortLikes'  => $user->totalLikes,
             'newFollowers'     => $newFollowers,
             'lastShortViews'   => $lastShortViews,
             'userBalance'      => showAmount($user->balance),
@@ -375,4 +374,68 @@ trait DashboardManager
         ]);
     }
 
+    public function editShort($id)
+    {
+        $user  = auth()->user();
+        $short = Short::where('user_id', $user->id)->find($id);
+
+        $categories = Category::active()
+            ->orderBy('id', 'desc')
+            ->get();
+
+        $pageTitle = 'Edit Short';
+        $view      = 'Template::user.short.edit';
+
+        return responseManager('Edit Short', $pageTitle, 'success', [
+            'view'       => $view,
+            'short'      => $short,
+            'categories' => $categories,
+            'pageTitle'  => $pageTitle,
+        ]);
+    }
+
+    public function updateShort(Request $request, $id)
+    {
+        $request->validate([
+            'description'    => 'nullable|string|max:4000',
+            'is_visible'     => 'required|in:1,2',
+            'allow_comments' => 'required|in:1,0',
+            'category_id'    => 'required|exists:categories,id',
+        ]);
+
+        $short = Short::where('user_id', auth()->user()->id)->find($id);
+
+        if (!$short) {
+            $message = 'Short not found';
+            return apiResponse("short", 'error', [$message]);
+        }
+
+        $category = Category::active()->find($request->category_id);
+
+        if (!$category) {
+            $message = 'Category not found';
+            return apiResponse("short", 'error', [$message]);
+        }
+
+        $short->description    = $request->description;
+        $short->is_visible     = $request->is_visible;
+        $short->allow_comments = $request->allow_comments;
+        $short->category_id    = $request->category_id;
+
+        if ($request->hasFile('cover_image')) {
+            try {
+                if ($short->cover_image && file_exists(getFilePath('coverImage') . '/' . $short->cover_image)) {
+                    unlink(getFilePath('coverImage') . '/' . $short->cover_image);
+                }
+                $short->cover_image = fileUploader($request->cover_image, getFilePath('coverImage'));
+            } catch (\Exception $exp) {
+                $message = 'Couldn\'t upload your image';
+                return responseManager("short", $message, 'error');
+            }
+        }
+
+        $short->save();
+
+        return apiResponse("short", 'success', ['Short updated successfully']);
+    }
 }

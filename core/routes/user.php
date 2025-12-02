@@ -56,6 +56,7 @@ Route::middleware('auth')->name('user.')->group(function () {
                 Route::get('dashboard', 'home')->name('home');
                 Route::get('download-attachments/{file_hash}', 'downloadAttachment')->name('download.attachment');
 
+
                 //2FA
                 Route::get('twofactor', 'show2faForm')->name('twofactor');
                 Route::post('twofactor/enable', 'create2fa')->name('twofactor.enable');
@@ -136,6 +137,7 @@ Route::middleware('auth')->name('user.')->group(function () {
                 Route::get('following-list', 'followingList')->name('following.list');
                 Route::get('followers/{id}', 'followers')->name('follower.all');
                 Route::get('following/{id}',  'followingUsers')->name('following.all');
+                Route::get('load-following-users', 'loadFollowingUsers')->name('load.following.users');
                 Route::get('sidebar-followings', 'sidebarFollowingUsers')->name('sidebar.following');
             });
 
@@ -162,7 +164,7 @@ Route::middleware('auth')->name('user.')->group(function () {
                 Route::get('/', 'index')->name('index');
                 Route::get('verification-data', 'verificationData')->name('data');
                 Route::post('apply-verification', 'applyVerification')->name('apply');
-                Route::post('purchase-verification', 'purchaseVerification')->name('purchase');
+                Route::get('purchase-verification', 'purchaseVerification')->name('purchase');
                 Route::post('store-info', 'storePaymentInfo')->name('store.payment.info');
             });
 

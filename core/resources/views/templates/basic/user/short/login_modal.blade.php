@@ -1,3 +1,11 @@
+{{-- @php
+$policyPages = getContent(
+'policy_pages.element',
+false,
+orderById: true,
+);
+@endphp --}}
+
 <div class="modal custom--modal fade  fade-in-scale login-modal" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -31,11 +39,32 @@
 
             <div class="login-modal__footer">
                 <div class="login-modal__footer__text">
-                    <p class="fs-14">
-                        @lang('By continuing with an account located in') <a href="#" class="link fw-700">Bangladesh</a>,
-                        @lang('you agree to our') <a href="#" class="link fw-700">Terms of Services</a> @lang('and acknowledge that
-                        you have read our') <a href="#" class="link fw-700">Privacy Policy</a>.
+
+                    @php
+                        $policyPages = getContent('policy_pages.element', false, orderById: true);
+
+                        $terms = $policyPages->firstWhere('data_values.title', 'Terms of Services');
+                        $privacy = $policyPages->firstWhere('data_values.title', 'Privacy Policy');
+                    @endphp
+
+                    <p class="mt-3">
+                        @lang('By continuing with an account you agree to our')
+
+                        @if ($terms)
+                            <a href="{{ route('policy.pages', $terms->slug) }}" target="_blank" class="link fw-700">
+                                {{ __($terms->data_values->title) }}
+                            </a>
+                        @endif
+
+                        @lang('and acknowledge that you have read our')
+
+                        @if ($privacy)
+                            <a href="{{ route('policy.pages', $privacy->slug) }}" target="_blank" class="link fw-700">
+                                {{ __($privacy->data_values->title) }}
+                            </a>.
+                        @endif
                     </p>
+
                 </div>
                 <div class="login-have-account">
                     <p class="login-have-account__text">@lang('Don’t have an Account?') <a href="{{ route('user.register') }}" class="login-have-account__link text--base fw-700">@lang('Sign Up')</a>

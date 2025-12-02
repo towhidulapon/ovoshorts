@@ -11,9 +11,10 @@ trait FriendsManager
     public function index()
     {
         $pageTitle = 'Friends';
-        $following = auth()->user()->followings->pluck('id')->toArray();
+        $user      = auth()->user();
+        $following = $user->followings->pluck('id')->toArray();
 
-        $query = User::active()->with([
+        $query = User::active()->where('id', '!=', $user->id)->with([
             'shorts' => function ($q) {
                 $q->approved()
                     ->published()
@@ -22,7 +23,7 @@ trait FriendsManager
                     ->orderBy('id', 'desc');
             },
         ]);
-        $users = $query->searchable(['username'])->paginate(getPaginate());
+        $users = $query->searchable(['username', 'firstname', 'lastname'])->paginate(getPaginate());
 
         $users->getCollection()->transform(function ($user) {
             if ($user->shorts->isNotEmpty()) {
@@ -103,7 +104,7 @@ trait FriendsManager
     {
         $pageTitle = 'Following';
 
-        $query = auth()->user()->followings()->with(['shorts' => function ($q) {
+        $query = auth()->user()->followings()->searchable(['username', 'firstname', 'lastname'])->with(['shorts' => function ($q) {
             $q->approved()
                 ->published()
                 ->publicShort()
@@ -150,11 +151,11 @@ trait FriendsManager
         ]);
     }
 
-    public function followingShorts(Request $request)
+    public function followingShorts()
     {
         $user = auth()->user();
 
-        $shorts = Short::with('user:id,username,image')
+        $shorts = Short::with('user:id,username,image,is_verified')
             ->whereIn('user_id', $user->followings()->select('users.id'))
             ->approved()
             ->published()

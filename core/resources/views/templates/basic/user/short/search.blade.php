@@ -16,7 +16,7 @@
                                     </video>
 
                                     @unless($userShort->is_placeholder)
-                                        <button class="explore-action like-btn {{ $userShort->isLiked ? 'liked' : '' }}" data-shorts-id="{{ $userShort->id }}" data-shorts-owner-id="{{ $userShort->user_id }}">
+                                        <button class="explore-action explore-action__button like-btn {{ $userShort->isLiked ? 'liked' : '' }}" data-shorts-id="{{ $userShort->id }}" data-shorts-owner-id="{{ $userShort->user_id }}">
                                             <span class="icon">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                                     <path d="M9.99984 17.0833C9.99984 17.0833 1.6665 12.0833 1.6665 7.24536C1.6665 4.85468 3.42089 2.91666 5.83317 2.91666C7.08317 2.91666 8.33317 3.33332 9.99984 4.99999C11.6665 3.33332 12.9165 2.91666 14.1665 2.91666C16.5788 2.91666 18.3332 4.85468 18.3332 7.24536C18.3332 12.0833 9.99984 17.0833 9.99984 17.0833Z" stroke="CurrentColor" stroke-width="2" stroke-linejoin="round" />

@@ -199,6 +199,6 @@ class LoginController extends Controller
 
     public function loginWithQrCode($encodedCode)
     {
-        return verifyQrCodeForLogin($encodedCode, 'user');
+        return verifyQrCodeForLogin($encodedCode);
     }
 }

@@ -90,7 +90,6 @@ class UserController extends Controller
         $shorts = Short::with('user:id,username,image')
             ->approved()
             ->published()
-            ->publicShort()
             ->where('user_id', $user->id)
             ->withActiveStorage()
             ->withCount('likes')
@@ -105,10 +104,6 @@ class UserController extends Controller
         $userProfile = route('user.profile.details', $user->username);
         $userQR      = cryptoQR($userProfile);
 
-        $totalLikes = $shorts->sum(function ($short) {
-            return $short->likes->count();
-        });
-
         return responseManager("profile_details", $pageTitle, 'success', [
             'user'           => $user,
             'userProfile'    => $userProfile,
@@ -118,7 +113,7 @@ class UserController extends Controller
             'coverImagePath' => getFilePath('coverImage'),
             'pageTitle'      => $pageTitle,
             'shorts'         => $shorts,
-            'totalLikes'     => $totalLikes,
+            'totalLikes'     => $user->totalLikes,
             'followers'      => $user->followers()->count(),
             'following'      => $user->followings()->count(),
         ]);
@@ -148,35 +143,6 @@ class UserController extends Controller
         ]);
     }
 
-    // public function savedShorts()
-    // {
-    //     $user = auth()->user();
-
-    //     $savedShorts = $user->savedShorts()
-    //         ->whereHas('short', function ($query) {
-    //             $query->approved()
-    //                 ->published()
-    //                 ->publicShort()
-    //                 ->withActiveStorage();
-    //         })
-    //         ->with(['short' => function ($query) {
-    //             $query->with('user:id,username,image')
-    //                 ->withCount('likes')
-    //                 ->withSum('stars', 'stars');
-    //         }])
-    //         ->orderBy('id', 'desc')
-    //         ->paginate();
-
-    //     $savedShorts->getCollection()->transform(function ($item) {
-    //         $item->short = $this->transformShort($item->short);
-    //         return $item;
-    //     });
-
-    //     return apiResponse("saved_shorts", "success", ["saved shorts"], [
-    //         'shorts' => $savedShorts,
-    //     ]);
-    // }
-
     public function likedShorts()
     {
         $user = auth()->user();
@@ -200,34 +166,6 @@ class UserController extends Controller
             'shorts' => $shorts,
         ]);
     }
-
-    // public function likedShorts() {
-    //     $user = auth()->user();
-
-    //     $likedShorts = $user->likes()
-    //         ->whereHas('short', function ($query) {
-    //             $query->approved()
-    //                 ->published()
-    //                 ->publicShort()
-    //                 ->withActiveStorage();
-    //         })
-    //         ->with(['short' => function ($query) {
-    //             $query->with('user:id,username,image')
-    //                 ->withCount('likes')
-    //                 ->withSum('stars', 'stars');
-    //         }])
-    //         ->orderBy('id', 'desc')
-    //         ->paginate();
-
-    //     $likedShorts->getCollection()->transform(function ($item) {
-    //         $item->short = $this->transformShort($item->short);
-    //         return $item;
-    //     });
-
-    //     return apiResponse("liked_shorts", "success", ["liked shorts"], [
-    //         'shorts' => $likedShorts,
-    //     ]);
-    // }
 
     public function kycForm()
     {
@@ -499,6 +437,14 @@ class UserController extends Controller
         $notification->save();
 
         return apiResponse("notification_read", "success", $notify);
+    }
+
+    public function qrCode()
+    {
+        $notify[] = 'QR Code';
+        return apiResponse("qr_code", "success", $notify, [
+            'qr_code' => getQrCodeUrl(),
+        ]);
     }
 
     public function userInfo()

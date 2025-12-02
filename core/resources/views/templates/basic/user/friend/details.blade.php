@@ -21,7 +21,7 @@
                             </button>
                         @endif
 
-                        <a href="{{ route('user.message.index', $follower->username) }}" class="profile-edit-btn btn btn--base">@lang('Message')</a>
+                        <a href="{{ route('user.message.index', $follower->username) }}" class="profile-edit-btn btn btn--base message-btn">@lang('Message')</a>
 
                         <button type="button" class="profile-action-btn" data-bs-toggle="modal" data-bs-target="#shareProfileModal">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="25" viewBox="0 0 24 25" fill="none">
@@ -120,6 +120,8 @@
     </div>
 </div>
 
+@include('Template::user.short.login_modal')
+
 
 @push('style')
     <style>
@@ -145,6 +147,7 @@
             let isLoading = false;
             let hasMorePages = true;
             let currentSort = 'latest';
+            const isLoggedIn = {{ auth()->check() ? 'true' : 'false' }};
 
             $('#copyProfileLink').on('click', function () {
                 var copyText = document.getElementById("profileShareLink");
@@ -231,6 +234,12 @@
 
             $(document).on("click", ".follow-btn", function (e) {
                 e.preventDefault();
+
+                if (!isLoggedIn) {
+                    $('.login-modal').modal('show');
+                    return;
+                }
+
                 let $btn = $(this);
                 let userId = $btn.data("id");
                 let action = $btn.data("action");
@@ -259,6 +268,17 @@
                         }
                     }
                 });
+            });
+
+            $(document).on('click', '.message-btn', function (e) {
+                e.preventDefault();
+
+                if (!isLoggedIn) {
+                    $('.login-modal').modal('show');
+                    return;
+                }
+
+                window.location.href = $(this).attr('href');
             });
 
             $('.tabs-action__btn').click(function (e) {

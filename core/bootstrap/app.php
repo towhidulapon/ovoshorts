@@ -7,6 +7,7 @@ use App\Http\Middleware\MaintenanceMode;
 use App\Http\Middleware\RedirectIfAdmin;
 use App\Http\Middleware\RedirectIfNotAdmin;
 use App\Http\Middleware\RegistrationStep;
+use App\Http\Middleware\TokenPermission;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -85,7 +86,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     return apiResponse('not_found', 'error', [$e->getMessage()], statusCode: 404);
                 }
 
-                //for authenticated 
+                //for authenticated
                 if ($e->getMessage() === 'Unauthenticated.') {
                     $notify[] = 'Unauthorized request';
                     return apiResponse('unauthenticated', 'error', $notify, statusCode: 401);

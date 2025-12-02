@@ -37,6 +37,8 @@ class UserController extends Controller
 
         $totalViews = $countryViews->sum('total');
 
+        $qrCodeUrl = getQrCodeUrl();
+
         $trafficSources = $countryViews->map(function ($row) use ($totalViews) {
             return [
                 'country'    => $row->country,
@@ -44,7 +46,7 @@ class UserController extends Controller
             ];
         });
 
-        return view('Template::user.dashboard', compact('pageTitle', 'shorts', 'trafficSources'));
+        return view('Template::user.dashboard', compact('pageTitle', 'shorts', 'trafficSources', 'qrCodeUrl'));
     }
 
     public function depositHistory(Request $request)

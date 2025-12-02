@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Constants\Status;
+use App\Events\QrCodeLogin;
 use App\Lib\CurlRequest;
 use App\Models\CronJob;
 use App\Models\CronJobLog;
+use App\Models\QrCode;
 use App\Models\Short;
 use Carbon\Carbon;
+use Exception;
 
 class CronController extends Controller
 {
@@ -84,6 +87,31 @@ class CronController extends Controller
                 $short->is_approved = Status::SHORT_PENDING;
                 $short->save();
             }
+        }
+    }
+
+    public function resetLoginQrCode()
+    {
+        try {
+
+                $qrCode     = QrCode::first();
+
+                if (!$qrCode) {
+                    getQrCodeUrlForLogin( false);
+                } else {
+                    $diffInMinute = now()->parse($qrCode->created_at)->diffInMinutes(now());
+
+                    if ($diffInMinute > 5) {
+                        $qrCode->delete();
+                        $qrCode = getQrCodeUrlForLogin($guard, false);
+                        event(new QrCodeLogin("$guard-qr_code_reset", [
+                            'qr_code' => $qrCode,
+                        ], "qr_code_reset"));
+                    }
+                }
+
+        } catch (Exception $ex) {
+            throw new Exception($ex->getMessage());
         }
     }
 }

@@ -77,16 +77,16 @@
                             </div>
                         </div>
                         @php
-                            $isLiked =
-                                auth()->check() &&
-                                App\Models\UserReaction::where('shorts_id', $short->id)
-                                    ->where('user_id', auth()->id())
-                                    ->exists();
-                            $isSaved =
-                                auth()->check() &&
-                                App\Models\SavedShort::where('shorts_id', $short->id)
-                                    ->where('user_id', auth()->id())
-                                    ->exists();
+$isLiked =
+    auth()->check() &&
+    App\Models\UserReaction::where('shorts_id', $short->id)
+        ->where('user_id', auth()->id())
+        ->exists();
+$isSaved =
+    auth()->check() &&
+    App\Models\SavedShort::where('shorts_id', $short->id)
+        ->where('user_id', auth()->id())
+        ->exists();
                         @endphp
                         <div class="video-action-wrapper">
                             <div class="video-item__action video-action-button-group">
@@ -246,7 +246,8 @@
                         <input type="number" class="form-control form--control" name="stars" min="1" required>
                     </div>
                     <div class="mb-3">
-                        <h6 class="available-stars">@lang('Stars Available:') {{ auth()?->user()?->stars }}</h6>
+                        <span>@lang('Stars Available:')</span>
+                        <h6 class="available-stars">{{ auth()?->user()?->stars }}</h6>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -539,7 +540,6 @@
                                 $commentCountElement.text(response.comment_count);
                                 $form.trigger('reset');
                                 $('.comments-container').prepend(response.html);
-                                notify('success', 'Comment added successfully');
                                 $('#pills-home-tab').text(`Comments (${response.comment_count})`);
                             } else {
                                 notify('error', 'Failed to add comment');
@@ -604,7 +604,6 @@
                                 } else {
                                     $btn.removeClass('liked');
                                 }
-                                notify('success', response.data.message);
                             } else {
                                 notify('error', 'Failed to update reaction');
                             }

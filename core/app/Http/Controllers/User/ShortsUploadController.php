@@ -14,10 +14,12 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class ShortsUploadController extends Controller {
+class ShortsUploadController extends Controller
+{
     use ShortsManager;
 
-    public function index($id = 0) {
+    public function index($id = 0)
+    {
         $pageTitle = 'Upload Shorts';
         $userId    = auth()->user()->id;
         $short     = null;
@@ -25,40 +27,46 @@ class ShortsUploadController extends Controller {
             $short = Short::where('user_id', $userId)->findOrFail($id);
         }
         $categories  = Category::where('status', Status::ENABLE)->get();
-        $latestDraft = Short::where('user_id', $userId)->where('status', Status::DRAFT)->orderBy('id', 'desc')->first();
+        $latestDraft = Short::where('user_id', $userId)
+            ->whereNotNull('temp_path')
+            ->where('status', Status::DRAFT)
+            ->orderBy('id', 'desc')
+            ->first();
         return view('Template::user.short.index', compact('pageTitle', 'short', 'categories', 'latestDraft'));
     }
 
-    public function initiateUpload(Request $request) {
+    public function initiateUpload(Request $request)
+    {
         $request->validate([
             'filename' => 'required|string',
         ]);
 
-        $uploadId  = Str::uuid()->toString();
-        $filename  = $request->filename;
-        $extension = pathinfo($filename, PATHINFO_EXTENSION);
-
+        $uploadId      = Str::uuid()->toString();
+        $filename      = $request->filename;
+        $extension     = pathinfo($filename, PATHINFO_EXTENSION);
         $username      = strtolower(auth()->user()->username);
         $finalFileName = $username . '_' . time() . '.' . $extension;
         $tempPath      = getFilePath('shortFile') . '/' . $finalFileName;
 
-        $short            = new Short();
-        $short->user_id   = auth()->id();
-        $short->name      = $finalFileName;
-        $short->temp_path = $tempPath;
-        $short->upload_id = $uploadId;
-        $short->status    = Status::DRAFT;
-        $short->save();
+        // $short            = new Short();
+        // $short->user_id   = auth()->id();
+        // $short->name      = $finalFileName;
+        // $short->temp_path = $tempPath;
+        // $short->upload_id = $uploadId;
+        // $short->status    = Status::DRAFT;
+        // $short->save();
 
         return apiResponse("upload", 'success', ["Upload initiated successfully"], [
             'success'   => true,
             'upload_id' => $uploadId,
             'temp_path' => $tempPath,
-            'short_id'  => $short->id,
+            'filename'  => $finalFileName,
+            // 'short_id'  => $short->id,
         ]);
     }
 
-    public function uploadChunk(Request $request) {
+    public function uploadChunk(Request $request)
+    {
         $request->validate([
             'upload_id'   => 'required',
             'chunk'       => 'required|file',
@@ -81,7 +89,8 @@ class ShortsUploadController extends Controller {
         ]);
     }
 
-    public function completeUpload(Request $request) {
+    public function completeUpload(Request $request)
+    {
         $request->validate([
             'upload_id' => 'required',
             'filename'  => 'required|string',
@@ -105,23 +114,107 @@ class ShortsUploadController extends Controller {
                     $chunks[] = $chunkDir . '/' . $file;
                 }
             }
-            closedir($dir);
+            sort($chunks);
+            // closedir($dir);
+        } else {
+            return apiResponse("upload", 'error', ["No chunks found"]);
         }
-        sort($chunks);
+        // sort($chunks);
 
-        $tempFile = $tempPath;
-        if (!file_exists(dirname($tempFile))) {
-            mkdir(dirname($tempFile), 0755, true);
+        // $tempFile = $tempPath;
+        // if (!file_exists(dirname($tempFile))) {
+        //     mkdir(dirname($tempFile), 0755, true);
+        // }
+
+        // $file = fopen($tempFile, 'wb');
+        // foreach ($chunks as $chunk) {
+        //     fwrite($file, file_get_contents($chunk));
+        // }
+        // fclose($file);
+
+        // DB::beginTransaction();
+
+        // try {
+        //     $driver = $this->storageConfig->configure();
+        // } catch (\Exception $e) {
+        //     $driver = 'local';
+        // }
+
+        // $storage = StorageSetting::where('alias', $driver)->first();
+        // $short   = Short::where('upload_id', $uploadId)->first();
+
+        // try {
+        //     if (!$storage) {
+        //         $success = $this->storageConfig->storeLocalFile($finalFileName, $tempFile);
+        //         if (!$success) {
+        //             return apiResponse("upload", 'error', ["Failed to save file to local storage"]);
+        //         }
+        //         $storageId     = 0;
+        //         $storageDriver = 'local';
+        //     } else {
+        //         if (file_exists($tempFile)) {
+        //             $uploadStatus = $this->storageConfig->storeFile($driver, $finalFileName, new UploadedFile($tempFile, $finalFileName));
+        //             if (!$uploadStatus) {
+        //                 throw new \Exception("Failed to upload file to storage");
+        //             }
+        //         } else {
+        //             return apiResponse("upload", 'error', ["File not found"]);
+        //         }
+        //         $storageId     = $storage->id;
+        //         $storageDriver = $driver;
+        //     }
+
+        //     if ($short) {
+        //         $short->name           = $finalFileName;
+        //         $short->storage_id     = $storageId;
+        //         $short->storage_driver = $storageDriver;
+        //         $short->temp_path      = $tempPath;
+        //         $short->save();
+        //     }
+
+        //     DB::commit();
+        // } catch (\Exception $e) {
+
+        //     DB::rollBack();
+
+        //     if (file_Exists($tempFile)) {
+        //         unlink($tempFile);
+        //     }
+
+        //     if (is_dir($chunkDir)) {
+        //         $files = glob($chunkDir . '/*');
+        //         foreach ($files as $file) {
+        //             if (is_file($file)) {
+        //                 unlink($file);
+        //             }
+        //         }
+        //         rmdir($chunkDir);
+        //     }
+
+        //     if ($short) {
+        //         $short->delete();
+        //     }
+
+        //     return apiResponse("upload", 'error', ["Upload Failed: " . $e->getMessage()]);
+        // }
+
+        // return apiResponse("upload", 'success', ["Upload Completed"], [
+        //     'video_path' => $filePath,
+        //     'short_id'   => $short->id,
+        //     'success'    => true,
+        // ]);
+
+        if (!file_exists(dirname($tempPath))) {
+            mkdir(dirname($tempPath), 0755, true);
         }
 
-        $file = fopen($tempFile, 'wb');
+        $output = fopen($tempPath, 'wb');
         foreach ($chunks as $chunk) {
-            fwrite($file, file_get_contents($chunk));
+            fwrite($output, file_get_contents($chunk));
         }
-        fclose($file);
+        fclose($output);
 
         DB::beginTransaction();
-
         try {
             $driver = $this->storageConfig->configure();
         } catch (\Exception $e) {
@@ -129,71 +222,72 @@ class ShortsUploadController extends Controller {
         }
 
         $storage = StorageSetting::where('alias', $driver)->first();
-        $short   = Short::where('upload_id', $uploadId)->first();
 
         try {
-            if (!$storage) {
-                $success = $this->storageConfig->storeLocalFile($finalFileName, $tempFile);
+            if (!$storage || $driver === 'local') {
+                $success = $this->storageConfig->storeLocalFile($finalFileName, $tempPath);
                 if (!$success) {
-                    return apiResponse("upload", 'error', ["Failed to save file to local storage"]);
+                    throw new \Exception("Failed to save file locally");
                 }
                 $storageId     = 0;
                 $storageDriver = 'local';
             } else {
-                if (file_exists($tempFile)) {
-                    $uploadStatus = $this->storageConfig->storeFile($driver, $finalFileName, new UploadedFile($tempFile, $finalFileName));
-                    if (!$uploadStatus) {
-                        throw new \Exception("Failed to upload file to storage");
-                    }
-                } else {
-                    return apiResponse("upload", 'error', ["File not found"]);
+                $uploaded = $this->storageConfig->storeFile(
+                    $driver,
+                    $finalFileName,
+                    new UploadedFile($tempPath, $finalFileName)
+                );
+                if (!$uploaded) {
+                    throw new \Exception("Failed to upload to cloud storage");
                 }
                 $storageId     = $storage->id;
                 $storageDriver = $driver;
             }
 
-            if ($short) {
-                $short->name           = $finalFileName;
-                $short->storage_id     = $storageId;
-                $short->storage_driver = $storageDriver;
-                $short->temp_path      = $tempPath;
-                $short->save();
-            }
+            // CREATE DRAFT ONLY HERE — AFTER FILE IS FULLY UPLOADED
+            $short                 = new Short();
+            $short->user_id        = auth()->id();
+            $short->name           = $finalFileName;
+            $short->storage_id     = $storageId;
+            $short->storage_driver = $storageDriver;
+            $short->temp_path      = $filePath; // Path for final video
+            $short->upload_id      = $uploadId; // Optional: keep for cleanup
+            $short->status         = Status::DRAFT;
+            $short->save();
 
             DB::commit();
-        } catch (\Exception $e) {
 
+            // Clean up chunks
+            foreach ($chunks as $chunk) {
+                @unlink($chunk);
+            }
+            @rmdir($chunkDir);
+
+            return apiResponse("upload", 'success', ["Upload Completed"], [
+                'video_path' => $filePath,
+                'short_id'   => $short->id,
+                'success'    => true,
+            ]);
+
+        } catch (\Exception $e) {
             DB::rollBack();
 
-            if (file_Exists($tempFile)) {
-                unlink($tempFile);
+            // Cleanup on failure
+            if (file_exists($tempPath)) {
+                unlink($tempPath);
             }
-
-            if (is_dir($chunkDir)) {
-                $files = glob($chunkDir . '/*');
-                foreach ($files as $file) {
-                    if (is_file($file)) {
-                        unlink($file);
-                    }
-                }
-                rmdir($chunkDir);
+            foreach ($chunks as $chunk) {
+                @unlink($chunk);
             }
-
-            if ($short) {
-                $short->delete();
-            }
+            @rmdir($chunkDir);
 
             return apiResponse("upload", 'error', ["Upload Failed: " . $e->getMessage()]);
         }
 
-        return apiResponse("upload", 'success', ["Upload Completed"], [
-            'video_path' => $filePath,
-            'short_id'   => $short->id,
-            'success'    => true,
-        ]);
     }
 
-    public function store(Request $request, $id = 0) {
+    public function store(Request $request, $id = 0)
+    {
         $isUpdate = $id != 0;
 
         $baseRules = [
@@ -252,7 +346,7 @@ class ShortsUploadController extends Controller {
 
             $short->description    = $request->description;
             $short->is_visible     = $request->visibility;
-            $short->allow_comments = $request->comment ?? 0;
+            $short->allow_comments = $request->comment;
             $short->category_id    = $request->category_id;
 
             if ($request->hasFile('cover_image')) {

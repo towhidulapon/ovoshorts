@@ -158,8 +158,8 @@
             position: absolute;
             bottom: 0;
             right: 0;
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 14px;
             background-color: #4CAF50;
             border-radius: 50%;
             border: 2px solid #fff;
@@ -456,6 +456,10 @@
                     }
                 });
             }
+
+            $(document).on('click', '.message-item', function() {
+                $('.message-sidebar').removeClass('show');
+            });
 
             function refreshSidebar() {
                 $.get('{{ route('user.message.sidebar') }}', {

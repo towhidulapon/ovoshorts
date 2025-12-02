@@ -4,7 +4,7 @@
             @forelse ($shorts as $short)
                 @include('Template::user.short.view.video_item', ['short' => $short])
             @empty
-                <x-empty-message message="No short found" />
+                <x-empty-message message="No short found" class="shorts-empty-message"/>
             @endforelse
         </div>
     </div>
@@ -150,7 +150,8 @@
                         <input type="number" class="form-control form--control" name="stars" min="1" required>
                     </div>
                     <div class="mb-3">
-                        <h6 class="available-stars">@lang('Stars Available:') {{ auth()?->user()?->stars }}</h6>
+                        <span>@lang('Stars Available:')</span>
+                        <h6 class="available-stars">{{ auth()?->user()?->stars }}</h6>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -181,6 +182,7 @@
             color: hsl(var(--base));
             text-decoration: underline;
         }
+
     </style>
 @endpush
 
@@ -680,6 +682,12 @@
 
                 $(document).on("click", ".follow-btn", function (e) {
                     e.preventDefault();
+
+                    if (!isLoggedIn) {
+                        $('.login-modal').modal('show');
+                        return;
+                    }
+
                     let $btn = $(this);
                     let userId = $btn.data("id");
                     let action = $btn.data("action");

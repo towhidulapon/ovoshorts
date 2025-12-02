@@ -14,21 +14,25 @@ trait VerificationManager
 {
     public function index()
     {
-        if (auth()->user()->is_verified == Status::VERIFICATION_PENDING) {
-            $notify[] = ['error', 'Your Verification is under review'];
-            return to_route('user.home')->withNotify($notify);
+        $user = auth()->user();
+
+        if ($user->is_verified == Status::VERIFICATION_PENDING) {
+            return responseManager('verification pending', 'Your Verification is under review', 'error', [
+                'redirect' => 'user.home',
+            ]);
         }
-        if (auth()->user()->is_verified == Status::VERIFICATION_SUCCESS) {
-            $notify[] = ['error', 'You are already verified'];
-            return to_route('user.home')->withNotify($notify);
+        if ($user->is_verified == Status::VERIFICATION_SUCCESS) {
+            return responseManager('already verified', 'You are already verified', 'success', [
+                'redirect' => 'user.home',
+            ]);
         }
 
         $pageTitle = "Verification";
-        $user      = auth()->user();
-
-        $view = 'Template::user.verification.index';
+        $view      = 'Template::user.verification.index';
+        $form      = Form::where('act', 'verification')->first();
 
         return responseManager('verification page', $pageTitle, 'success', [
+            'form'      => $form,
             'pageTitle' => $pageTitle,
             'user'      => $user,
             'view'      => $view,
@@ -76,11 +80,8 @@ trait VerificationManager
 
     public function purchaseVerification(Request $request)
     {
-        $request->validate([
-            'amount' => 'required|numeric|gt:0',
-        ]);
         $pageTitle       = 'Verification Payment';
-        $amount          = $request->amount;
+        $amount          = gs('verification_price');
         $gatewayCurrency = GatewayCurrency::whereHas('method', function ($gate) {
             $gate->where('status', Status::ENABLE);
         })->with('method')->orderby('name')->get();
@@ -117,7 +118,7 @@ trait VerificationManager
             }
 
             if (isApiRequest()) {
-                $data = (new ApiPaymentController())->insertDepositData($gate, $request->amount, null, true);
+                $data     = (new ApiPaymentController())->insertDepositData($gate, $request->amount, null, true);
                 $notify[] = 'Deposit inserted';
                 return apiResponse("deposit_inserted", "success", $notify, [
                     'deposit'      => $data,

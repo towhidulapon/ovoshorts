@@ -86,10 +86,10 @@
 
             <div class="tab-content" id="pills-tabContent">
                 @foreach ([
-                'home' => $shorts,
-                'profile' => $favShorts,
-                'contact' => $likedShorts,
-                ] as $tab => $collection)
+    'home' => $shorts,
+    'profile' => $favShorts,
+    'contact' => $likedShorts,
+] as $tab => $collection)
                 <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="pills-{{ $tab }}"
                     role="tabpanel">
                     @include('Template::user.tab_content', compact('collection', 'tab'))
@@ -163,194 +163,194 @@
 
 
 @push('script')
-<script>
-    (function($) {
-        "use strict";
-        let currentPage = 2;
-        let isLoading = false;
-        let hasMorePages = true;
-        let currentSort = '{{ $sort }}' || 'latest';
-        let currentTab = 'home';
+    <script>
+        (function($) {
+            "use strict";
+            let currentPage = 2;
+            let isLoading = false;
+            let hasMorePages = true;
+            let currentSort = '{{ $sort }}' || 'latest';
+            let currentTab = 'home';
 
-        $('#copyProfileLink').click(function() {
-            $('#profileShareLink').select();
-            document.execCommand("copy");
-            notify('success', 'Link copied to clipboard');
-        });
-
-        function initializeVideoPlayers() {
-            $('.video-player').each(function() {
-                let poster = $(this).attr('poster');
-                let player = new Plyr(this);
-                if (poster) {
-                    $(this).attr('poster', poster);
-                }
+            $('#copyProfileLink').click(function() {
+                $('#profileShareLink').select();
+                document.execCommand("copy");
+                notify('success', 'Link copied to clipboard');
             });
-        }
 
-        function loadMoreContent() {
-            if (isLoading || !hasMorePages) return;
-            isLoading = true;
+            function initializeVideoPlayers() {
+                $('.video-player').each(function() {
+                    let poster = $(this).attr('poster');
+                    let player = new Plyr(this);
+                    if (poster) {
+                        $(this).attr('poster', poster);
+                    }
+                });
+            }
 
-            $.ajax({
-                url: "{{ route('user.profile.tab.content') }}",
-                type: 'GET',
-                data: {
-                    tab: currentTab,
-                    sort: currentSort,
-                    page: currentPage,
-                    _token: $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function(response) {
-                    if (response.status == 'success') {
-                        var $newContent = $(response.data.data).find('.explore-item-wrapper')
-                            .children();
-                        if ($newContent.length > 0) {
-                            $('#pills-' + currentTab).find('.explore-item-wrapper').append($newContent);
+            function loadMoreContent() {
+                if (isLoading || !hasMorePages) return;
+                isLoading = true;
+
+                $.ajax({
+                    url: "{{ route('user.profile.tab.content') }}",
+                    type: 'GET',
+                    data: {
+                        tab: currentTab,
+                        sort: currentSort,
+                        page: currentPage,
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        if (response.status == 'success') {
+                            var $newContent = $(response.data.data).find('.explore-item-wrapper')
+                                .children();
+                            if ($newContent.length > 0) {
+                                $('#pills-' + currentTab).find('.explore-item-wrapper').append($newContent);
+                            }
+
+                            hasMorePages = response.data.hasMorePages;
+                            currentPage++;
+                            initializeVideoPlayers();
                         }
-
-                        hasMorePages = response.data.hasMorePages;
-                        currentPage++;
-                        initializeVideoPlayers();
+                    },
+                    complete: function() {
+                        isLoading = false;
                     }
-                },
-                complete: function() {
-                    isLoading = false;
-                }
-            });
-        }
+                });
+            }
 
-        function loadTabContent(reset = true) {
-            if (isLoading) return;
-            isLoading = true;
+            function loadTabContent(reset = true) {
+                if (isLoading) return;
+                isLoading = true;
 
-            $.ajax({
-                url: "{{ route('user.profile.tab.content') }}",
-                type: 'GET',
-                data: {
-                    tab: currentTab,
-                    sort: currentSort,
-                    page: 1,
-                    _token: $('meta[name="csrf-token"]').attr('content')
-                },
-                beforeSend: function() {
-                    if (reset) {
-                        $('#pills-' + currentTab).html($('#skeleton-loader').html());
+                $.ajax({
+                    url: "{{ route('user.profile.tab.content') }}",
+                    type: 'GET',
+                    data: {
+                        tab: currentTab,
+                        sort: currentSort,
+                        page: 1,
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    beforeSend: function() {
+                        if (reset) {
+                            $('#pills-' + currentTab).html($('#skeleton-loader').html());
+                        }
+                    },
+                    success: function(response) {
+                        if (response.status == 'success') {
+                            $('#pills-' + currentTab).html(response.data.data);
+                            hasMorePages = response.data.hasMorePages;
+                            currentPage = 2;
+                            initializeVideoPlayers();
+                        }
+                    },
+                    complete: function() {
+                        isLoading = false;
                     }
-                },
-                success: function(response) {
-                    if (response.status == 'success') {
-                        $('#pills-' + currentTab).html(response.data.data);
-                        hasMorePages = response.data.hasMorePages;
-                        currentPage = 2;
-                        initializeVideoPlayers();
+                });
+            }
+
+            $('.tabs-action__btn').click(function(e) {
+                e.preventDefault();
+                $('.tabs-action__btn').removeClass('active');
+                $(this).addClass('active');
+                currentSort = $(this).data('sort');
+                loadTabContent(true);
+            });
+
+            $('.nav-link').click(function(e) {
+                e.preventDefault();
+                $('.nav-link').removeClass('active');
+                $(this).addClass('active');
+                currentTab = $(this).attr('data-bs-target').replace('#pills-', '');
+                currentPage = 2;
+                hasMorePages = true;
+                $('.tabs-action__btn').toggleClass('d-none', !$(this).hasClass('videos'));
+                loadTabContent(true);
+            });
+
+            let followersPage = 1;
+            let followersLoading = false;
+
+            $('.open-followers').on('click', function() {
+                followersPage = 1;
+                $('.followers-list').html('<div class="text-center py-3">Loading...</div>');
+                $.get("{{ route('user.friend.follower.all', $user->id) }}?page=" + followersPage, function(
+                    res) {
+                    $('.followers-list').html(res);
+                });
+            });
+
+            $('#followersModal .modal-body').on('scroll', function() {
+                let container = $(this);
+
+                if (!followersLoading &&
+                    container.scrollTop() + container.innerHeight() >= container[0].scrollHeight - 50) {
+
+                    let nextPage = container.find('.load-more').data('next-page');
+                    if (nextPage) {
+                        followersLoading = true;
+
+                        container.find('.load-more').html("<div class='py-2'>@lang('Loading more...')</div>");
+
+
+                        $.get(nextPage, function(res) {
+                            container.find('.load-more').remove();
+                            container.append(res);
+                            followersLoading = false;
+                        });
                     }
-                },
-                complete: function() {
-                    isLoading = false;
                 }
             });
-        }
 
-        $('.tabs-action__btn').click(function(e) {
-            e.preventDefault();
-            $('.tabs-action__btn').removeClass('active');
-            $(this).addClass('active');
-            currentSort = $(this).data('sort');
-            loadTabContent(true);
-        });
 
-        $('.nav-link').click(function(e) {
-            e.preventDefault();
-            $('.nav-link').removeClass('active');
-            $(this).addClass('active');
-            currentTab = $(this).attr('data-bs-target').replace('#pills-', '');
-            currentPage = 2;
-            hasMorePages = true;
-            $('.tabs-action__btn').toggleClass('d-none', !$(this).hasClass('videos'));
-            loadTabContent(true);
-        });
+            let followingPage = 1;
+            let followingLoading = false;
 
-        let followersPage = 1;
-        let followersLoading = false;
+            $('.open-following').on('click', function() {
+                followingPage = 1;
+                $('.following-list').html('<div class="text-center py-3">Loading...</div>');
 
-        $('.open-followers').on('click', function() {
-            followersPage = 1;
-            $('.followers-list').html('<div class="text-center py-3">Loading...</div>');
-            $.get("{{ route('user.friend.follower.all', $user->id) }}?page=" + followersPage, function(
-                res) {
-                $('.followers-list').html(res);
+                $.get("{{ route('user.friend.following.all', $user->id) }}?page=" + followingPage, function(res) {
+                    $('.following-list').html(res);
+                });
             });
-        });
 
-        $('#followersModal .modal-body').on('scroll', function() {
-            let container = $(this);
+            $('#followingModal .modal-body').on('scroll', function() {
+                let container = $(this);
 
-            if (!followersLoading &&
-                container.scrollTop() + container.innerHeight() >= container[0].scrollHeight - 50) {
+                if (!followingLoading &&
+                    container.scrollTop() + container.innerHeight() >= container[0].scrollHeight - 50) {
 
-                let nextPage = container.find('.load-more').data('next-page');
-                if (nextPage) {
-                    followersLoading = true;
-                    container.find('.load-more').html('<div class="py-2">@lang('
-                        Loading more...')</div>');
+                    let nextPage = container.find('.load-more').data('next-page');
+                    if (nextPage) {
+                        followingLoading = true;
 
-                    $.get(nextPage, function(res) {
-                        container.find('.load-more').remove();
-                        container.append(res);
-                        followersLoading = false;
-                    });
+                        container.find('.load-more').html("<div class='py-2'>@lang('Loading more...')</div>");
+
+                        $.get(nextPage, function(res) {
+                            container.find('.load-more').remove();
+                            container.append(res);
+                            followingLoading = false;
+                        });
+                    }
                 }
-            }
-        });
-
-
-        let followingPage = 1;
-        let followingLoading = false;
-
-        $('.open-following').on('click', function() {
-            followingPage = 1;
-            $('.following-list').html('<div class="text-center py-3">Loading...</div>');
-
-            $.get("{{ route('user.friend.following.all', $user->id) }}?page=" + followingPage, function(
-                res) {
-                $('.following-list').html(res);
             });
-        });
 
-        $('#followingModal .modal-body').on('scroll', function() {
-            let container = $(this);
 
-            if (!followingLoading &&
-                container.scrollTop() + container.innerHeight() >= container[0].scrollHeight - 50) {
-
-                let nextPage = container.find('.load-more').data('next-page');
-                if (nextPage) {
-                    followingLoading = true;
-                    container.find('.load-more').html('<div class="py-2">@lang('
-                        Loading more...')</div>');
-
-                    $.get(nextPage, function(res) {
-                        container.find('.load-more').remove();
-                        container.append(res);
-                        followingLoading = false;
-                    });
+            $(window).on('scroll', function() {
+                if (hasMorePages && !isLoading && $(window).scrollTop() + $(window).height() >= $(document)
+                    .height() - 200) {
+                    loadMoreContent();
                 }
-            }
-        });
+            });
 
-
-        $(window).on('scroll', function() {
-            if (hasMorePages && !isLoading && $(window).scrollTop() + $(window).height() >= $(document)
-                .height() - 200) {
-                loadMoreContent();
-            }
-        });
-
-        $(document).ready(function() {
-            $('.tabs-action__btn[data-sort="' + currentSort + '"]').addClass('active');
-            initializeVideoPlayers();
-        });
-    })(jQuery);
-</script>
+            $(document).ready(function() {
+                $('.tabs-action__btn[data-sort="' + currentSort + '"]').addClass('active');
+                initializeVideoPlayers();
+            });
+        })(jQuery);
+    </script>
 @endpush

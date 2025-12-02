@@ -851,19 +851,17 @@ function getQrCodeUrl($guard = 'user')
     return $qrCode;
 }
 
-function getQrCodeUrlForLogin($guard = "user", $checkExists = true)
+function getQrCodeUrlForLogin( $checkExists = true)
 {
-    $columnName = "for_" . $guard . "_login";
 
     if ($checkExists) {
-        $qrCode = QrCode::where($columnName, Status::YES)->first();
+        $qrCode = QrCode::first();
     } else {
         $qrCode = null;
     }
 
     if (!$qrCode) {
         $qrCode              = new QrCode();
-        $qrCode->$columnName = Status::YES;
         $qrCode->unique_code = keyGenerator(15);
         $qrCode->save();
     }
@@ -882,8 +880,7 @@ function qrCodeLoginAttempt($guard, $encodeId, $encodedCode)
         return apiResponse('exception', "error", $notify);
     }
 
-    $columnName = "for_" . $guard . "_login";
-    $qrCode     = QrCode::where($columnName, Status::YES)->where('unique_code', $code)->first();
+    $qrCode = QrCode::where('unique_code', $code)->first();
 
     if (!$qrCode) {
         $message[] = "The qr code token is mismatch, Please try again";
@@ -897,18 +894,10 @@ function qrCodeLoginAttempt($guard, $encodeId, $encodedCode)
         return apiResponse('exception', "error", $notify);
     }
 
-    $guardData = [
-        'user' => [
-            'model_class' => User::class,
-            'column_name' => 'user_id',
-        ],
-    ][$guard];
-
-    $model = $guardData['model_class'];
-    $user  = $model::find($id);
+    $user = User::find($id);
 
     if (!$user) {
-        $notify[] = "The $guard account is not found";
+        $notify[] = "The user account is not found";
         return apiResponse('not_found', "error", $notify);
     }
 
@@ -950,13 +939,6 @@ function qrCodeLoginAttempt($guard, $encodeId, $encodedCode)
         return apiResponse('error', "error", $notify);
     }
 
-    $tokenName = $guard . "_token";
-
-    if ($tokenName != $accessToken->name) {
-        $notify[] = "Something went to wrong. Please try again";
-        return apiResponse('error', "error", $notify);
-    }
-
     $tokenUser = @$accessToken->tokenable;
 
     if (@$tokenUser->username != @$user->username) {
@@ -986,11 +968,9 @@ function qrCodeLoginAttempt($guard, $encodeId, $encodedCode)
         $userLogin->country      = @implode(',', $info['country']);
     }
 
-    $columnName = $guardData['column_name'];
-
-    $userAgent              = osBrowser();
-    $userLogin->$columnName = $user->id;
-    $userLogin->user_ip     = $ip;
+    $userAgent          = osBrowser();
+    $userLogin->user_id = $user->id;
+    $userLogin->user_ip = $ip;
 
     $userLogin->browser = @$userAgent['browser'];
     $userLogin->os      = @$userAgent['os_platform'];
@@ -1000,7 +980,7 @@ function qrCodeLoginAttempt($guard, $encodeId, $encodedCode)
     return apiResponse('success', "success", $notify);
 }
 
-function verifyQrCodeForLogin($encodedCode, $guard)
+function verifyQrCodeForLogin($encodedCode)
 {
     try {
         $code = base64_decode($encodedCode);
@@ -1009,8 +989,7 @@ function verifyQrCodeForLogin($encodedCode, $guard)
         return apiResponse('exception', "error", $notify);
     }
 
-    $columnName = "for_" . $guard . "_login";
-    $qrCode     = QrCode::where($columnName, Status::YES)->where('unique_code', $code)->first();
+    $qrCode = QrCode::where('unique_code', $code)->first();
 
     if (!$qrCode) {
         $message[] = "The qr code is not available, Please try again";
@@ -1020,7 +999,7 @@ function verifyQrCodeForLogin($encodedCode, $guard)
     $user  = auth()->user();
     $token = request()->bearerToken();
 
-    event(new QrCodeLogin("$guard-qr-code-login", [
+    event(new QrCodeLogin("user-qr-code-login", [
         "user"    => base64_encode($user->id),
         "s_token" => base64_encode($token),
         'qr_code' => $encodedCode,

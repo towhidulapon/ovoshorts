@@ -1,11 +1,11 @@
 @forelse ($users as $user)
         @php
-        $short = $user->shorts->first();
-        $fileUrl = $short?->fileUrl;
-        $extension = $short?->extension;
-        $poster = $short
-            ? getImage(getFilePath('coverImage') . '/' . $short->cover_image)
-            : asset($activeTemplateTrue . 'images/default.png');
+    $short = $user->shorts->first();
+    $fileUrl = $short?->fileUrl;
+    $extension = $short?->extension;
+    $poster = $short
+        ? getImage(getFilePath('coverImage') . '/' . $short->cover_image)
+        : asset($activeTemplateTrue . 'images/default.png');
         @endphp
 
         <div class="explore-item">
@@ -16,7 +16,7 @@
 
                 <div class="follower-profile">
                     <div class="follower-profile__thumb">
-                        <img src="{{ getImage(getFilePath('userProfile') . '/' . $user->image, getFileSize('userProfile')) }}" alt="" class="fit-image">
+                        <img src="{{ $user->image ? getImage(getFilePath('userProfile') . '/' . $user->image, getFileSize('userProfile')) : asset('assets/images/avatar.jpg') }}" alt="image" class="fit-image">
                     </div>
                     <div class="follower-profile__author">
                         <a href="{{ route('user.profile', $user->username) }}" class="name">{{ $user->firstname }} {{ $user->lastname }}</a>

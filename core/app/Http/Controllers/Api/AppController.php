@@ -9,18 +9,20 @@ use App\Models\Short;
 use App\Models\ShortShare;
 use App\Models\ShortView;
 use App\Models\User;
+use App\Traits\ShortDataTransform;
 use App\Traits\StarManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Laravel\Sanctum\PersonalAccessToken;
-use App\Traits\ShortDataTransform;
 
-class AppController extends Controller {
+class AppController extends Controller
+{
     use StarManager;
 
     use ShortDataTransform;
 
-    public function generalSetting() {
+    public function generalSetting()
+    {
         $notify[] = 'General setting data';
         return apiResponse("general_setting", "success", $notify, [
             'general_setting'       => gs(),
@@ -28,7 +30,8 @@ class AppController extends Controller {
         ]);
     }
 
-    public function getCountries() {
+    public function getCountries()
+    {
         $countryData = json_decode(file_get_contents(resource_path('views/partials/country.json')));
         $notify[]    = 'Country List';
 
@@ -44,7 +47,8 @@ class AppController extends Controller {
         ]);
     }
 
-    public function getLanguage($code) {
+    public function getLanguage($code)
+    {
         $languages     = Language::get();
         $languageCodes = $languages->pluck('code')->toArray();
 
@@ -63,7 +67,8 @@ class AppController extends Controller {
         ]);
     }
 
-    public function policies() {
+    public function policies()
+    {
         $policies = getContent('policy_pages.element', orderById: true);
         $notify[] = 'All policies';
 
@@ -72,7 +77,8 @@ class AppController extends Controller {
         ]);
     }
 
-    public function faq() {
+    public function faq()
+    {
         $faq      = getContent('faq.element', orderById: true);
         $notify[] = 'FAQ';
         return apiResponse("faq", "success", $notify, [
@@ -80,17 +86,25 @@ class AppController extends Controller {
         ]);
     }
 
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $user = $this->getAuthUser($request);
 
-        $shorts = Short::with('user:id,username,image')
+        $shorts = Short::with('user:id,username,image,is_verified')
             ->approved()
             ->published()
             ->publicShort()
             ->withActiveStorage()
             ->withCount('likes', 'comments')
             ->withSum('stars', 'stars')
-            ->inRandomOrder()
+            ->selectRaw("
+        shorts.*,
+        (
+            (views_count * 0.1) +
+            (RAND() * 100)
+        ) AS weight_score
+    ")
+            ->orderByDesc('weight_score')
             ->paginate();
 
         $shorts->transform(fn($short) => $this->transformShort($short, $user));
@@ -103,7 +117,8 @@ class AppController extends Controller {
         ]);
     }
 
-    public function recordView(Request $request) {
+    public function recordView(Request $request)
+    {
         $request->validate([
             'shorts_id' => 'required|exists:shorts,id',
         ]);
@@ -146,7 +161,8 @@ class AppController extends Controller {
         ]);
     }
 
-    public function trackAnalytics(Request $request, $id) {
+    public function trackAnalytics(Request $request, $id)
+    {
         $request->validate([
             'play_time' => 'nullable|integer|min:0',
         ]);
@@ -165,7 +181,8 @@ class AppController extends Controller {
         ]);
     }
 
-    public function getAnalytics($id) {
+    public function getAnalytics($id)
+    {
         $short = Short::where('id', $id)->approved()->publicShort();
         if (!$short) {
             return apiResponse("short", "error", ['Short not found']);
@@ -177,7 +194,8 @@ class AppController extends Controller {
         ]);
     }
 
-    public function share(Request $request) {
+    public function share(Request $request)
+    {
         $request->validate([
             'shorts_id' => 'required|exists:shorts,id',
             'platform'  => 'required|in:telegram,whatsapp,facebook,modal,link,messenger,pinterest,linkedin',
@@ -208,7 +226,8 @@ class AppController extends Controller {
         ]);
     }
 
-    public function hashtag(Request $request, $hashtag) {
+    public function hashtag(Request $request, $hashtag)
+    {
         $pageTitle = '#' . $hashtag;
         $user      = $this->getAuthUser($request);
 
@@ -234,7 +253,8 @@ class AppController extends Controller {
         ]);
     }
 
-    public function userProfile(Request $request, $username = null) {
+    public function userProfile(Request $request, $username = null)
+    {
         $pageTitle   = 'User Details';
         $user        = User::where('username', $username)->first();
         $userProfile = route('user.profile.details', $user->username);
@@ -292,8 +312,9 @@ class AppController extends Controller {
         ]);
     }
 
-    public function playShort($shortId) {
-        $clickedShort = Short::with('user:id,username,image')
+    public function playShort($shortId)
+    {
+        $clickedShort = Short::with('user:id,username,image,is_verified')
             ->approved()
             ->published()
             ->publicShort()
@@ -329,7 +350,8 @@ class AppController extends Controller {
         ]);
     }
 
-    public function getComments(Request $request) {
+    public function getComments(Request $request)
+    {
         $request->validate([
             'shorts_id' => 'required|exists:shorts,id',
         ]);
@@ -362,7 +384,8 @@ class AppController extends Controller {
         ]);
     }
 
-    private function recursiveComment($comment, $user) {
+    private function recursiveComment($comment, $user)
+    {
         $commentReplies = @$comment->replies;
         $commentArray   = [];
 
@@ -389,7 +412,8 @@ class AppController extends Controller {
      * @param Request $request
      * @return User|null
      */
-    private function getAuthUser(Request $request) {
+    private function getAuthUser(Request $request)
+    {
         $token = $request->bearerToken();
         if ($token) {
             $personalToken = PersonalAccessToken::findToken($token);

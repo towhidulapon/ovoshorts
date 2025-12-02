@@ -9,9 +9,9 @@
                     @include('Template::partials.mobile_bottom')
 
                     @php
-                        $isProfileDetails = request()->routeIs('user.profile.details','user.profile');
-                        $isExploreRoute = request()->routeIs('explore', 'user.friend.index', 'user.friend.following');
-                        $shouldShowHeader = !request()->routeIs('explore');
+    $isProfileDetails = request()->routeIs('user.profile.details', 'user.profile');
+    $isExploreRoute = request()->routeIs('explore', 'user.friend.index', 'user.friend.following');
+    $shouldShowHeader = !request()->routeIs('explore');
                     @endphp
 
                     <div class="home-body{{ $isProfileDetails ? '' : ($isExploreRoute ? ' common-body' : ' overflow-hidden') }}">
@@ -29,3 +29,35 @@
         </div>
     </div>
 @endsection
+
+
+@push('script')
+    <script>
+        "use strict";
+        $(document).ready(function () {
+
+            $('.load-more-followings').on('click', function () {
+                var button = $(this);
+                var page = button.data('page');
+                // var skip = button.data('skip');
+
+                $.ajax({
+                    url: "{{ route('user.friend.load.following.users') }}",
+                    type: "GET",
+                    data: { page: page },
+                    success: function (response) {
+                        $('.followings-container').append(response.html);
+
+                        if(response.hasMore) {
+                            button.data('page', page + 1);
+                        } else {
+                            button.hide();
+                        }
+
+                    }
+                });
+            });
+
+        });
+    </script>
+@endpush

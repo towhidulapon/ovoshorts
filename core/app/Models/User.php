@@ -30,9 +30,9 @@ class User extends Authenticatable
      * @var array
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'kyc_data'          => 'object',
-        'verification_data' => 'object',
+        'email_verified_at'    => 'datetime',
+        'kyc_data'             => 'object',
+        'verification_data'    => 'object',
         'ver_code_send_at'     => 'datetime',
         'last_seen'            => 'datetime',
         'show_activity_status' => 'integer',
@@ -141,6 +141,11 @@ class User extends Authenticatable
         return $this->hasMany(StarPurchase::class);
     }
 
+    public function qrCode()
+    {
+        return $this->hasOne(QrCode::class, 'user_id');
+    }
+
     public function isVerified()
     {
         return $this->is_verified;
@@ -178,6 +183,13 @@ class User extends Authenticatable
     {
         return new Attribute(
             get: fn() => $this->dial_code . $this->mobile,
+        );
+    }
+
+    public function fullname(): Attribute
+    {
+        return new Attribute(
+            get: fn() => $this->firstname . ' ' . $this->lastname,
         );
     }
 

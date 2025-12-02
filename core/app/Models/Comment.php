@@ -31,15 +31,15 @@ class Comment extends Model
         return $this->hasMany(CommentReaction::class, 'comment_id');
     }
 
-    public function isLikedBy($userId)
+    public function likedByUser()
     {
-        if (!$userId) {
-            return false;
-        }
-
-        return $this->reactions()
-            ->where('user_id', $userId)
-            ->exists();
+        return $this->hasOne(CommentReaction::class)->where('user_id', auth()->id());
     }
+
+    public function getIsLikedAttribute()
+    {
+        return $this->likedByUser()->exists();
+    }
+
 
 }

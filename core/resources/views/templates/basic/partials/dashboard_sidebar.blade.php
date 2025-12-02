@@ -1,8 +1,8 @@
 @if (request()->routeIs('user.dashboard.analytics.post'))
 
     @php
-    $user = auth()->user();
-    $shorts = App\Models\Short::where('user_id', $user->id)->withCount('likes', 'comments')->orderBy('id', 'desc')->get();
+        $user = auth()->user();
+        $shorts = App\Models\Short::where('user_id', $user->id)->withCount('likes', 'comments')->orderBy('id', 'desc')->get();
     @endphp
 
     <div class="dashboard-sidebar-menu flex-between">

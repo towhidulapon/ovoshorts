@@ -74,16 +74,19 @@ trait StarManager
     public function storePaymentInfo(Request $request)
     {
         $request->validate([
-            'amount'   => 'required|numeric|gt:0',
+            'star_id'  => 'required',
             'gateway'  => 'required',
             'currency' => 'required',
         ]);
 
         $user = auth()->user();
+        $star = Star::findOrFail($request->star_id);
+
+        $amount = $star->price;
 
         $starPurchase          = new StarPurchase();
         $starPurchase->user_id = $user->id;
-        $starPurchase->star_id = $request->star_id;
+        $starPurchase->star_id = $star->id;
         $starPurchase->status  = Status::PAYMENT_INITIATE;
         $starPurchase->save();
 
@@ -97,13 +100,13 @@ trait StarManager
                 $message = 'Invalid gateway';
                 return responseManager('invalid_gateway', $message);
             }
-            if ($gate->min_amount > $request->amount || $gate->max_amount < $request->amount) {
+            if ($gate->min_amount > $amount || $gate->max_amount < $amount) {
                 $message = 'Please follow deposit limit';
                 return responseManager('deposit_limit', $message);
             }
 
             if (isApiRequest()) {
-                $data = (new ApiPaymentController())->insertDepositData($gate, $request->amount, $starPurchase->id);
+                $data = (new ApiPaymentController())->insertDepositData($gate, $amount, $starPurchase->id);
                 $notify[] = 'Deposit inserted';
                 return apiResponse("deposit_inserted", "success", $notify, [
                     'deposit'      => $data,
@@ -111,7 +114,7 @@ trait StarManager
                 ]);
 
             } else {
-                $data = (new PaymentController())->insertDepositData($gate, $request->amount, $starPurchase->id);
+                $data = (new PaymentController())->insertDepositData($gate, $amount, $starPurchase->id);
             }
 
             return to_route('user.deposit.confirm');
@@ -122,7 +125,7 @@ trait StarManager
             return responseManager('insufficient_balance', $message);
         }
 
-        $this->confirmPurchase($user, $starPurchase->id, $request->amount);
+        $this->confirmPurchase($user, $starPurchase->id, $amount);
 
         $redirect = 'user.transactions';
 

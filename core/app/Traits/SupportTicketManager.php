@@ -343,7 +343,7 @@ trait SupportTicketManager
 
         if ($this->apiRequest) {
             $notify[] = 'Ticket closed successfully';
-            return apiResponse("ticket_closed", "error", $notify);
+            return apiResponse("ticket_closed", "success", $notify);
         }
 
         $notify[] = ['success', 'Support ticket closed successfully'];
