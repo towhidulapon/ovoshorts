@@ -32,10 +32,11 @@ trait VerificationManager
         $form      = Form::where('act', 'verification')->first();
 
         return responseManager('verification page', $pageTitle, 'success', [
-            'form'      => $form,
-            'pageTitle' => $pageTitle,
-            'user'      => $user,
-            'view'      => $view,
+            'form'           => $form,
+            'pageTitle'      => $pageTitle,
+            'user'           => $user,
+            'wallet_balance' => $user->balance,
+            'view'           => $view,
         ]);
 
     }
@@ -102,6 +103,8 @@ trait VerificationManager
         $user->is_verified = Status::PAYMENT_INITIATE;
         $user->save();
 
+        $amount = gs('verification_price');
+
         if ($request->gateway != 'main-balance') {
 
             $gate = GatewayCurrency::whereHas('method', function ($gate) {
@@ -112,31 +115,31 @@ trait VerificationManager
                 $message = 'Invalid gateway';
                 return responseManager('invalid_gateway', $message);
             }
-            if ($gate->min_amount > $request->amount || $gate->max_amount < $request->amount) {
+            if ($gate->min_amount > $amount || $gate->max_amount < $amount) {
                 $message = 'Please follow deposit limit';
                 return responseManager('deposit_limit', $message);
             }
 
             if (isApiRequest()) {
-                $data     = (new ApiPaymentController())->insertDepositData($gate, $request->amount, null, true);
+                $data     = (new ApiPaymentController())->insertDepositData($gate, $amount, null, true);
                 $notify[] = 'Deposit inserted';
                 return apiResponse("deposit_inserted", "success", $notify, [
                     'deposit'      => $data,
                     'redirect_url' => route('deposit.app.confirm', encrypt($data->id)),
                 ]);
             } else {
-                $data = (new PaymentController())->insertDepositData($gate, $request->amount, null, true);
+                $data = (new PaymentController())->insertDepositData($gate, $amount, null, true);
             }
 
             return to_route('user.deposit.confirm');
         }
 
-        if ($request->amount > $user->balance) {
+        if ($amount > $user->balance) {
             $message = 'Insufficient Balance';
             return responseManager('insufficient_balance', $message);
         }
 
-        $this->confirmPurchase($user, $request->amount);
+        $this->confirmPurchase($user, $amount);
 
         $message  = 'Verification payment successfully done';
         $redirect = 'user.transactions';

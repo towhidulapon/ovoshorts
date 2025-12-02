@@ -85,8 +85,10 @@
                                 </div>
                             </div>
                         </div>
-                        <button data-action="{{ route('user.short.upload.delete.draft', $latestDraft->id ?? null) }}" class="btn btn-sm video-upload__replace video-replace-btn confirmationBtn" data-question="@lang('Are you sure to replace this video?')"> <i class="fas fa-sync-alt"></i>@lang('Replace')
-                        </button>
+                        @if ($latestDraft)
+                            <button data-action="{{ route('user.short.upload.delete.draft', $latestDraft->id ?? null) }}" class="btn btn-sm video-upload__replace video-replace-btn confirmationBtn" data-question="@lang('Are you sure to replace this video?')"> <i class="fas fa-sync-alt"></i>@lang('Replace')
+                            </button>
+                        @endif
                     </div>
                 </div>
                 <div class="video-upload__progress">

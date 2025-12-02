@@ -159,8 +159,7 @@ Route::namespace('Api')->name('api.')->group(function () {
                     Route::get('/', 'index');
                     Route::get('/verification-data', 'verificationData');
                     Route::post('/apply', 'applyVerification');
-                    Route::post('/purchase', 'purchaseVerification');
-                    Route::post('/payment-info', 'storePaymentInfo');
+                    Route::post('store/payment-info', 'storePaymentInfo');
                 });
 
                 Route::controller('DashboardController')->prefix('dashboard')->group(function () {

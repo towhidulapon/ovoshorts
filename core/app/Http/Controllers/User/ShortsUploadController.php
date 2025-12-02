@@ -48,20 +48,11 @@ class ShortsUploadController extends Controller
         $finalFileName = $username . '_' . time() . '.' . $extension;
         $tempPath      = getFilePath('shortFile') . '/' . $finalFileName;
 
-        // $short            = new Short();
-        // $short->user_id   = auth()->id();
-        // $short->name      = $finalFileName;
-        // $short->temp_path = $tempPath;
-        // $short->upload_id = $uploadId;
-        // $short->status    = Status::DRAFT;
-        // $short->save();
-
         return apiResponse("upload", 'success', ["Upload initiated successfully"], [
             'success'   => true,
             'upload_id' => $uploadId,
             'temp_path' => $tempPath,
             'filename'  => $finalFileName,
-            // 'short_id'  => $short->id,
         ]);
     }
 
@@ -115,94 +106,9 @@ class ShortsUploadController extends Controller
                 }
             }
             sort($chunks);
-            // closedir($dir);
         } else {
             return apiResponse("upload", 'error', ["No chunks found"]);
         }
-        // sort($chunks);
-
-        // $tempFile = $tempPath;
-        // if (!file_exists(dirname($tempFile))) {
-        //     mkdir(dirname($tempFile), 0755, true);
-        // }
-
-        // $file = fopen($tempFile, 'wb');
-        // foreach ($chunks as $chunk) {
-        //     fwrite($file, file_get_contents($chunk));
-        // }
-        // fclose($file);
-
-        // DB::beginTransaction();
-
-        // try {
-        //     $driver = $this->storageConfig->configure();
-        // } catch (\Exception $e) {
-        //     $driver = 'local';
-        // }
-
-        // $storage = StorageSetting::where('alias', $driver)->first();
-        // $short   = Short::where('upload_id', $uploadId)->first();
-
-        // try {
-        //     if (!$storage) {
-        //         $success = $this->storageConfig->storeLocalFile($finalFileName, $tempFile);
-        //         if (!$success) {
-        //             return apiResponse("upload", 'error', ["Failed to save file to local storage"]);
-        //         }
-        //         $storageId     = 0;
-        //         $storageDriver = 'local';
-        //     } else {
-        //         if (file_exists($tempFile)) {
-        //             $uploadStatus = $this->storageConfig->storeFile($driver, $finalFileName, new UploadedFile($tempFile, $finalFileName));
-        //             if (!$uploadStatus) {
-        //                 throw new \Exception("Failed to upload file to storage");
-        //             }
-        //         } else {
-        //             return apiResponse("upload", 'error', ["File not found"]);
-        //         }
-        //         $storageId     = $storage->id;
-        //         $storageDriver = $driver;
-        //     }
-
-        //     if ($short) {
-        //         $short->name           = $finalFileName;
-        //         $short->storage_id     = $storageId;
-        //         $short->storage_driver = $storageDriver;
-        //         $short->temp_path      = $tempPath;
-        //         $short->save();
-        //     }
-
-        //     DB::commit();
-        // } catch (\Exception $e) {
-
-        //     DB::rollBack();
-
-        //     if (file_Exists($tempFile)) {
-        //         unlink($tempFile);
-        //     }
-
-        //     if (is_dir($chunkDir)) {
-        //         $files = glob($chunkDir . '/*');
-        //         foreach ($files as $file) {
-        //             if (is_file($file)) {
-        //                 unlink($file);
-        //             }
-        //         }
-        //         rmdir($chunkDir);
-        //     }
-
-        //     if ($short) {
-        //         $short->delete();
-        //     }
-
-        //     return apiResponse("upload", 'error', ["Upload Failed: " . $e->getMessage()]);
-        // }
-
-        // return apiResponse("upload", 'success', ["Upload Completed"], [
-        //     'video_path' => $filePath,
-        //     'short_id'   => $short->id,
-        //     'success'    => true,
-        // ]);
 
         if (!file_exists(dirname($tempPath))) {
             mkdir(dirname($tempPath), 0755, true);
@@ -244,20 +150,18 @@ class ShortsUploadController extends Controller
                 $storageDriver = $driver;
             }
 
-            // CREATE DRAFT ONLY HERE — AFTER FILE IS FULLY UPLOADED
             $short                 = new Short();
             $short->user_id        = auth()->id();
             $short->name           = $finalFileName;
             $short->storage_id     = $storageId;
             $short->storage_driver = $storageDriver;
-            $short->temp_path      = $filePath; // Path for final video
-            $short->upload_id      = $uploadId; // Optional: keep for cleanup
+            $short->temp_path      = $filePath;
+            $short->upload_id      = $uploadId;
             $short->status         = Status::DRAFT;
             $short->save();
 
             DB::commit();
 
-            // Clean up chunks
             foreach ($chunks as $chunk) {
                 @unlink($chunk);
             }
@@ -272,7 +176,6 @@ class ShortsUploadController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            // Cleanup on failure
             if (file_exists($tempPath)) {
                 unlink($tempPath);
             }
